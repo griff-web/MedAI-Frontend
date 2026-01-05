@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    <title>MedAI ASSISTANT</title>
+    <style>
+       /* KENYA NATIONAL COLORS THEME - World Class Medical Chatbot */
+:root {
+    --kenya-black: #000000;
+    --kenya-red: #BB0000;
+    --kenya-green: #006600;
+    --kenya-white: #FFFFFF;
+    --kenya-yellow: #FCDC0B;
+    --kenya-grey: #2C3E50;
+    
+    /* UI Colors derived from Kenya flag */
+    --primary: var(--kenya-green);
+    --secondary: var(--kenya-red);
+    --accent: var(--kenya-yellow);
+    --background: linear-gradient(135deg, #000000 0%, #0A1929 100%);
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-hover: rgba(255, 255, 255, 0.1);
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --success: #00C853;
+    --warning: #FF9800;
+    --danger: #FF5252;
+    --info: #2196F3;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(0, 102, 0, 0.3);
+    
+    /* Borders */
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    --border-radius-xl: 30px;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
+}
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Tech Overlay Effects */
+.tech-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.tech-overlay::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(90deg, 
+            transparent 50%, 
+            rgba(0, 102, 0, 0.03) 50%
+        ),
+        linear-gradient(
+            transparent 50%, 
+            rgba(187, 0, 0, 0.02) 50%
+        );
+    background-size: 60px 60px;
+    opacity: 0.4;
+}
+
+.tech-overlay::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        circle at 20% 80%,
+        rgba(0, 102, 0, 0.1) 0%,
+        transparent 50%
+    );
+}
+
+/* Grid Lines Animation */
+@keyframes gridLines {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 60px 60px;
+    }
+}
+
+/* Main Container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-md);
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header - Kenya Themed */
+.header {
+    background: linear-gradient(135deg, 
+        rgba(0, 0, 0, 0.95) 0%, 
+        rgba(10, 25, 41, 0.95) 100%
+    );
+    backdrop-filter: blur(20px);
+    border-bottom: 3px solid var(--kenya-green);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        var(--kenya-black) 0%,
+        var(--kenya-red) 33%,
+        var(--kenya-green) 66%,
+        var(--kenya-yellow) 100%
+    );
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.logo-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--kenya-green), var(--kenya-red));
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-icon::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    background: linear-gradient(
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0%, 100% {
+        transform: translateX(-100%) rotate(45deg);
+    }
+    50% {
+        transform: translateX(100%) rotate(45deg);
+    }
+}
+
+.logo-icon span {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--kenya-white);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-text h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, 
+        var(--kenya-white) 0%,
+        var(--kenya-yellow) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 1px;
+}
+
+.logo-text p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: var(--spacing-xs);
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--surface);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid rgba(0, 102, 0, 0.3);
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 10px var(--success);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* Main Layout */
+.main-content {
+    display: flex;
+    gap: var(--spacing-lg);
+    flex: 1;
+    min-height: 70vh;
+}
+
+/* Sidebar - Disease Selection */
+.sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.panel {
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.panel:hover {
+    box-shadow: var(--shadow-glow);
+    border-color: var(--kenya-green);
+}
+
+.panel h3 {
+    color: var(--kenya-yellow);
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.disease-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.disease-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.disease-card:hover {
+    background: rgba(0, 102, 0, 0.2);
+    transform: translateY(-2px);
+    border-color: var(--kenya-green);
+    box-shadow: var(--shadow-glow);
+}
+
+.disease-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transition: left 0.5s;
+}
+
+.disease-card:hover::before {
+    left: 100%;
+}
+
+.disease-icon {
+    font-size: 24px;
+    margin-bottom: var(--spacing-sm);
+    display: block;
+}
+
+.disease-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Symptom Checker Panel */
+.symptom-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.symptom-input {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.symptom-input:focus {
+    outline: none;
+    border-color: var(--kenya-green);
+    box-shadow: 0 0 0 2px rgba(0, 102, 0, 0.2);
+}
+
+.btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    background: linear-gradient(135deg, var(--kenya-green), var(--kenya-red));
+    border: none;
+    border-radius: var(--border-radius-md);
+    color: var(--kenya-white);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: rotate(45deg);
+    transition: transform 0.5s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn:hover::after {
+    transform: translateX(100%) rotate(45deg);
+}
+
+/* Chat Area */
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.chat-header {
+    padding: var(--spacing-lg);
+    background: linear-gradient(90deg, 
+        rgba(0, 102, 0, 0.2) 0%,
+        rgba(187, 0, 0, 0.1) 100%
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-header h2 {
+    color: var(--kenya-yellow);
+    font-size: 1.4rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.chat-header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-height: 500px;
+}
+
+/* Custom Scrollbar */
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--kenya-green);
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--kenya-red);
+}
+
+/* Message Styling */
+.message {
+    max-width: 80%;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    animation: messageAppear 0.3s ease;
+    position: relative;
+}
+
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bot-message {
+    background: linear-gradient(135deg, 
+        rgba(0, 102, 0, 0.15) 0%,
+        rgba(0, 102, 0, 0.05) 100%
+    );
+    border-left: 4px solid var(--kenya-green);
+    align-self: flex-start;
+    border-top-left-radius: 4px;
+}
+
+.bot-message::before {
+    content: "🤖 AI";
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 0.8rem;
+    color: var(--kenya-green);
+    opacity: 0.7;
+}
+
+.user-message {
+    background: linear-gradient(135deg, 
+        rgba(187, 0, 0, 0.15) 0%,
+        rgba(187, 0, 0, 0.05) 100%
+    );
+    border-right: 4px solid var(--kenya-red);
+    align-self: flex-end;
+    border-top-right-radius: 4px;
+}
+
+.user-message::before {
+    content: "👤 You";
+    position: absolute;
+    top: -20px;
+    right: 0;
+    font-size: 0.8rem;
+    color: var(--kenya-red);
+    opacity: 0.7;
+}
+
+.message-content {
+    line-height: 1.6;
+}
+
+/* Disease Information Card */
+.disease-info {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.disease-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.disease-title h3 {
+    color: var(--kenya-yellow);
+    font-size: 1.3rem;
+}
+
+.severity-badge {
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.severity-low {
+    background: rgba(0, 200, 83, 0.2);
+    color: var(--success);
+    border: 1px solid rgba(0, 200, 83, 0.3);
+}
+
+.severity-medium {
+    background: rgba(255, 152, 0, 0.2);
+    color: var(--warning);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.severity-high {
+    background: rgba(255, 82, 82, 0.2);
+    color: var(--danger);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+}
+
+.info-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.info-section h4 {
+    color: var(--kenya-green);
+    font-size: 1rem;
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.info-list {
+    list-style: none;
+    padding-left: var(--spacing-md);
+}
+
+.info-list li {
+    margin-bottom: var(--spacing-xs);
+    padding-left: var(--spacing-sm);
+    position: relative;
+}
+
+.info-list li::before {
+    content: "•";
+    color: var(--kenya-yellow);
+    position: absolute;
+    left: 0;
+}
+
+/* Medication Grid */
+.medication-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.medication-card {
+    background: rgba(0, 102, 0, 0.1);
+    border: 1px solid rgba(0, 102, 0, 0.3);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-md);
+    transition: all 0.3s ease;
+}
+
+.medication-card:hover {
+    background: rgba(0, 102, 0, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 102, 0, 0.2);
+}
+
+.medication-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.medication-type {
+    color: var(--kenya-yellow);
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Chat Input */
+.chat-input-container {
+    padding: var(--spacing-lg);
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.input-group {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.chat-input {
+    flex: 1;
+    padding: var(--spacing-md);
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: var(--kenya-green);
+    box-shadow: 0 0 0 2px rgba(0, 102, 0, 0.2);
+}
+
+.send-btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    background: linear-gradient(135deg, var(--kenya-green), var(--kenya-red));
+    border: none;
+    border-radius: var(--border-radius-md);
+    color: var(--kenya-white);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-width: 120px;
+    justify-content: center;
+}
+
+.send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.send-btn:active {
+    transform: translateY(0);
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-top: var(--spacing-md);
+}
+
+.quick-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-btn:hover {
+    background: rgba(0, 102, 0, 0.2);
+    color: var(--text-primary);
+    border-color: var(--kenya-green);
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    gap: 6px;
+    padding: var(--spacing-md);
+    align-self: flex-start;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--kenya-green);
+    border-radius: 50%;
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing {
+    0%, 80%, 100% { 
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    40% { 
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+/* Disclaimer */
+.disclaimer {
+    background: rgba(187, 0, 0, 0.1);
+    border: 1px solid rgba(187, 0, 0, 0.3);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Footer */
+.footer {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    background: var(--surface);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border-top: 3px solid var(--kenya-red);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .panel {
+        flex: 1;
+        min-width: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .logo {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .disease-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .medication-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .chat-input {
+        width: 100%;
+    }
+    
+    .send-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: var(--spacing-sm);
+    }
+    
+    .panel {
+        padding: var(--spacing-md);
+    }
+    
+    .disease-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .quick-actions {
+        justify-content: center;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .tech-overlay,
+    .chat-input-container,
+    .send-btn,
+    .quick-actions {
+        display: none;
+    }
+    
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .message {
+        max-width: 100%;
+        break-inside: avoid;
+    }
+}
+
+/* Dark/Light Mode Support */
+@media (prefers-color-scheme: light) {
+    :root {
+        --background: linear-gradient(135deg, #FFFFFF 0%, #F5F7FA 100%);
+        --surface: rgba(0, 0, 0, 0.05);
+        --surface-hover: rgba(0, 0, 0, 0.1);
+        --text-primary: #000000;
+        --text-secondary: rgba(0, 0, 0, 0.7);
+    }
+    
+    .chat-messages::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --kenya-green: #006600;
+        --kenya-red: #BB0000;
+        --kenya-yellow: #FFD700;
+    }
+    
+    .message {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Focus Styles for Accessibility */
+:focus {
+    outline: 2px solid var(--kenya-yellow);
+    outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--kenya-yellow);
+    outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+    background-color: rgba(0, 102, 0, 0.3);
+    color: var(--text-primary);
+}
+
+/* Custom Scrollbar for Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--kenya-green) rgba(0, 0, 0, 0.2);
+}
+
+/* Smooth transitions for interactive elements */
+button,
+.disease-card,
+.medication-card,
+.quick-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects for cards */
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Gradient text effect */
+.gradient-text {
+    background: linear-gradient(90deg, 
+        var(--kenya-red) 0%,
+        var(--kenya-yellow) 50%,
+        var(--kenya-green) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Glowing effects */
+.glow {
+    box-shadow: 0 0 20px rgba(0, 102, 0, 0.5);
+}
+
+.glow-red {
+    box-shadow: 0 0 20px rgba(187, 0, 0, 0.5);
+}
+
+.glow-yellow {
+    box-shadow: 0 0 20px rgba(252, 220, 11, 0.5);
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mt-1 { margin-top: var(--spacing-sm); }
+.mt-2 { margin-top: var(--spacing-md); }
+.mt-3 { margin-top: var(--spacing-lg); }
+.mt-4 { margin-top: var(--spacing-xl); }
+
+.mb-1 { margin-bottom: var(--spacing-sm); }
+.mb-2 { margin-bottom: var(--spacing-md); }
+.mb-3 { margin-bottom: var(--spacing-lg); }
+.mb-4 { margin-bottom: var(--spacing-xl); }
+
+.p-1 { padding: var(--spacing-sm); }
+.p-2 { padding: var(--spacing-md); }
+.p-3 { padding: var(--spacing-lg); }
+.p-4 { padding: var(--spacing-xl); }
+
+.hidden { display: none; }
+.visible { display: block; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+
+.grid { display: grid; }
+.gap-1 { gap: var(--spacing-sm); }
+.gap-2 { gap: var(--spacing-md); }
+.gap-3 { gap: var(--spacing-lg); }
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+.slide-in-up {
+    animation: slideInUp 0.5s ease;
+}
+
+.slide-in-down {
+    animation: slideInDown 0.5s ease;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease;
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">⚕</div>
+            <div>
+                <div class="logo-text">MedAI Assistant/div>
+                <div class="tagline">AI-powered medical information assistant</div>
+            </div>
+        </div>
+        <div class="warning">
+            ⚠️ DISCLAIMER: This is for informational purposes only. Always consult a healthcare professional.
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="disease-cards">
+                <h3>🔬 Common Diseases</h3>
+                <div class="disease-list">
+                    <button class="disease-btn" data-disease="malaria">Malaria</button>
+                    <button class="disease-btn" data-disease="hiv">HIV/AIDS</button>
+                    <button class="disease-btn" data-disease="typhoid">Typhoid Fever</button>
+                    <button class="disease-btn" data-disease="tuberculosis">Tuberculosis (TB)</button>
+                    <button class="disease-btn" data-disease="chlamydia">Chlamydia</button>
+                    <button class="disease-btn" data-disease="gonorrhea">Gonorrhea</button>
+                    <button class="disease-btn" data-disease="syphilis">Syphilis</button>
+                    <button class="disease-btn" data-disease="hepatitis">Hepatitis B</button>
+                    <button class="disease-btn" data-disease="dengue">Dengue Fever</button>
+                    <button class="disease-btn" data-disease="cholera">Cholera</button>
+                </div>
+            </div>
+
+            <div class="symptom-checker">
+                <h3>📋 Symptom Checker</h3>
+                <input type="text" class="symptom-input" placeholder="Enter symptoms (e.g., fever, headache, rash)">
+                <button class="analyze-btn">Analyze Symptoms</button>
+                <div class="disclaimer">
+                    Enter multiple symptoms for better analysis
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot-message">
+                    <strong>👋 Welcome to MedAI Symptom Checker</strong><br><br>
+                    I can provide information about diseases including:
+                    • Symptoms and causes
+                    • Treatment options
+                    • Medication suggestions
+                    • Prevention methods
+                    <br><br>
+                    <em>Please note: This is for informational purposes only. Always consult a doctor for proper diagnosis.</em>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-container">
+                    <input type="text" class="chat-input" id="user-input" 
+                           placeholder="Ask about symptoms, diseases, or treatments...">
+                    <button class="send-btn" id="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       // Enhanced Medical Knowledge Database
+const medicalDatabase = {
+    malaria: {
+        name: "Malaria",
+        icon: "🦟",
+        symptoms: [
+            "High fever (often cyclical - every 48-72 hours)",
+            "Chills and shaking",
+            "Headache and muscle pain",
+            "Fatigue and weakness",
+            "Nausea and vomiting",
+            "Sweating",
+            "Abdominal pain"
+        ],
+        causes: [
+            "Plasmodium parasite transmitted through mosquito bites",
+            "Anopheles mosquito vector",
+            "Blood transfusion (rare)",
+            "Congenital transmission (mother to child)",
+            "Shared needles"
+        ],
+        medications: [
+            { name: "Artemisinin-based Combination Therapy (ACT)", type: "Primary treatment" },
+            { name: "Chloroquine", type: "In chloroquine-sensitive areas" },
+            { name: "Quinine", type: "Severe malaria" },
+            { name: "Mefloquine", type: "Prophylaxis" },
+            { name: "Doxycycline", type: "Prophylaxis" },
+            { name: "Primaquine", type: "Prevents relapse (P. vivax/ovale)" }
+        ],
+        severity: "high",
+        severityText: "High",
+        prevention: [
+            "Use insecticide-treated bed nets",
+            "Indoor residual spraying",
+            "Antimalarial prophylaxis when traveling",
+            "Wear protective clothing",
+            "Remove standing water"
+        ]
+    },
+    hiv: {
+        name: "HIV/AIDS",
+        icon: "🩺",
+        symptoms: [
+            "Early stage: Flu-like symptoms (fever, sore throat, rash)",
+            "Chronic stage: Often asymptomatic for years",
+            "Late stage (AIDS): Rapid weight loss, recurring fever",
+            "Extreme fatigue, swollen lymph nodes",
+            "Prolonged diarrhea, mouth ulcers",
+            "Pneumonia, skin rashes",
+            "Neurological disorders"
+        ],
+        causes: [
+            "Human Immunodeficiency Virus (HIV)",
+            "Unprotected sexual contact",
+            "Sharing contaminated needles",
+            "Mother-to-child transmission",
+            "Blood transfusion (rare with screening)",
+            "Occupational exposure"
+        ],
+        medications: [
+            { name: "Antiretroviral Therapy (ART)", type: "Primary treatment" },
+            { name: "Tenofovir/Emtricitabine", type: "NRTI combination" },
+            { name: "Dolutegravir", type: "Integrase inhibitor" },
+            { name: "Efavirenz", type: "NNRTI" },
+            { name: "Lopinavir/Ritonavir", type: "Protease inhibitor" },
+            { name: "Post-exposure prophylaxis (PEP)", type: "Prevention within 72h" },
+            { name: "Pre-exposure prophylaxis (PrEP)", type: "High-risk prevention" }
+        ],
+        severity: "high",
+        severityText: "High",
+        prevention: [
+            "Consistent condom use",
+            "Pre-exposure prophylaxis (PrEP)",
+            "Regular testing",
+            "Safe injection practices",
+            "Mother-to-child transmission prevention"
+        ]
+    },
+    typhoid: {
+        name: "Typhoid Fever",
+        icon: "🌡️",
+        symptoms: [
+            "Prolonged high fever (up to 104°F/40°C)",
+            "Weakness and fatigue",
+            "Headache and body aches",
+            "Abdominal pain and discomfort",
+            "Rose-colored spots on chest/abdomen",
+            "Constipation or diarrhea",
+            "Loss of appetite"
+        ],
+        causes: [
+            "Salmonella Typhi bacteria",
+            "Contaminated food or water",
+            "Poor sanitation",
+            "Close contact with infected person",
+            "Chronic carriers"
+        ],
+        medications: [
+            { name: "Ciprofloxacin", type: "First-line treatment" },
+            { name: "Azithromycin", type: "Alternative treatment" },
+            { name: "Ceftriaxone", type: "Severe cases" },
+            { name: "Chloramphenicol", type: "Where resistance low" },
+            { name: "Typhoid vaccine", type: "Prevention" }
+        ],
+        severity: "medium",
+        severityText: "Medium",
+        prevention: [
+            "Safe drinking water",
+            "Proper food handling",
+            "Hand washing with soap",
+            "Vaccination for high-risk areas",
+            "Proper sewage disposal"
+        ]
+    },
+    tuberculosis: {
+        name: "Tuberculosis (TB)",
+        icon: "🫁",
+        symptoms: [
+            "Persistent cough (3+ weeks)",
+            "Coughing up blood or sputum",
+            "Chest pain",
+            "Unintentional weight loss",
+            "Fatigue and weakness",
+            "Fever and night sweats",
+            "Loss of appetite"
+        ],
+        causes: [
+            "Mycobacterium tuberculosis bacteria",
+            "Airborne transmission",
+            "Close contact with infected person",
+            "Weakened immune system",
+            "HIV co-infection",
+            "Malnutrition",
+            "Diabetes"
+        ],
+        medications: [
+            { name: "Isoniazid", type: "First-line (6-9 months)" },
+            { name: "Rifampicin", type: "First-line (6-9 months)" },
+            { name: "Ethambutol", type: "First-line (2 months)" },
+            { name: "Pyrazinamide", type: "First-line (2 months)" },
+            { name: "Bedaquiline", type: "MDR-TB treatment" },
+            { name: "Delamanid", type: "MDR-TB treatment" }
+        ],
+        severity: "high",
+        severityText: "High",
+        prevention: [
+            "BCG vaccination",
+            "Proper ventilation",
+            "Early diagnosis and treatment",
+            "Infection control measures",
+            "Treatment of latent TB"
+        ]
+    },
+    chlamydia: {
+        name: "Chlamydia",
+        icon: "🦠",
+        symptoms: [
+            "Often asymptomatic (70% women, 50% men)",
+            "Painful urination",
+            "Abnormal vaginal discharge",
+            "Penile discharge",
+            "Pain during sex",
+            "Lower abdominal pain",
+            "Bleeding between periods"
+        ],
+        causes: [
+            "Chlamydia trachomatis bacteria",
+            "Unprotected vaginal, anal, or oral sex",
+            "Mother-to-child during birth",
+            "Multiple sexual partners"
+        ],
+        medications: [
+            { name: "Azithromycin", type: "Single dose (1g)" },
+            { name: "Doxycycline", type: "7-day course" },
+            { name: "Erythromycin", type: "Pregnancy alternative" },
+            { name: "Levofloxacin", type: "Alternative treatment" }
+        ],
+        severity: "medium",
+        severityText: "Medium",
+        prevention: [
+            "Consistent condom use",
+            "Regular STI screening",
+            "Mutual monogamy",
+            "Avoid douching",
+            "Partner notification and treatment"
+        ]
+    },
+    gonorrhea: {
+        name: "Gonorrhea",
+        icon: "🔬",
+        symptoms: [
+            "Thick, cloudy, or bloody discharge",
+            "Painful urination",
+            "Painful/swollen testicles",
+            "Vaginal bleeding between periods",
+            "Pelvic pain",
+            "Anal itching/discharge",
+            "Sore throat"
+        ],
+        causes: [
+            "Neisseria gonorrhoeae bacteria",
+            "Unprotected sexual contact",
+            "Mother-to-child during birth",
+            "Multiple sexual partners"
+        ],
+        medications: [
+            { name: "Ceftriaxone", type: "Injection (500mg)" },
+            { name: "Azithromycin", type: "Oral (1g) - dual therapy" },
+            { name: "Gentamicin", type: "Alternative" },
+            { name: "Cefixime", type: "Alternative oral" }
+        ],
+        severity: "medium",
+        severityText: "Medium",
+        prevention: [
+            "Consistent condom use",
+            "Regular STI testing",
+            "Partner treatment",
+            "Avoid multiple partners",
+            "Get vaccinated for Hepatitis B"
+        ]
+    },
+    syphilis: {
+        name: "Syphilis",
+        icon: "⚕️",
+        symptoms: [
+            "Primary: Painless sore (chancre)",
+            "Secondary: Skin rash, mucous patches",
+            "Latent: No symptoms",
+            "Tertiary: Heart, brain, nerve damage",
+            "Fever, swollen lymph nodes",
+            "Fatigue, muscle aches",
+            "Hair loss"
+        ],
+        causes: [
+            "Treponema pallidum bacteria",
+            "Direct contact with sore",
+            "Unprotected sexual contact",
+            "Mother-to-child during pregnancy",
+            "Blood transfusion (rare)"
+        ],
+        medications: [
+            { name: "Benzathine penicillin G", type: "Injection (primary/secondary)" },
+            { name: "Procaine penicillin", type: "Neuro/late syphilis" },
+            { name: "Doxycycline", type: "Penicillin allergy" },
+            { name: "Ceftriaxone", type: "Alternative" }
+        ],
+        severity: "high",
+        severityText: "High",
+        prevention: [
+            "Consistent condom use",
+            "Regular STI screening",
+            "Prenatal screening",
+            "Partner notification",
+            "Avoid sexual contact with sores"
+        ]
+    },
+    hepatitis: {
+        name: "Hepatitis B",
+        icon: "🩸",
+        symptoms: [
+            "Fatigue and weakness",
+            "Jaundice (yellow skin/eyes)",
+            "Dark urine",
+            "Abdominal pain",
+            "Loss of appetite",
+            "Nausea and vomiting",
+            "Joint pain"
+        ],
+        causes: [
+            "Hepatitis B virus (HBV)",
+            "Unprotected sex",
+            "Sharing needles",
+            "Mother-to-child during birth",
+            "Contact with infected blood",
+            "Unsafe medical procedures"
+        ],
+        medications: [
+            { name: "Tenofovir", type: "Oral antiviral" },
+            { name: "Entecavir", type: "Oral antiviral" },
+            { name: "Pegylated interferon", type: "Injection" },
+            { name: "Hepatitis B vaccine", type: "Prevention (3 doses)" },
+            { name: "Hepatitis B immune globulin", type: "Post-exposure" }
+        ],
+        severity: "high",
+        severityText: "High",
+        prevention: [
+            "Vaccination (3 doses)",
+            "Safe sex practices",
+            "Avoid sharing needles",
+            "Safe blood transfusion",
+            "Infection control in healthcare"
+        ]
+    },
+    dengue: {
+        name: "Dengue Fever",
+        icon: "🩹",
+        symptoms: [
+            "Sudden high fever (104°F/40°C)",
+            "Severe headache",
+            "Pain behind the eyes",
+            "Muscle and joint pain",
+            "Nausea and vomiting",
+            "Skin rash (appears 2-5 days)",
+            "Mild bleeding (nose/gums)"
+        ],
+        causes: [
+            "Dengue virus (DENV 1-4)",
+            "Aedes mosquito bite",
+            "Daytime biting mosquitoes",
+            "Urban areas with standing water",
+            "Travel to endemic areas"
+        ],
+        medications: [
+            { name: "Acetaminophen/Paracetamol", type: "Fever and pain relief" },
+            { name: "Oral rehydration salts", type: "Fluid replacement" },
+            { name: "Avoid NSAIDs (aspirin/ibuprofen)", type: "Warning - bleeding risk" },
+            { name: "Hospitalization for severe cases", type: "IV fluids, monitoring" }
+        ],
+        severity: "medium",
+        severityText: "Medium",
+        prevention: [
+            "Eliminate mosquito breeding sites",
+            "Use mosquito repellent",
+            "Wear protective clothing",
+            "Window screens and bed nets",
+            "Dengue vaccine in some countries"
+        ]
+    },
+    cholera: {
+        name: "Cholera",
+        icon: "💧",
+        symptoms: [
+            "Profuse watery diarrhea (rice-water stools)",
+            "Vomiting",
+            "Leg cramps",
+            "Rapid heart rate",
+            "Loss of skin elasticity",
+            "Dry mucous membranes",
+            "Low blood pressure"
+        ],
+        causes: [
+            "Vibrio cholerae bacteria",
+            "Contaminated water",
+            "Contaminated food",
+            "Poor sanitation",
+            "Areas with inadequate sewage",
+            "Natural disasters"
+        ],
+        medications: [
+            { name: "Oral rehydration salts (ORS)", type: "Primary treatment" },
+            { name: "Intravenous fluids", type: "Severe dehydration" },
+            { name: "Antibiotics (Doxycycline)", type: "Severe cases" },
+            { name: "Zinc supplements", type: "Children" },
+            { name: "Cholera vaccine", type: "Prevention (oral)" }
+        ],
+        severity: "high",
+        severityText: "High",
+        prevention: [
+            "Safe drinking water",
+            "Proper sanitation",
+            "Hand washing with soap",
+            "Proper food preparation",
+            "Oral cholera vaccine"
+        ]
+    }
+};
+
+// Smart Greetings Database
+const greetingResponses = {
+    morning: [
+        "Good morning! 🌅 Ready to assist with your health questions today?",
+        "Morning! ☀️ How can I help you with medical information this fine day?",
+        "Jambo! Habari ya asubuhi? I'm here to provide medical insights.",
+        "Good morning! Feeling well today? Ask me anything about diseases or symptoms."
+    ],
+    afternoon: [
+        "Good afternoon! 🌤️ How can I assist with your health inquiries?",
+        "Afternoon! What medical information can I provide for you today?",
+        "Jambo! Habari ya mchana? Ready to discuss health matters.",
+        "Good afternoon! Let's talk about staying healthy. What's on your mind?"
+    ],
+    evening: [
+        "Good evening! 🌙 How can I help with medical information tonight?",
+        "Evening! Need health advice or information about diseases?",
+        "Jambo! Habari ya jioni? I'm here for your health questions.",
+        "Good evening! Let's discuss health concerns before the day ends."
+    ],
+    night: [
+        "Good night! 🌃 Still here for your health questions.",
+        "Late night health inquiry? I'm here to help!",
+        "Jambo! Usiku mwema. Need medical information at this hour?",
+        "Good night! Can't sleep? Let's talk about health instead."
+    ],
+    general: [
+        "Hello! 👋 Welcome to MedAI Kenya. I provide medical information about diseases, symptoms, and treatments.",
+        "Hi there! 🩺 I'm your medical assistant. Ask me about diseases like malaria, HIV, or typhoid.",
+        "Jambo! 🇰🇪 Karibu! I can help you understand diseases, symptoms, and medications.",
+        "Greetings! 💊 Ready to discuss health? I know about 10 common diseases and their treatments.",
+        "Welcome! 🏥 I'm here to provide accurate medical information. What would you like to know?"
+    ],
+    swahili: [
+        "Habari yako! 🇰🇪 Ni nini unaweza kuuliza kuhusu magonjwa?",
+        "Karibu! 🩺 Ninaweza kukupa maelezo kuhusu malaria, HIV, na magonjwa mengine.",
+        "Sasa! 💊 Una swali gani la kiafya? Niko hapa kusaidia.",
+        "Mambo! 🏥 Vipi kuhusu afya? Niambie nini unahitaji kujua."
+    ],
+    formal: [
+        "Greetings. I am MedAI Kenya, your medical information assistant. How may I be of service?",
+        "Welcome. I provide detailed information about diseases and their treatments. What is your query?",
+        "Hello. This medical assistant can provide insights on various diseases. Please state your question.",
+        "Good day. I specialize in medical knowledge. What would you like to learn about?"
+    ],
+    casual: [
+        "Hey! 👋 What's up? Got any health questions?",
+        "Yo! 🩺 Need medical info? I'm your bot!",
+        "What's good? 💊 Let's talk health stuff.",
+        "Sup! 🏥 Health questions? I got answers."
+    ]
+};
+
+// DOM Elements
+let chatMessages;
+let userInput;
+let sendBtn;
+let diseaseButtons;
+let symptomInput;
+let analyzeBtn;
+let chatContainer;
+
+// Initialize DOM elements after page loads
+function initializeDOMElements() {
+    chatMessages = document.getElementById('chat-messages');
+    userInput = document.getElementById('user-input');
+    sendBtn = document.getElementById('send-btn');
+    diseaseButtons = document.querySelectorAll('.disease-btn');
+    symptomInput = document.querySelector('.symptom-input');
+    analyzeBtn = document.querySelector('.analyze-btn');
+    chatContainer = document.querySelector('.chat-messages');
+}
+
+// Get appropriate greeting based on time and user input
+function getSmartGreeting(userText = '') {
+    const hour = new Date().getHours();
+    const lowerText = userText.toLowerCase();
+    
+    // Check for specific greeting patterns
+    if (/(jambo|habari|mambo|sasa)/i.test(lowerText)) {
+        return getRandomResponse(greetingResponses.swahili);
+    }
+    
+    if (/(good morning|morning|asubuhi)/i.test(lowerText)) {
+        return getRandomResponse(greetingResponses.morning);
+    }
+    
+    if (/(good afternoon|afternoon|mchana)/i.test(lowerText)) {
+        return getRandomResponse(greetingResponses.afternoon);
+    }
+    
+    if (/(good evening|evening|jioni)/i.test(lowerText)) {
+        return getRandomResponse(greetingResponses.evening);
+    }
+    
+    if (/(good night|night|lala salama|usiku)/i.test(lowerText)) {
+        return getRandomResponse(greetingResponses.night);
+    }
+    
+    if (/(hello|hi|hey|yo|sup|greetings)/i.test(lowerText)) {
+        if (/(hello|hi|hey)/i.test(lowerText) && lowerText.length < 10) {
+            return getRandomResponse(greetingResponses.casual);
+        }
+        return getRandomResponse(greetingResponses.general);
+    }
+    
+    // Time-based greeting if no specific greeting detected
+    if (hour < 12) {
+        return getRandomResponse(greetingResponses.morning);
+    } else if (hour < 17) {
+        return getRandomResponse(greetingResponses.afternoon);
+    } else if (hour < 21) {
+        return getRandomResponse(greetingResponses.evening);
+    } else {
+        return getRandomResponse(greetingResponses.night);
+    }
+}
+
+// Helper function to get random response from array
+function getRandomResponse(responses) {
+    return responses[Math.floor(Math.random() * responses.length)];
+}
+
+// Add message to chat with enhanced styling
+function addMessage(content, type = 'bot') {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}-message fade-in`;
+    
+    if (typeof content === 'string') {
+        messageDiv.innerHTML = content;
+    } else {
+        messageDiv.appendChild(content);
+    }
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Add animation
+    messageDiv.style.animation = 'messageAppear 0.3s ease';
+}
+
+// Show typing indicator with enhanced animation
+function showTyping() {
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'typing-indicator slide-in-up';
+    typingDiv.id = 'typing-indicator';
+    typingDiv.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+    `;
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Hide typing indicator
+function hideTyping() {
+    const typing = document.getElementById('typing-indicator');
+    if (typing) {
+        typing.style.opacity = '0';
+        typing.style.transform = 'translateY(-10px)';
+        setTimeout(() => typing.remove(), 300);
+    }
+}
+
+// Generate enhanced disease information card
+function createDiseaseCard(disease) {
+    const card = document.createElement('div');
+    card.className = 'disease-info slide-in-up';
+    
+    card.innerHTML = `
+        <div class="disease-title">
+            <h3>${disease.icon || '🩺'} ${disease.name}</h3>
+            <span class="severity-badge severity-${disease.severity}">
+                ${disease.severityText} Severity
+            </span>
+        </div>
+        
+        <div class="info-section">
+            <h4>📋 Common Symptoms:</h4>
+            <ul class="info-list">
+                ${disease.symptoms.map(s => `<li>${s}</li>`).join('')}
+            </ul>
+        </div>
+        
+        <div class="info-section">
+            <h4>🔬 Causes & Transmission:</h4>
+            <ul class="info-list">
+                ${disease.causes.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+        </div>
+        
+        <div class="info-section">
+            <h4>💊 Treatment & Medications:</h4>
+            <div class="medication-grid">
+                ${disease.medications.map(m => 
+                    `<div class="medication-card">
+                        <div class="medication-name">${m.name}</div>
+                        <div class="medication-type">${m.type}</div>
+                    </div>`
+                ).join('')}
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h4>🛡️ Prevention Methods:</h4>
+            <ul class="info-list">
+                ${disease.prevention.map(p => `<li>${p}</li>`).join('')}
+            </ul>
+        </div>
+        
+        <div class="disclaimer">
+            ⚠️ <strong>Medical Disclaimer:</strong> This information is for educational purposes only. 
+            Always consult a qualified healthcare professional for diagnosis and treatment. 
+            Do not self-medicate based on this information.
+        </div>
+    `;
+    
+    return card;
+}
+
+// Enhanced symptom analysis function
+function analyzeSymptoms(symptoms) {
+    const lowerSymptoms = symptoms.toLowerCase();
+    const matchedDiseases = [];
+    
+    // Score diseases based on symptom matches
+    for (const [key, disease] of Object.entries(medicalDatabase)) {
+        let score = 0;
+        const symptomKeywords = lowerSymptoms.split(/[,\s]+/);
+        
+        disease.symptoms.forEach(symptom => {
+            const lowerSymptom = symptom.toLowerCase();
+            symptomKeywords.forEach(keyword => {
+                if (keyword.length > 3 && lowerSymptom.includes(keyword)) {
+                    score += 2;
+                } else if (keyword.length > 2 && lowerSymptom.includes(keyword)) {
+                    score += 1;
+                }
+            });
+        });
+        
+        if (score > 0) {
+            matchedDiseases.push({
+                disease: disease,
+                score: score,
+                matchPercentage: Math.min(100, (score / (disease.symptoms.length * 2)) * 100)
+            });
+        }
+    }
+    
+    // Sort by score
+    matchedDiseases.sort((a, b) => b.score - a.score);
+    
+    return matchedDiseases.slice(0, 3); // Return top 3 matches
+}
+
+// Process user input intelligently
+function processInput(input) {
+    const lowerInput = input.toLowerCase().trim();
+    
+    // Check for greetings first
+    if (/(hello|hi|hey|jambo|habari|good|morning|afternoon|evening|night)/i.test(lowerInput) && lowerInput.split(' ').length < 4) {
+        return {
+            type: 'greeting',
+            response: getSmartGreeting(input)
+        };
+    }
+    
+    // Check for thank you
+    if (/(thanks|thank you|asante|shukran)/i.test(lowerInput)) {
+        return {
+            type: 'thanks',
+            response: "You're welcome! 😊 Is there anything else you'd like to know about diseases or symptoms?"
+        };
+    }
+    
+    // Check for help request
+    if (/(help|what can you do|what do you know|features)/i.test(lowerInput)) {
+        const diseasesList = Object.values(medicalDatabase).map(d => d.name).join(', ');
+        return {
+            type: 'help',
+            response: `I can provide detailed information about diseases including symptoms, causes, treatments, and prevention. I know about: <strong>${diseasesList}</strong>. Try asking about a specific disease or symptoms!`
+        };
+    }
+    
+    // Check for disease names
+    for (const [key, disease] of Object.entries(medicalDatabase)) {
+        const diseaseNameLower = disease.name.toLowerCase();
+        if (lowerInput.includes(key) || lowerInput.includes(diseaseNameLower) || 
+            new RegExp(`\\b${key}\\b|\\b${diseaseNameLower}\\b`).test(lowerInput)) {
+            return {
+                type: 'disease',
+                data: disease
+            };
+        }
+    }
+    
+    // Check for symptom keywords
+    const symptomWords = lowerInput.split(/\W+/).filter(word => word.length > 3);
+    if (symptomWords.length > 0) {
+        const symptomQuery = symptomWords.join(' ');
+        const matchedDiseases = analyzeSymptoms(symptomQuery);
+        
+        if (matchedDiseases.length > 0) {
+            return {
+                type: 'symptom_analysis',
+                symptoms: symptomQuery,
+                matches: matchedDiseases
+            };
+        }
+    }
+    
+    // Check for specific question patterns
+    if (/(symptoms of|signs of|what are.*symptoms)/i.test(lowerInput)) {
+        for (const [key, disease] of Object.entries(medicalDatabase)) {
+            if (lowerInput.includes(disease.name.toLowerCase().split(' ')[0])) {
+                return {
+                    type: 'disease_symptoms',
+                    data: disease
+                };
+            }
+        }
+    }
+    
+    if (/(causes of|what causes|how do you get)/i.test(lowerInput)) {
+        for (const [key, disease] of Object.entries(medicalDatabase)) {
+            if (lowerInput.includes(disease.name.toLowerCase().split(' ')[0])) {
+                return {
+                    type: 'disease_causes',
+                    data: disease
+                };
+            }
+        }
+    }
+    
+    if (/(treatment for|medicine for|drugs for|cure for|how to treat)/i.test(lowerInput)) {
+        for (const [key, disease] of Object.entries(medicalDatabase)) {
+            if (lowerInput.includes(disease.name.toLowerCase().split(' ')[0])) {
+                return {
+                    type: 'disease_treatment',
+                    data: disease
+                };
+            }
+        }
+    }
+    
+    if (/(how to prevent|prevention of|avoid)/i.test(lowerInput)) {
+        for (const [key, disease] of Object.entries(medicalDatabase)) {
+            if (lowerInput.includes(disease.name.toLowerCase().split(' ')[0])) {
+                return {
+                    type: 'disease_prevention',
+                    data: disease
+                };
+            }
+        }
+    }
+    
+    // Default fallback
+    return {
+        type: 'unknown',
+        response: "I'm not sure I understand. You can ask me about:<br>" +
+                 "• Specific diseases (malaria, HIV, typhoid, etc.)<br>" +
+                 "• Disease symptoms<br>" +
+                 "• Treatment options<br>" +
+                 "• Prevention methods<br>" +
+                 "Or try typing your symptoms for analysis."
+    };
+}
+
+// Send message function with enhanced UX
+function sendMessage(text = null) {
+    const messageText = text || userInput.value.trim();
+    if (!messageText) return;
+    
+    // Add user message
+    if (!text) {
+        addMessage(messageText, 'user');
+        userInput.value = '';
+        userInput.focus();
+    }
+    
+    // Show typing indicator
+    showTyping();
+    
+    // Process after delay
+    setTimeout(() => {
+        hideTyping();
+        
+        const response = processInput(messageText);
+        
+        switch(response.type) {
+            case 'greeting':
+                addMessage(response.response, 'bot');
+                break;
+                
+            case 'thanks':
+                addMessage(response.response, 'bot');
+                break;
+                
+            case 'help':
+                addMessage(response.response, 'bot');
+                break;
+                
+            case 'disease':
+                const diseaseCard = createDiseaseCard(response.data);
+                addMessage(diseaseCard, 'bot');
+                break;
+                
+            case 'disease_symptoms':
+                addMessage(`<strong>${response.data.name} Symptoms:</strong><br><br>` +
+                          response.data.symptoms.map(s => `• ${s}`).join('<br>'), 'bot');
+                break;
+                
+            case 'disease_causes':
+                addMessage(`<strong>${response.data.name} Causes:</strong><br><br>` +
+                          response.data.causes.map(c => `• ${c}`).join('<br>'), 'bot');
+                break;
+                
+            case 'disease_treatment':
+                addMessage(`<strong>${response.data.name} Treatments:</strong><br><br>` +
+                          response.data.medications.map(m => `• <strong>${m.name}</strong> - ${m.type}`).join('<br>'), 'bot');
+                break;
+                
+            case 'disease_prevention':
+                addMessage(`<strong>${response.data.name} Prevention:</strong><br><br>` +
+                          response.data.prevention.map(p => `• ${p}`).join('<br>'), 'bot');
+                break;
+                
+            case 'symptom_analysis':
+                let analysisHTML = `<strong>🔍 Symptom Analysis Results</strong><br><br>`;
+                analysisHTML += `Based on your symptoms "<em>${response.symptoms}</em>":<br><br>`;
+                
+                response.matches.forEach((match, index) => {
+                    analysisHTML += `
+                        <div class="match-result">
+                            <strong>${index + 1}. ${match.disease.name}</strong><br>
+                            <small>Match: ${match.matchPercentage.toFixed(0)}% • Severity: ${match.disease.severityText}</small>
+                        </div>
+                    `;
+                });
+                
+                analysisHTML += `
+                    <br>
+                    <div class="disclaimer">
+                        ⚠️ <strong>Important:</strong> This is NOT a diagnosis. 
+                        Many diseases share similar symptoms. Please consult a healthcare professional 
+                        for proper evaluation and treatment.
+                    </div>
+                `;
+                
+                addMessage(analysisHTML, 'bot');
+                break;
+                
+            default:
+                addMessage(response.response, 'bot');
+        }
+        
+        // Add quick suggestions after certain responses
+        if (response.type !== 'greeting' && response.type !== 'thanks') {
+            setTimeout(addQuickSuggestions, 500);
+        }
+    }, Math.random() * 800 + 700); // Random delay between 700-1500ms
+}
+
+// Add quick suggestion buttons
+function addQuickSuggestions() {
+    const suggestions = document.createElement('div');
+    suggestions.className = 'quick-actions slide-in-up';
+    suggestions.innerHTML = `
+        <button class="quick-btn" onclick="sendMessage('Tell me about malaria')">Malaria Info</button>
+        <button class="quick-btn" onclick="sendMessage('What are HIV symptoms?')">HIV Symptoms</button>
+        <button class="quick-btn" onclick="sendMessage('Typhoid treatment')">Typhoid Treatment</button>
+        <button class="quick-btn" onclick="sendMessage('How to prevent cholera')">Cholera Prevention</button>
+    `;
+    
+    // Check if suggestions already exist
+    const existing = document.querySelector('.quick-actions');
+    if (existing) existing.remove();
+    
+    chatMessages.appendChild(suggestions);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Initialize disease buttons
+function initializeDiseaseButtons() {
+    const diseaseGrid = document.querySelector('.disease-grid');
+    if (diseaseGrid) {
+        diseaseGrid.innerHTML = '';
+        
+        Object.entries(medicalDatabase).forEach(([key, disease]) => {
+            const button = document.createElement('button');
+            button.className = 'disease-card card-hover';
+            button.innerHTML = `
+                <span class="disease-icon">${disease.icon}</span>
+                <span class="disease-name">${disease.name}</span>
+            `;
+            button.onclick = () => {
+                userInput.value = `Tell me about ${disease.name}`;
+                sendMessage();
+            };
+            diseaseGrid.appendChild(button);
+        });
+    }
+}
+
+// Initialize chat with welcome message
+function initializeChat() {
+    setTimeout(() => {
+        const welcomeMessage = `
+            <strong>🇰🇪 MedAI Kenya Medical Assistant</strong><br><br>
+            Jambo! I'm your AI-powered medical information assistant.<br><br>
+            I can help you with:<br>
+            • Disease information & symptoms<br>
+            • Treatment options & medications<br>
+            • Prevention methods<br>
+            • Symptom analysis<br><br>
+            <em>Try asking about a disease or describing your symptoms!</em>
+        `;
+        addMessage(welcomeMessage, 'bot');
+    }, 1000);
+}
+
+// Initialize everything when DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDOMElements();
+    initializeDiseaseButtons();
+    initializeChat();
+    
+    // Event listeners
+    if (sendBtn) {
+        sendBtn.addEventListener('click', () => sendMessage());
+    }
+    
+    if (userInput) {
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Auto-focus input
+        setTimeout(() => userInput.focus(), 1500);
+    }
+    
+    if (analyzeBtn && symptomInput) {
+        analyzeBtn.addEventListener('click', function() {
+            const symptoms = symptomInput.value.trim();
+            if (!symptoms) {
+                addMessage("Please enter some symptoms to analyze.", 'bot');
+                return;
+            }
+            
+            sendMessage(`Analyze symptoms: ${symptoms}`);
+            symptomInput.value = '';
+        });
+        
+        symptomInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                analyzeBtn.click();
+            }
+        });
+    }
+    
+    // Add example questions
+    setTimeout(() => {
+        const exampleDiv = document.createElement('div');
+        exampleDiv.className = 'panel slide-in-up';
+        exampleDiv.innerHTML = `
+            <h3>💡 Try These Questions</h3>
+            <div style="display: flex; flex-direction: column; gap: var(--spacing-sm); margin-top: var(--spacing-md);">
+                <button class="quick-btn" onclick="sendMessage('What are malaria symptoms?')">What are malaria symptoms?</button>
+                <button class="quick-btn" onclick="sendMessage('HIV treatment options')">HIV treatment options</button>
+                <button class="quick-btn" onclick="sendMessage('How to prevent typhoid')">How to prevent typhoid?</button>
+                <button class="quick-btn" onclick="sendMessage('Dengue fever causes')">Dengue fever causes</button>
+            </div>
+        `;
+        
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            const existingExamples = sidebar.querySelector('.panel:last-child');
+            if (existingExamples && existingExamples.querySelector('h3').textContent.includes('Try These')) {
+                existingExamples.remove();
+            }
+            sidebar.appendChild(exampleDiv);
+        }
+    }, 2000);
+});
+
+// Utility function to clear chat
+function clearChat() {
+    if (chatMessages) {
+        chatMessages.innerHTML = '';
+        initializeChat();
+    }
+}
+
+// Export functions for global access (if needed)
+window.sendMessage = sendMessage;
+window.clearChat = clearChat;
+    </script>
+</body>
+</html>

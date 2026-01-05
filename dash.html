@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnostic Dashboard | MedAI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/dash.css">
+
+    <script src="js/auth.js" defer></script>
+    <script src="js/dash.js" defer></script>
+</head>
+
+<body class="dashboard-body">
+
+<!-- ===================== TOP NAV ===================== -->
+<nav class="dash-nav">
+    <div class="nav-brand">
+        <div class="logo">Med<span>AI</span></div>
+    </div>
+
+    <div class="user-profile">
+        <div class="user-info">
+            <span class="user-name" id="display-name">Dr. Practitioner</span>
+            <span class="user-role">Medical Practitioner</span>
+        </div>
+        <div class="user-avatar">MD</div>
+    </div>
+</nav>
+
+<!-- ===================== LAYOUT ===================== -->
+<main class="dash-container">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="dash-sidebar">
+        <button class="nav-item active" data-tab="scanner">
+            <i class="icon-camera"></i>
+            <span>Scanner</span>
+        </button>
+
+        <button class="nav-item" data-tab="history">
+            <i class="icon-history"></i>
+            <span>History</span>
+        </button>
+
+        <button class="nav-item" data-tab="analytics">
+            <i class="icon-chart"></i>
+            <span>Analytics</span>
+        </button>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <section class="main-content">
+
+        <!-- ===== SCANNER VIEW ===== -->
+        <div id="scanner-section" class="content-view">
+
+            <header class="view-header">
+                <h2>Live Diagnostic Scan</h2>
+                <p>Select scan type and align image in the viewfinder</p>
+            </header>
+
+            <div class="scan-type-selector">
+                <button class="type-btn active" data-type="xray">X-Ray</button>
+                <button class="type-btn" data-type="ct">CT Scan</button>
+                <button class="type-btn" data-type="mri">MRI</button>
+                <button class="type-btn" data-type="ultrasound">Ultrasound</button>
+            </div>
+
+            <div class="scanner-card">
+                <div class="camera-container">
+                    <video id="camera-stream" autoplay playsinline></video>
+
+                    <div class="scanner-overlay">
+                        <div class="target-box">
+                            <div class="scan-line"></div>
+                        </div>
+                    </div>
+
+                    <div class="ai-status-badge hidden" id="ai-status">
+                        <span class="pulse-dot"></span>
+                        AI: Analyzing…
+                    </div>
+                </div>
+
+                <div class="camera-controls">
+                    <button id="capture-trigger" class="btn-capture" title="Capture Scan">
+                        <div class="inner-circle"></div>
+                    </button>
+                    <button id="toggle-torch" class="btn-tool" title="Toggle Flash">🔦</button>
+                    <button id="upload-local" class="btn-tool" title="Upload File">📂</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== HISTORY VIEW (READY FOR DATA) ===== -->
+        <div id="history-section" class="content-view hidden">
+            <header class="view-header">
+                <h2>Scan History</h2>
+                <p>Previous diagnostic analyses</p>
+            </header>
+        </div>
+
+        <!-- ===== ANALYTICS VIEW (READY FOR DATA) ===== -->
+        <div id="analytics-section" class="content-view hidden">
+            <header class="view-header">
+                <h2>Analytics</h2>
+                <p>AI performance and scan insights</p>
+            </header>
+        </div>
+
+    </section>
+</main>
+
+<!-- ===================== RESULTS PANEL ===================== -->
+<div id="results-panel" class="results-container hidden">
+    <div class="panel-header">
+        <h3>AI Diagnostic Analysis</h3>
+        <button id="close-results">✕</button>
+    </div>
+
+    <div class="results-body">
+
+        <div class="analysis-summary">
+            <div class="confidence-score">
+                <svg viewBox="0 0 36 36" class="circular-chart">
+                    <path class="circle-bg"
+                          d="M18 2.0845
+                             a 15.9155 15.9155 0 0 1 0 31.831
+                             a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="circle"
+                          id="confidence-path"
+                          stroke-dasharray="0, 100"
+                          d="M18 2.0845
+                             a 15.9155 15.9155 0 0 1 0 31.831
+                             a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="percentage" id="confidence-text">0%</div>
+            </div>
+
+            <div class="diagnosis-label">
+                <h4 id="result-title">Analyzing…</h4>
+                <p id="result-description">Awaiting scan capture.</p>
+            </div>
+        </div>
+
+        <div class="clinical-findings">
+            <h5>Key Findings</h5>
+            <ul id="findings-list">
+                <li>System ready for scan input.</li>
+            </ul>
+        </div>
+
+        <div class="action-footer">
+            <button class="btn-primary">Generate Report (PDF)</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===================== MEDBOT FAB ===================== -->
+<a href="MedBot.html" class="medbot-fab" id="MedBot-btn">
+    <span class="bot-icon">🤖</span>
+    <div class="fab-ping"></div>
+</a>
+
+<!-- ===================== NOTIFICATION ===================== -->
+<div id="notification" class="notification hidden"></div>
+
+</body>
+</html>

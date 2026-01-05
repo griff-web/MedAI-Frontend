@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MedAI Loading | Kenya</title>
+<link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+
+<style>
+:root {
+  --black: #000000;
+  --red: #bb0000;
+  --green: #006600;
+  --white: #ffffff;
+  --glow: #00ffea;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  height: 100vh;
+  background: radial-gradient(circle at center, #111 0%, #000 100%);
+  display: flex; justify-content: center; align-items: center;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  overflow: hidden; color: var(--white);
+}
+
+/* Grid background */
+.grid {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: moveGrid 15s linear infinite;
+  z-index: 0;
+}
+
+@keyframes moveGrid {
+  from { background-position: 0 0; }
+  to { background-position: 50px 50px; }
+}
+
+/* Loader Container */
+.loader-container { position: relative; z-index: 2; text-align: center; display: flex; flex-direction: column; align-items: center; }
+
+/* MedAI Title */
+.title {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 40px;
+  color: var(--white);
+  text-shadow:
+    0 0 10px var(--red),
+    0 0 20px var(--green),
+    0 0 30px var(--white),
+    0 0 40px var(--red),
+    0 0 50px var(--green);
+}
+
+.title span {
+  color: var(--red);
+  animation: neonPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulse {
+  0% { text-shadow: 0 0 5px var(--red), 0 0 15px var(--green); }
+  100% { text-shadow: 0 0 15px var(--red), 0 0 35px var(--green), 0 0 60px var(--white); }
+}
+
+/* Rotating tech rings */
+.ring {
+  position: absolute;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  width: 180px;
+  height: 180px;
+  animation: rotateRing 6s linear infinite;
+}
+
+.ring::before,
+.ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border-top: 3px solid var(--red);
+  border-right: 3px solid var(--green);
+  border-bottom: 3px solid var(--white);
+  border-left: 3px solid var(--black);
+  animation: rotateRingReverse 4s linear infinite;
+}
+
+.ring::after {
+  inset: 25px;
+  border-width: 2px;
+  animation-duration: 5s;
+}
+
+@keyframes rotateRing { to { transform: rotate(360deg); } }
+@keyframes rotateRingReverse { to { transform: rotate(-360deg); } }
+
+/* Progress Bar */
+.progress-wrapper {
+  width: min(400px, 80vw);
+  height: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 260px;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--black), var(--red), var(--green), var(--white));
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px var(--red), 0 0 15px var(--green);
+}
+
+/* Percentage text */
+.percent {
+  font-size: 1rem;
+  margin-top: 8px;
+  opacity: 0.85;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px var(--red);
+}
+
+/* Fade-out */
+.fade-out { animation: fadeOut 1s ease forwards; }
+@keyframes fadeOut { to { opacity: 0; transform: scale(1.05); } }
+</style>
+</head>
+
+<body>
+
+<div class="grid"></div>
+
+<div class="loader-container" id="loader">
+  <div class="ring"></div>
+  <div class="title">Med<span>AI</span></div>
+  <div class="progress-wrapper">
+    <div class="progress-bar" id="bar"></div>
+  </div>
+  <div class="percent" id="percent">0%</div>
+</div>
+
+<script>
+let progress = 0;
+const bar = document.getElementById("bar");
+const percent = document.getElementById("percent");
+const loader = document.getElementById("loader");
+
+// Update this with real login check logic later
+const loggedIn = localStorage.getItem("loggedIn") === "true";
+
+const interval = setInterval(() => {
+  progress += Math.random() * 6;
+
+  if (progress >= 100) {
+    progress = 100;
+    clearInterval(interval);
+
+    setTimeout(() => {
+      loader.classList.add("fade-out");
+
+      // Redirect to frontend/login.html if logged in, else reg.html
+      if(loggedIn){
+        window.location.href = "frontend/login.html";
+      } else {
+        window.location.href = "frontend/reg.html";
+      }
+
+    }, 500);
+  }
+
+  bar.style.width = progress + "%";
+  percent.textContent = Math.floor(progress) + "%";
+}, 150);
+</script>
+
+</body>
+</html>

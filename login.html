@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In | MedAI</title>
+    <meta name="description" content="Secure login for MedAI - AI-powered medical image analysis." />
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    <link rel="stylesheet" href="css/auth.css" />
+    
+    <script src="js/auth.js" defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+<main class="auth-container">
+
+    <div 
+        id="notification" 
+        class="notification hidden" 
+        role="status" 
+        aria-live="polite"
+    ></div>
+
+    <section class="auth-card">
+        <header class="auth-header">
+            <div class="logo">Med<span>AI</span></div>
+            <h1>Welcome Back</h1>
+            <p>Sign in to access your clinical dashboard</p>
+        </header>
+
+        <div class="social-auth">
+            <div id="g_id_onload"
+                 data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-login_uri="/auth/google"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" 
+                 data-type="standard" 
+                 data-shape="rectangular" 
+                 data-theme="outline" 
+                 data-text="signin_with" 
+                 data-size="large" 
+                 data-logo_alignment="left"
+                 data-width="100%">
+            </div>
+        </div>
+
+        <div class="divider">
+            <span>or sign in with email</span>
+        </div>
+
+        <form id="form-login" method="POST" action="/auth/login" novalidate>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="you@hospital.com" 
+                    required 
+                    autocomplete="username"
+                />
+            </div>
+
+            <div class="form-group">
+                <div class="label-row">
+                    <label for="password">Password</label>
+                    <a href="forgot-password.html" class="helper-link">Forgot password?</a>
+                </div>
+                <div class="password-wrapper">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password"
+                    />
+                    <button type="button" class="toggle-password" id="togglePass" aria-label="Show password">
+                        Show
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-meta">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="remember" id="remember">
+                    <span class="checkmark"></span>
+                    <span class="label-text">Remember this device</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary" id="loginBtn">
+                Sign In
+            </button>
+        </form>
+
+        <footer class="auth-footer">
+            <p>Don’t have an account? <a href="reg.html">Create one</a></p>
+        </footer>
+    </section>
+</main>
+</body>
+</html>

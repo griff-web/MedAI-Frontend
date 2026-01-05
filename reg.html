@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | MedAI</title>
+    <meta name="description" content="Join MedAI for secure, AI-powered medical image analysis.">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    <script src="js/auth.js" defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <div id="notification" class="notification hidden"></div>
+
+    <main class="auth-container">
+        <section class="auth-card">
+            <header class="auth-header">
+                <div class="logo">Med<span>AI</span></div>
+                <h1>Create Your Account</h1>
+                <p>Secure access to AI-powered medical image analysis</p>
+            </header>
+
+            <div class="social-auth">
+                <div id="g_id_onload"
+                     data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                     data-context="signup"
+                     data-ux_mode="popup"
+                     data-login_uri="/auth/google"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left"></div>
+            </div>
+
+            <div class="divider">
+                <span>or sign up with email</span>
+            </div>
+
+            <form id="form-register" novalidate>
+                
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" required autocomplete="name" placeholder="Dr. John Doe">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required autocomplete="email" placeholder="name@hospital.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Practitioner Role</label>
+                    <select id="role" name="role" class="form-input" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 12px; color: white;">
+                        <option value="user">General Practitioner</option>
+                        <option value="doctor">Radiologist</option>
+                        <option value="admin">Hospital Admin</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" required autocomplete="new-password">
+                        <button type="button" class="toggle-password" aria-label="Toggle password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-consent">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <span class="label-text" style="font-size: 0.8rem; color: var(--text-muted);">
+                            I agree to the <a href="#" style="color: var(--kenya-green);">Terms</a> and <a href="#" style="color: var(--kenya-green);">Privacy Policy</a>
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    Create Account
+                </button>
+            </form>
+
+            <footer class="auth-footer">
+                <p>Already registered? <a href="login.html">Sign in</a></p>
+            </footer>
+        </section>
+    </main>
+</body>
+</html>
