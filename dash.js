@@ -6,7 +6,7 @@
 class MedAICore {
     constructor() {
         this.config = {
-            API_BASE: "https://bug-free-space-adventure-695gv4gqwv6wh44j7-4000.app.github.dev",
+            API_BASE: "https://medai-backend-j9i6.onrender.com",
             ENDPOINTS: {
                 ANALYZE: "/diagnostics/process"
             }
