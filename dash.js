@@ -5,10 +5,11 @@
 
 class MedAICore {
     constructor() {
+        // Updated to use dynamic environment variables with a fallback
         this.config = {
-            API_BASE: "https://medai-backend-j9i6.onrender.com",
+            API_BASE: window.ENV_API_BASE || "https://medai-backend-j9i6.onrender.com",
             ENDPOINTS: {
-                ANALYZE: "/diagnostics/process"
+                ANALYZE: window.ENV_ANALYZE_ENDPOINT || "/diagnostics/process"
             }
         };
 
@@ -218,7 +219,7 @@ class MedAICore {
 
     /* =====================================================
        UI & EVENTS
-    ===================================================== */
+    ==================================================== */
     bindEvents() {
         this.dom.captureBtn.onclick = () => this.handleCapture();
 
@@ -323,6 +324,6 @@ class MedAICore {
 }
 
 /* =====================================================
-   BOOTSTRAP
+    BOOTSTRAP
 ===================================================== */
 window.addEventListener("DOMContentLoaded", () => new MedAICore());
