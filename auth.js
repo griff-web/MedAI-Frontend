@@ -6,7 +6,8 @@
     "use strict";
 
     const CONFIG = {
-        API_BASE: "https://medai-backend-j9i6.onrender.com",
+        // Use global variable for dynamic hosting (Render/Cloudflare)
+        API_BASE: window.ENV_API_BASE || "https://medai-backend-j9i6.onrender.com",
         ENDPOINTS: {
             health: "/health",
             login: "/auth/login",
@@ -95,7 +96,7 @@
             } catch (err) {
                 this.isServerOnline = false;
                 this.setUIReadyState(false);
-                notifier.show("System link failed. Verify Backend visibility on Port 4000.", "error");
+                notifier.show("System link failed. Verify Backend visibility.", "error");
             }
         },
 
@@ -108,7 +109,9 @@
         initPasswordToggles() {
             document.querySelectorAll(".toggle-password").forEach(btn => {
                 btn.onclick = (e) => {
-                    const input = e.target.closest('.form-group').querySelector('input');
+                    const group = e.target.closest('.form-group');
+                    if (!group) return;
+                    const input = group.querySelector('input');
                     const isPass = input.type === "password";
                     input.type = isPass ? "text" : "password";
                     btn.innerHTML = isPass ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
@@ -171,12 +174,11 @@
                 }
             });
 
-            // REGISTER HANDLER (Synchronized to work like login)
+            // REGISTER HANDLER
             document.getElementById("form-register")?.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 const btn = e.target.querySelector('button[type="submit"]');
                 
-                // CRITICAL: Check your HTML names. Use e.target.name.value
                 const payload = {
                     name: (e.target.fullname || e.target.name).value.trim(),
                     email: e.target.email.value.trim().toLowerCase(),
