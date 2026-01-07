@@ -3,182 +3,202 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MedAI Loading | Kenya</title>
-<link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+<title>MedAI </title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --black: #000000;
-  --red: #bb0000;
-  --green: #006600;
-  --white: #ffffff;
-  --glow: #00ffea;
+  --primary-green: #006039;
+  --kenya-red: #E31837;
+  --obsidian: #05070A;
+  --text-dim: rgba(255, 255, 255, 0.6);
+  --glow-green: rgba(0, 96, 57, 0.4);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   height: 100vh;
-  background: radial-gradient(circle at center, #111 0%, #000 100%);
+  background-color: var(--obsidian);
   display: flex; justify-content: center; align-items: center;
-  font-family: "Segoe UI", system-ui, sans-serif;
-  overflow: hidden; color: var(--white);
+  font-family: 'Space Grotesk', sans-serif;
+  overflow: hidden; 
+  color: #fff;
 }
 
-/* Grid background */
-.grid {
+/* World-Class Tech Background */
+.scanline {
   position: absolute; inset: 0;
-  background:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: moveGrid 15s linear infinite;
-  z-index: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0, 96, 57, 0.05) 50%);
+  background-size: 100% 4px;
+  z-index: 10; pointer-events: none;
 }
 
-@keyframes moveGrid {
-  from { background-position: 0 0; }
-  to { background-position: 50px 50px; }
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(circle, black, transparent 80%);
 }
 
-/* Loader Container */
-.loader-container { position: relative; z-index: 2; text-align: center; display: flex; flex-direction: column; align-items: center; }
+/* Core Loader Engine */
+.loader-ui {
+  position: relative;
+  width: 400px;
+  display: flex; flex-direction: column; align-items: center;
+  z-index: 20;
+}
 
-/* MedAI Title */
-.title {
-  font-size: clamp(2rem, 6vw, 4rem);
-  font-weight: 900;
-  letter-spacing: 3px;
+/* Pulsing Heartbeat (ECG) */
+.heartbeat-container {
+  width: 100%; height: 60px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.ecg-line {
+  font-size: 2rem;
+  color: var(--primary-green);
+  letter-spacing: 5px;
+  filter: drop-shadow(0 0 10px var(--primary-green));
+  animation: heartPulse 1.2s infinite;
+}
+
+@keyframes heartPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  10% { transform: scale(1.2); opacity: 1; }
+  20% { transform: scale(1); opacity: 0.5; }
+}
+
+/* Central Logo */
+.brand {
+  font-size: 3.5rem; font-weight: 700;
+  letter-spacing: -2px; margin-bottom: 5px;
+  background: linear-gradient(to right, #fff, var(--primary-green));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.brand span { color: var(--kenya-red); -webkit-text-fill-color: var(--kenya-red); }
+
+.status-text {
+  font-size: 0.75rem; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 4px;
   margin-bottom: 40px;
-  color: var(--white);
-  text-shadow:
-    0 0 10px var(--red),
-    0 0 20px var(--green),
-    0 0 30px var(--white),
-    0 0 40px var(--red),
-    0 0 50px var(--green);
 }
 
-.title span {
-  color: var(--red);
-  animation: neonPulse 1.5s ease-in-out infinite alternate;
+/* High-Tech Progress Rail */
+.progress-rail {
+  width: 100%; height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  border-radius: 2px;
 }
 
-@keyframes neonPulse {
-  0% { text-shadow: 0 0 5px var(--red), 0 0 15px var(--green); }
-  100% { text-shadow: 0 0 15px var(--red), 0 0 35px var(--green), 0 0 60px var(--white); }
+.progress-fill {
+  position: absolute; top: 0; left: 0;
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--primary-green), var(--kenya-red));
+  box-shadow: 0 0 15px var(--primary-green);
+  transition: width 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1);
 }
 
-/* Rotating tech rings */
-.ring {
-  position: absolute;
-  border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 50%;
-  width: 180px;
-  height: 180px;
-  animation: rotateRing 6s linear infinite;
+.data-stream {
+  width: 100%; display: flex; justify-content: space-between;
+  margin-top: 10px; font-family: monospace; font-size: 10px;
+  color: var(--primary-green);
 }
 
-.ring::before,
-.ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border-top: 3px solid var(--red);
-  border-right: 3px solid var(--green);
-  border-bottom: 3px solid var(--white);
-  border-left: 3px solid var(--black);
-  animation: rotateRingReverse 4s linear infinite;
+/* Scanning Overlay */
+.scanner {
+  position: absolute; top: 0; left: 0; width: 100%; height: 20%;
+  background: linear-gradient(to bottom, transparent, var(--glow-green));
+  border-bottom: 1px solid var(--primary-green);
+  animation: scanMove 3s ease-in-out infinite;
+  z-index: 5;
 }
 
-.ring::after {
-  inset: 25px;
-  border-width: 2px;
-  animation-duration: 5s;
+@keyframes scanMove {
+  0% { top: -20%; }
+  100% { top: 120%; }
 }
 
-@keyframes rotateRing { to { transform: rotate(360deg); } }
-@keyframes rotateRingReverse { to { transform: rotate(-360deg); } }
-
-/* Progress Bar */
-.progress-wrapper {
-  width: min(400px, 80vw);
-  height: 10px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 260px;
+.fade-out { animation: finalize 0.8s forwards; }
+@keyframes finalize {
+  to { opacity: 0; transform: scale(1.1); filter: blur(10px); }
 }
-
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--black), var(--red), var(--green), var(--white));
-  transition: width 0.3s ease;
-  box-shadow: 0 0 10px var(--red), 0 0 15px var(--green);
-}
-
-/* Percentage text */
-.percent {
-  font-size: 1rem;
-  margin-top: 8px;
-  opacity: 0.85;
-  letter-spacing: 1px;
-  text-shadow: 0 0 5px var(--red);
-}
-
-/* Fade-out */
-.fade-out { animation: fadeOut 1s ease forwards; }
-@keyframes fadeOut { to { opacity: 0; transform: scale(1.05); } }
 </style>
 </head>
 
 <body>
 
-<div class="grid"></div>
+<div class="grid-bg"></div>
+<div class="scanline"></div>
+<div class="scanner"></div>
 
-<div class="loader-container" id="loader">
-  <div class="ring"></div>
-  <div class="title">Med<span>AI</span></div>
-  <div class="progress-wrapper">
-    <div class="progress-bar" id="bar"></div>
+<div class="loader-ui" id="loader">
+  <div class="heartbeat-container">
+    <div class="ecg-line">^v^v^--^v^--</div>
   </div>
-  <div class="percent" id="percent">0%</div>
+
+  <div class="brand">Med<span>AI</span></div>
+  <div class="status-text" id="status-label">Initializing Core Diagnostics</div>
+
+  <div class="progress-rail">
+    <div class="progress-fill" id="bar"></div>
+  </div>
+
+  <div class="data-stream">
+    <span id="hex-code">AUTH_KEY: 0x882...</span>
+    <span id="percent">0%</span>
+  </div>
 </div>
 
 <script>
 let progress = 0;
 const bar = document.getElementById("bar");
 const percent = document.getElementById("percent");
+const statusLabel = document.getElementById("status-label");
+const hexCode = document.getElementById("hex-code");
 const loader = document.getElementById("loader");
 
-// Update this with real login check logic later
-const loggedIn = localStorage.getItem("loggedIn") === "true";
+const statuses = [
+  "Establishing Secure Link...",
+  "Loading Medical Knowledge Base...",
+  "Calibrating Neural Pathways...",
+  "Syncing Kenya Regional Data...",
+  "Finalizing AI Protocols..."
+];
 
 const interval = setInterval(() => {
-  progress += Math.random() * 6;
+  progress += Math.random() * 8;
+  
+  // High-tech hex code generator for look
+  hexCode.textContent = "SEC_TOKEN: " + Math.random().toString(16).substr(2, 8).toUpperCase();
 
   if (progress >= 100) {
     progress = 100;
     clearInterval(interval);
+    statusLabel.textContent = "ACCESS GRANTED";
+    statusLabel.style.color = "var(--primary-green)";
 
     setTimeout(() => {
       loader.classList.add("fade-out");
-
-      // Redirect to frontend/login.html if logged in, else reg.html
-      if(loggedIn){
-        window.location.href = "login.html";
-      } else {
-        window.location.href = "reg.html";
-      }
-
-    }, 500);
+      setTimeout(() => {
+          // Change this to your actual app path
+          window.location.href = "login.html"; 
+      }, 800);
+    }, 1000);
   }
+
+  // Update Status Text based on progress
+  let statusIndex = Math.floor((progress / 100) * statuses.length);
+  if(statusIndex < statuses.length) statusLabel.textContent = statuses[statusIndex];
 
   bar.style.width = progress + "%";
   percent.textContent = Math.floor(progress) + "%";
-}, 150);
+}, 200);
 </script>
 
 </body>
