@@ -1,22 +1,21 @@
 /**
- * MedAI Enterprise Authentication Engine v3.3.0
- * Features: Multi-role support, AbortController timeouts, Session persistence
+ * MedAI Enterprise Authentication Engine v1.0.0
+ * Optimized for Auto-Connectivity and Render Cold-Starts
  */
 (() => {
     "use strict";
 
     const CONFIG = {
-        // Use global variable for dynamic hosting (Render/Cloudflare)
-        API_BASE: window.ENV_API_BASE || "https://medai-backend-j9i6.onrender.com",
+        // Backend URL auto-detected or defaulted to your Render instance
+        API_BASE: window.ENV_API_BASE || "https://m-backend-n2pd.onrender.com",
         ENDPOINTS: {
-            health: "/health",
             login: "/auth/login",
             register: "/auth/register",
             reset: "/auth/reset"
         },
         REDIRECT_PATH: "dash.html",
         NOTIF_DURATION: 5000,
-        REQUEST_TIMEOUT: 12000
+        REQUEST_TIMEOUT: 25000 // Increased to allow Render instances to "wake up"
     };
 
     class NotificationManager {
@@ -59,51 +58,19 @@
     const notifier = new NotificationManager("notification");
 
     const AuthApp = {
-        isServerOnline: false,
-
-        async init() {
-            console.log("🚀 MedAI Engine Online");
+        init() {
+            console.log("🚀 MedAI Engine: Auto-Connect Mode Active");
             this.handleAutoRedirect();
             this.bindEvents();
             this.initPasswordToggles();
-            await this.checkServerHealth();
+            // Buttons are enabled by default now; no pre-check required.
         },
 
-        // If already logged in, skip the login page
         handleAutoRedirect() {
             const token = localStorage.getItem("medai_token");
             if (token && (window.location.pathname.includes('login') || window.location.pathname === '/')) {
                 window.location.href = CONFIG.REDIRECT_PATH;
             }
-        },
-
-        async checkServerHealth() {
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-                const response = await fetch(`${CONFIG.API_BASE}${CONFIG.ENDPOINTS.health}`, { 
-                    method: 'GET',
-                    signal: controller.signal
-                });
-                
-                clearTimeout(timeoutId);
-
-                if (response.ok) {
-                    this.isServerOnline = true;
-                    this.setUIReadyState(true);
-                }
-            } catch (err) {
-                this.isServerOnline = false;
-                this.setUIReadyState(false);
-                notifier.show("System link failed. Verify Backend visibility.", "error");
-            }
-        },
-
-        setUIReadyState(isReady) {
-            document.querySelectorAll('button[type="submit"]').forEach(btn => {
-                btn.disabled = !isReady;
-            });
         },
 
         initPasswordToggles() {
@@ -138,7 +105,7 @@
                 const result = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(result.message || `Protocol Error: ${response.status}`);
+                    throw new Error(result.message || `System error: ${response.status}`);
                 }
 
                 if (result.token) {
@@ -148,7 +115,9 @@
 
                 return result;
             } catch (err) {
-                if (err.name === 'AbortError') throw new Error("Server took too long to respond.");
+                if (err.name === 'AbortError') {
+                    throw new Error("Connection timeout. The secure server is waking up, please try again in 5 seconds.");
+                }
                 throw err;
             }
         },
@@ -164,9 +133,9 @@
                 };
 
                 try {
-                    this.toggleLoading(btn, true, "Verifying...");
+                    this.toggleLoading(btn, true, "Authenticating...");
                     await this.postData(CONFIG.ENDPOINTS.login, payload);
-                    notifier.show("Welcome back. Redirecting...", "success");
+                    notifier.show("Access Granted. Synchronizing...", "success");
                     setTimeout(() => window.location.href = CONFIG.REDIRECT_PATH, 1000);
                 } catch (err) {
                     notifier.show(err.message, "error");
@@ -187,14 +156,13 @@
                 };
 
                 if (payload.password.length < 6) {
-                    return notifier.show("Security requirement: Password must be 6+ characters.", "warning");
+                    return notifier.show("Password must be at least 6 characters.", "warning");
                 }
 
                 try {
-                    this.toggleLoading(btn, true, "Provisioning Account...");
+                    this.toggleLoading(btn, true, "Initializing Profile...");
                     await this.postData(CONFIG.ENDPOINTS.register, payload);
-                    
-                    notifier.show("Account Created. Entering Dashboard...", "success");
+                    notifier.show("Account Ready. Welcome!", "success");
                     setTimeout(() => window.location.href = CONFIG.REDIRECT_PATH, 1200);
                 } catch (err) {
                     notifier.show(err.message, "error");
@@ -211,7 +179,7 @@
                 btn.innerHTML = `<span class="loader"></span> ${text}`;
             } else {
                 btn.disabled = false;
-                btn.innerHTML = btn.dataset.prev || "Confirm";
+                btn.innerHTML = btn.dataset.prev || "Continue";
             }
         }
     };
