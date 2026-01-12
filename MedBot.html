@@ -3,38 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google MedAI Assistant</title>
-    <link rel="icon" type="image/png" href="https://www.gstatic.com/lamda/images/favicon_v1_150160d13966550cda95.png">
+    <title>MedAI | Your Health Assistant</title>
     
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23007bff%22/><path d=%22M30 50h40M50 30v40%22 stroke=%22white%22 stroke-width=%2215%22 stroke-linecap=%22round%22/></svg>">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root {
-            --google-blue: #1a73e8;
-            --google-red: #ea4335;
-            --google-yellow: #fbbc04;
-            --google-green: #34a853;
-            --bg-gray: #f8f9fa;
-            --border-color: #dadce0;
+            --primary-blue: #007bff;
+            --secondary-blue: #e7f1ff;
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --border-color: #dfe6e9;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background: white;
+            background: #fdfdfd;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            color: #3c4043;
+            color: var(--text-dark);
         }
 
         /* Header / Nav */
         .nav-bar {
             background: white;
-            padding: 12px 24px;
+            padding: 15px 30px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
@@ -42,64 +44,67 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .nav-title {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 22px;
-            font-weight: 400;
-        }
-
-        .nav-title span {
-            color: #5f6368;
-        }
-
-        .google-logo {
-            font-weight: 500;
+            gap: 10px;
             font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-blue);
         }
 
-        .dash-link {
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #5f6368;
-            font-weight: 500;
-            padding: 10px 20px;
-            border-radius: 24px;
-            transition: background 0.2s;
-            border: 1px solid var(--border-color);
+            gap: 6px;
         }
 
-        .dash-link:hover {
-            background: #f1f3f4;
+        .btn-dash { color: var(--text-light); background: white; }
+        .btn-dash:hover { background: #f8f9fa; }
+
+        .btn-pdf { 
+            background: var(--primary-blue); 
+            color: white; 
+            border: none;
         }
+        .btn-pdf:hover { background: #0056b3; }
 
         /* Main Layout */
-        .chat-container {
+        #content-to-print {
             flex: 1;
-            max-width: 850px;
+            max-width: 800px;
             margin: 0 auto;
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            padding-bottom: 120px; /* Space for input */
+            padding-bottom: 150px;
         }
 
         .messages {
-            padding: 24px;
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 25px;
         }
 
         .message {
             display: flex;
-            gap: 16px;
-            max-width: 85%;
+            gap: 15px;
+            max-width: 90%;
         }
 
         .user-message {
@@ -108,36 +113,38 @@
         }
 
         .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            font-weight: bold;
         }
 
-        .ai-avatar { background: #e8f0fe; color: var(--google-blue); }
-        .user-avatar { background: #f1f3f4; color: #5f6368; }
+        .ai-avatar { background: var(--secondary-blue); color: var(--primary-blue); }
+        .user-avatar { background: #eee; color: #555; }
 
         .message-bubble {
-            padding: 12px 20px;
-            border-radius: 18px;
+            padding: 14px 18px;
+            border-radius: 15px;
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
         }
 
         .user-message .message-bubble {
-            background: #f1f3f4;
-            color: #202124;
-            border-bottom-right-radius: 4px;
+            background: var(--primary-blue);
+            color: white;
+            border-bottom-right-radius: 2px;
         }
 
         .ai-message .message-bubble {
             background: white;
-            color: #202124;
+            color: var(--text-dark);
             border: 1px solid var(--border-color);
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 2px;
         }
 
         /* Fixed Bottom Input */
@@ -147,98 +154,103 @@
             left: 0;
             right: 0;
             background: white;
-            padding: 20px;
+            padding: 25px;
             display: flex;
             justify-content: center;
+            border-top: 1px solid var(--border-color);
         }
 
         .input-area {
-            max-width: 800px;
+            max-width: 750px;
             width: 100%;
-            position: relative;
             display: flex;
             align-items: center;
             background: #f1f3f4;
-            border-radius: 28px;
-            padding: 4px 8px 4px 24px;
-            transition: box-shadow 0.2s, background 0.2s;
-        }
-
-        .input-area:focus-within {
-            background: white;
-            box-shadow: 0 1px 6px rgba(32,33,36,.28);
+            border-radius: 12px;
+            padding: 5px 10px 5px 20px;
         }
 
         #user-input {
             flex: 1;
-            height: 48px;
+            height: 50px;
             border: none;
             background: transparent;
             outline: none;
             font-size: 16px;
-            color: #202124;
         }
 
         .send-btn {
-            background: transparent;
+            background: var(--primary-blue);
             border: none;
-            color: var(--google-blue);
-            padding: 12px;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             cursor: pointer;
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .send-btn:hover { background: rgba(26, 115, 232, 0.1); }
-
-        /* API Notifications */
-        .api-banner {
-            background: #feefc3;
-            color: #664d03;
-            padding: 12px;
-            text-align: center;
-            font-size: 14px;
-            border-bottom: 1px solid #ffe69c;
+        .typing { 
+            font-size: 13px; 
+            color: var(--text-light); 
+            margin: 10px 0 0 75px; 
+            display: none; 
         }
 
-        .api-banner a { color: #1a73e8; font-weight: 500; }
-
-        .typing { font-style: italic; color: #5f6368; font-size: 14px; margin-left: 52px; display: none; }
+        /* PDF Styles Header (Hidden in UI) */
+        .pdf-header {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            border-bottom: 2px solid #000;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
-    
-
     <div class="nav-bar">
         <div class="nav-title">
-            
-            <span>MedAI</span>
+            <span>✚ MedAI</span>
         </div>
-        <a href="dash.html" class="dash-link">Dashboard</a>
+        <div class="nav-actions">
+            <button class="btn btn-pdf" id="download-pdf">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                </svg>
+                Save PDF
+            </button>
+            <a href="dash.html" class="btn btn-dash">Dashboard</a>
+        </div>
     </div>
 
-    <div class="chat-container">
+    <div id="content-to-print">
+        <div class="pdf-header" id="pdf-header">
+            <h1>MedAI Consultation Summary</h1>
+            <p>Generated on: <span id="current-date"></span></p>
+        </div>
+
         <div class="messages" id="chat-box">
             <div class="message ai-message">
                 <div class="avatar ai-avatar">✚</div>
                 <div class="message-bubble">
-                    Hello! I'm  MedAI Assistant. I can help answer health-related questions.
+                    Hello! I'm your <b>MedAI Assistant</b>. How can I help you with your health today?
                     <br><br>
-                    <small style="color: #5f6368;"><b>Disclaimer:</b> This is for informational purposes only. Always consult a professional for medical advice.</small>
+                    <small style="color: #636e72;"><i><b>Note:</b> This summary is for information only. Please see a doctor for diagnosis.</i></small>
                 </div>
             </div>
         </div>
-        <div class="typing" id="typing-indicator"> MedAI is thinking...</div>
+        <div class="typing" id="typing-indicator">MedAI is analyzing...</div>
     </div>
 
     <div class="input-container-fixed">
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Ask a health question..." autocomplete="off">
+            <input type="text" id="user-input" placeholder="Describe your symptoms or ask a health question..." autocomplete="off">
             <button class="send-btn" id="send-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </button>
         </div>
     </div>
@@ -247,7 +259,7 @@
         import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
         // ==================== CONFIGURATION ====================
-        const API_KEY = "AIzaSyAROcK27ByBWLd2WKW2jEEMg2W2HyJ-FnY"; // Replace with your key
+        const API_KEY = "AIzaSyAROcK27ByBWLd2WKW2jEEMg2W2HyJ-FnY"; 
         const genAI = new GoogleGenerativeAI(API_KEY);
         // ======================================================
 
@@ -255,24 +267,22 @@
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
         const typingIndicator = document.getElementById("typing-indicator");
-        const apiHint = document.getElementById("api-hint");
-
-        // Hide banner if key is provided
-        if (API_KEY !== "YOUR_GOOGLE_GEMINI_API_KEY") {
-            apiHint.style.display = "none";
-        }
+        const downloadBtn = document.getElementById("download-pdf");
 
         async function addMessage(text, isUser = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
             
             const avatar = isUser ? 
-                '<div class="avatar user-avatar">👤</div>' : 
+                '<div class="avatar user-avatar">ME</div>' : 
                 '<div class="avatar ai-avatar">✚</div>';
+
+            // Convert markdown-style bold to HTML
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
             messageDiv.innerHTML = `
                 ${avatar}
-                <div class="message-bubble">${text}</div>
+                <div class="message-bubble">${formattedText}</div>
             `;
             
             chatBox.appendChild(messageDiv);
@@ -283,18 +293,14 @@
             const prompt = userInput.value.trim();
             if (!prompt) return;
 
-            // Clear input and show user message
             userInput.value = '';
             addMessage(prompt, true);
-            
-            // Show typing indicator
             typingIndicator.style.display = "block";
 
             try {
-                // Setup the model
                 const model = genAI.getGenerativeModel({ 
                     model: "gemini-1.5-flash",
-                    systemInstruction: "You are a helpful medical assistant for Google. Provide accurate, empathetic health information. Always end with a disclaimer that you are not a doctor.",
+                    systemInstruction: "You are MedAI, a professional and empathetic medical assistant. Provide clear, structured health information. Use bold text for key points. Always end every response with a short medical disclaimer.",
                 });
 
                 const result = await model.generateContent(prompt);
@@ -306,10 +312,32 @@
 
             } catch (error) {
                 typingIndicator.style.display = "none";
-                console.error(error);
-                addMessage("I'm sorry, I'm having trouble connecting to my knowledge base. Please check your API key.");
+                addMessage("System is currently busy. Please ensure your API key is valid and try again.");
             }
         }
+
+        // PDF Generation Logic
+        downloadBtn.addEventListener('click', () => {
+            const element = document.getElementById('content-to-print');
+            const pdfHeader = document.getElementById('pdf-header');
+            const dateSpan = document.getElementById('current-date');
+            
+            // Show header only for PDF
+            pdfHeader.style.display = 'block';
+            dateSpan.innerText = new Date().toLocaleString();
+
+            const opt = {
+                margin:       [15, 15],
+                filename:     'MedAI-Consultation.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                pdfHeader.style.display = 'none'; // Hide again after saving
+            });
+        });
 
         sendBtn.addEventListener('click', handleChat);
         userInput.addEventListener('keypress', (e) => {
