@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7476/7476971.png">
     <title>MedAI Assistant</title>
     <style>
         * {
@@ -213,6 +212,21 @@
             display: block;
         }
 
+        .api-status {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            border-left: 4px solid #38a169;
+            display: none;
+        }
+
+        .api-status.show {
+            display: block;
+        }
+
         .typing-indicator {
             display: flex;
             gap: 4px;
@@ -246,6 +260,26 @@
             text-align: center;
             margin-top: 10px;
         }
+
+        .api-key-hint {
+            background: #e6f7ff;
+            border: 1px dashed #91d5ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #006d75;
+        }
+
+        .api-key-hint a {
+            color: #1890ff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .api-key-hint a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -257,7 +291,7 @@
                     <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
                 </svg>
             </div>
-            <span>MedAI Assistant</span>
+            <span>MedAI Assistant (Free Tier)</span>
         </div>
         <a href="dash.html" class="dash-link">
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
@@ -267,17 +301,29 @@
         </a>
     </div>
 
+    <!-- API Status -->
+    <div class="api-status" id="api-status"></div>
+    
     <!-- Error Box -->
     <div class="error-box" id="error-box"></div>
 
     <!-- Chat Container -->
     <div class="chat-container">
+        <!-- API Key Hint -->
+        <div class="api-key-hint" id="api-hint">
+            <strong>Free API Setup Required:</strong> Get your free API key from 
+            <a href="https://platform.deepseek.com/api_keys" target="_blank">DeepSeek Platform</a> 
+            and replace the API_KEY below. First-time users get free credits.
+        </div>
+
         <div class="chat-area">
             <div class="messages" id="chat-box">
                 <!-- Messages will appear here -->
                 <div class="message ai-message">
                     <div class="message-bubble">
-                        Hello! I'm your MedAI Assistant. I can help with medical questions, symptom information, and general health guidance. How can I assist you today?
+                        Hello! I'm your MedAI Assistant . I can help with medical questions and health guidance. 
+                        <br><br>
+                        <small>Note: Please Consult a doctor to be sure.</small>
                     </div>
                 </div>
             </div>
@@ -305,20 +351,97 @@
         </div>
 
         <div class="welcome-text">
-            Type your medical question and press Enter or click Send
+            MedAI
         </div>
     </div>
 
     <script>
-        // Configuration
-        const API_KEY = "sk-af1906c81e144ccbb9b717c8e56af95d";
-        const API_URL = "https://api.deepseek.com/chat/completions";
+        // ==================== CONFIGURATION ====================
+        // GET YOUR FREE API KEY FROM: https://platform.deepseek.com/api_keys
+        const API_KEY = "sk-a10cb178fbfe46bd8b9471757fc9e4c9"; // Replace with your free tier key
+        
+        // Try these endpoints for free tier:
+        const API_URLS = [
+            "https://api.deepseek.com/v1/chat/completions",
+            "https://api.deepseek.com/chat/completions"
+        ];
+        
+        let currentApiUrlIndex = 0;
+        // ======================================================
 
         // DOM Elements
         const chatBox = document.getElementById("chat-box");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
         const errorBox = document.getElementById("error-box");
+        const apiStatus = document.getElementById("api-status");
+        const apiHint = document.getElementById("api-hint");
+
+        // Test API on load
+        async function testApiConnection() {
+            if (!API_KEY || API_KEY === "sk-a10cb178fbfe46bd8b9471757fc9e4c9") {
+                showStatus("⚠️ API Key Required: Please get a free API key from DeepSeek Platform", "warning");
+                return false;
+            }
+            
+            showStatus("Testing API connection...", "info");
+            
+            // Try different endpoints
+            for (let i = 0; i < API_URLS.length; i++) {
+                try {
+                    const response = await fetch(API_URLS[i], {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: "deepseek-chat",
+                            messages: [{ role: "user", content: "test" }],
+                            max_tokens: 10
+                        })
+                    });
+                    
+                    if (response.status === 401) {
+                        showStatus("❌ Invalid API Key: Please check your free tier API key", "error");
+                        return false;
+                    } else if (response.status === 429) {
+                        showStatus("⚠️ Rate Limited: Free tier may have limits. Try again later.", "warning");
+                        return true; // API works but rate limited
+                    } else if (response.ok) {
+                        currentApiUrlIndex = i;
+                        showStatus("✅ API Connected Successfully (Free Tier Active)", "success");
+                        apiHint.style.display = 'none';
+                        return true;
+                    }
+                } catch (error) {
+                    continue; // Try next endpoint
+                }
+            }
+            
+            showStatus("❌ API Connection Failed: Check endpoint or try later", "error");
+            return false;
+        }
+
+        // Show status message
+        function showStatus(message, type = "info") {
+            apiStatus.textContent = message;
+            apiStatus.className = "api-status show";
+            
+            if (type === "error") {
+                apiStatus.style.background = "#fed7d7";
+                apiStatus.style.color = "#9b2c2c";
+                apiStatus.style.borderLeftColor = "#f56565";
+            } else if (type === "success") {
+                apiStatus.style.background = "#c6f6d5";
+                apiStatus.style.color = "#22543d";
+                apiStatus.style.borderLeftColor = "#38a169";
+            } else if (type === "warning") {
+                apiStatus.style.background = "#feebc8";
+                apiStatus.style.color = "#744210";
+                apiStatus.style.borderLeftColor = "#ed8936";
+            }
+        }
 
         // Show error message
         function showError(message) {
@@ -357,7 +480,7 @@
             const typing = showTyping();
             
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(API_URLS[currentApiUrlIndex], {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -368,7 +491,7 @@
                         messages: [
                             {
                                 role: "system",
-                                content: "You are a medical AI assistant. Provide helpful, accurate health information. Always remind users to consult doctors for medical advice."
+                                content: "You are a helpful medical AI assistant. Provide accurate health information. Remind users to consult doctors."
                             },
                             {
                                 role: "user",
@@ -382,7 +505,13 @@
 
                 typing.remove();
 
-                if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Invalid API Key - Get free key from DeepSeek Platform');
+                } else if (response.status === 429) {
+                    throw new Error('Rate limited - Free tier has usage limits. Try again in a minute.');
+                } else if (response.status === 402) {
+                    throw new Error('Payment required - Free credits may be exhausted');
+                } else if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
                 }
 
@@ -396,17 +525,18 @@
 
             } catch (error) {
                 typing.remove();
-                console.error('Error:', error);
-                showError(`Error: ${error.message}. Using fallback response.`);
+                console.error('API Error:', error);
+                showError(error.message);
                 
                 // Fallback responses
                 const fallbacks = [
-                    "I understand your medical question. For accurate diagnosis and treatment, please consult with a healthcare professional who can examine you personally.",
-                    "Thank you for your health question. I recommend speaking with a doctor who can provide personalized medical advice based on your specific situation.",
-                    "That's an important health concern. While I can offer general information, it's best to consult with a medical professional for proper evaluation."
+                    "I understand your question. For accurate medical advice, please consult with a healthcare professional.",
+                    "Thanks for your question. I recommend speaking with a doctor for personalized medical guidance.",
+                    "That's a health-related question. While I can provide general information, a medical professional should be consulted."
                 ];
                 
-                return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+                return fallbacks[Math.floor(Math.random() * fallbacks.length)] + 
+                       "\n\n[Note: Free API tier may have limitations. Get API key from DeepSeek Platform.]";
             }
         }
 
@@ -431,14 +561,20 @@
             }
         });
 
-        // Focus input on load
-        userInput.focus();
-
-        // Test API connection on load
-        window.addEventListener('load', () => {
-            console.log('MedAI Assistant loaded');
-            console.log('Using API Key:', API_KEY ? '✓ Present' : '✗ Missing');
+        // Initialize
+        window.addEventListener('load', async () => {
+            userInput.focus();
+            
+            // Check if API key is the placeholder
+            if (API_KEY === "sk-a10cb178fbfe46bd8b9471757fc9e4c9") {
+                showStatus("⚠️ Replace API_KEY with your free key from DeepSeek Platform", "warning");
+            } else {
+                await testApiConnection();
+            }
         });
+
+        // Check API connection every 5 minutes
+        setInterval(testApiConnection, 300000);
     </script>
 </body>
 </html>
