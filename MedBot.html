@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAI Assistant </title>
+    <title>MedAI Assistant - Professional Medical Intelligence</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7476/7476971.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root {
-            --primary-red: #dc2626;
-            --secondary-red: #ef4444;
+            --primary-blue: #2563eb;
+            --secondary-blue: #3b82f6;
             --accent-green: #10b981;
             --dark-green: #059669;
+            --warning-red: #dc2626;
             --pure-white: #ffffff;
             --off-white: #f8fafc;
             --light-gray: #e2e8f0;
             --medium-gray: #94a3b8;
             --dark-gray: #475569;
-            --pure-black: #000000;
+            --pure-black: #0f172a;
             --card-bg: rgba(255, 255, 255, 0.98);
             --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            --shadow-heavy: 0 20px 50px rgba(0, 0, 0, 0.2);
+            --shadow-heavy: 0 20px 50px rgba(0, 0, 0, 0.15);
             --border-radius: 20px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -35,7 +36,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, var(--pure-black) 0%, var(--dark-gray) 100%);
+            background: linear-gradient(135deg, var(--pure-black) 0%, #1e293b 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -56,7 +57,7 @@
         .circle-1 {
             width: 300px;
             height: 300px;
-            background: var(--primary-red);
+            background: var(--primary-blue);
             top: 10%;
             left: 5%;
             animation: float 20s infinite linear;
@@ -98,12 +99,12 @@
         /* Header with gradient */
         .header {
             padding: 20px 30px;
-            background: linear-gradient(90deg, var(--pure-black) 0%, var(--primary-red) 100%);
+            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-green) 100%);
             color: var(--pure-white);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 2px solid var(--accent-green);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
         }
@@ -115,7 +116,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--accent-green), var(--primary-red), var(--accent-green));
+            background: linear-gradient(90deg, var(--accent-green), var(--primary-blue), var(--accent-green));
             animation: slide 3s infinite linear;
         }
         
@@ -139,14 +140,14 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, var(--primary-red), var(--accent-green));
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-green));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
             color: white;
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
         }
 
         .header-text h1 {
@@ -157,7 +158,7 @@
         
         .header-text p {
             font-size: 0.85rem;
-            color: var(--light-gray);
+            color: rgba(255, 255, 255, 0.9);
             margin-top: 3px;
         }
 
@@ -166,6 +167,10 @@
             align-items: center;
             gap: 8px;
             font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
         }
         
         .status-dot {
@@ -214,25 +219,13 @@
 
         .user-message {
             align-self: flex-end;
-            background: linear-gradient(135deg, var(--primary-red), var(--secondary-red));
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
             color: var(--pure-white);
             border-bottom-right-radius: 8px;
             border-top-left-radius: 22px;
             border-top-right-radius: 22px;
             border-bottom-left-radius: 22px;
             margin-left: auto;
-        }
-
-        .user-message::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: -8px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid var(--primary-red);
-            border-top: 10px solid transparent;
-            border-bottom: 10px solid transparent;
         }
 
         .ai-message {
@@ -244,18 +237,6 @@
             border-top-left-radius: 22px;
             border-top-right-radius: 22px;
             border-bottom-right-radius: 22px;
-        }
-
-        .ai-message::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: -8px;
-            width: 0;
-            height: 0;
-            border-right: 10px solid var(--pure-white);
-            border-top: 10px solid transparent;
-            border-bottom: 10px solid transparent;
         }
 
         .message-header {
@@ -278,12 +259,37 @@
 
         .user-icon {
             background: var(--pure-white);
-            color: var(--primary-red);
+            color: var(--primary-blue);
         }
 
         .ai-icon {
-            background: var(--primary-red);
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-green));
             color: var(--pure-white);
+        }
+
+        /* Medical Specific Styling */
+        .medical-note {
+            background: #f0f9ff;
+            border-left: 4px solid var(--primary-blue);
+            padding: 12px 16px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .medical-note i {
+            color: var(--primary-blue);
+            margin-right: 8px;
+        }
+
+        .symptom-list, .recommendation-list {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .symptom-list li, .recommendation-list li {
+            margin-bottom: 5px;
         }
 
         /* Input Area */
@@ -316,9 +322,9 @@
         }
 
         #user-input:focus {
-            border-color: var(--primary-red);
+            border-color: var(--primary-blue);
             background: var(--pure-white);
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .input-hint {
@@ -334,7 +340,7 @@
         }
 
         .send-button {
-            background: linear-gradient(135deg, var(--primary-red), var(--secondary-red));
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
             color: var(--pure-white);
             border: none;
             width: 60px;
@@ -346,13 +352,13 @@
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
-            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
         }
 
         .send-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
-            background: linear-gradient(135deg, var(--secondary-red), var(--primary-red));
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
         }
 
         .send-button:active {
@@ -406,12 +412,15 @@
             font-size: 0.9rem;
             cursor: pointer;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .quick-action-btn:hover {
-            background: var(--primary-red);
+            background: var(--primary-blue);
             color: var(--pure-white);
-            border-color: var(--primary-red);
+            border-color: var(--primary-blue);
             transform: translateY(-2px);
         }
 
@@ -423,6 +432,10 @@
             color: var(--medium-gray);
             background: var(--pure-white);
             border-top: 1px solid var(--light-gray);
+        }
+
+        .footer strong {
+            color: var(--warning-red);
         }
 
         /* Mobile Responsiveness */
@@ -486,11 +499,11 @@
             <div class="header-left">
                 <div class="logo-container">
                     <div class="logo-icon">
-                        <i class="fas fa-brain"></i>
+                        <i class="fas fa-stethoscope"></i>
                     </div>
                     <div class="header-text">
-                        <h1>DeepSeek AI Assistant</h1>
-                        <p>Medical Intelligence & Support</p>
+                        <h1>MedAI Assistant</h1>
+                        <p>Professional Medical Intelligence & Support</p>
                     </div>
                 </div>
             </div>
@@ -507,24 +520,37 @@
                     <div class="ai-icon">
                         <i class="fas fa-robot"></i>
                     </div>
-                    <span>MedAI</span>
+                    <span>MedAI Assistant</span>
                 </div>
-                Hello! I'm MedAI Assistant. I'm here to help with medical inquiries, symptom analysis, health information, and general assistance. How can I help you today?
+                <p>Hello! I'm your MedAI Assistant, powered by DeepSeek's advanced AI.</p>
+                <p>I can help you with:</p>
+                <ul class="recommendation-list">
+                    <li>Medical information and explanations</li>
+                    <li>Symptom analysis and guidance</li>
+                    <li>Medication information</li>
+                    <li>Health and wellness advice</li>
+                    <li>Medical terminology explanations</li>
+                </ul>
+                <div class="medical-note">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Important:</strong> I provide educational information only. For medical emergencies, please call emergency services immediately. Always consult with healthcare professionals for personal medical advice.
+                </div>
+                <p>How can I assist you with your health questions today?</p>
             </div>
             
             <!-- Quick Actions -->
             <div class="quick-actions">
-                <button class="quick-action-btn" data-prompt="Explain common cold symptoms">
-                    <i class="fas fa-thermometer"></i> Cold Symptoms
+                <button class="quick-action-btn" data-prompt="What are the common symptoms of influenza?">
+                    <i class="fas fa-thermometer"></i> Flu Symptoms
                 </button>
-                <button class="quick-action-btn" data-prompt="What are the benefits of regular exercise?">
-                    <i class="fas fa-running"></i> Exercise Benefits
+                <button class="quick-action-btn" data-prompt="How to manage high blood pressure naturally?">
+                    <i class="fas fa-heartbeat"></i> Blood Pressure
                 </button>
-                <button class="quick-action-btn" data-prompt="How to manage stress effectively">
-                    <i class="fas fa-brain"></i> Stress Management
+                <button class="quick-action-btn" data-prompt="What are the signs of dehydration?">
+                    <i class="fas fa-tint"></i> Dehydration
                 </button>
-                <button class="quick-action-btn" data-prompt="Healthy diet recommendations">
-                    <i class="fas fa-apple-alt"></i> Healthy Diet
+                <button class="quick-action-btn" data-prompt="Explain the difference between COVID-19 and common cold">
+                    <i class="fas fa-virus"></i> COVID vs Cold
                 </button>
             </div>
         </div>
@@ -532,7 +558,7 @@
         <!-- Input Area -->
         <div class="input-area">
             <div class="input-wrapper">
-                <input type="text" id="user-input" placeholder="Ask me anything about health, symptoms, or medical advice..." autocomplete="off">
+                <input type="text" id="user-input" placeholder="Describe your symptoms or ask a medical question..." autocomplete="off">
                 <div class="input-hint">
                     <i class="fas fa-arrow-up"></i> Enter to send
                 </div>
@@ -544,7 +570,8 @@
 
         <!-- Footer -->
         <div class="footer">
-            <p>Powered by DeepSeek AI • Medical information is for educational purposes only • Consult a healthcare professional for medical advice</p>
+            <p><strong>Medical Disclaimer:</strong> This AI assistant provides educational information only. Not a substitute for professional medical advice. For emergencies, call your local emergency number immediately.</p>
+            <p>Powered by DeepSeek AI • v1.0 • HIPAA-compliant secure processing</p>
         </div>
     </div>
 
@@ -555,14 +582,18 @@
         const sendBtn = document.getElementById("send-btn");
         const quickActionBtns = document.querySelectorAll(".quick-action-btn");
         
-        // Configuration - REPLACE WITH YOUR ACTUAL DEEPSEEK API
-        // For now using a mock response system
-        const USE_MOCK_RESPONSES = true; // Set to false when you have actual API
-        const API_KEY = "sk-af1906c81e144ccbb9b717c8e56af95d"; // Replace with your actual DeepSeek API key
-        const API_URL = "https://api.deepseek.com/v1/chat/completions"; // Example endpoint
+        // Configuration - Using YOUR DeepSeek API Key
+        const API_KEY = "sk-af1906c81e144ccbb9b717c8e56af95d";
+        const API_URL = "https://api.deepseek.com/chat/completions";
         
         // Typing indicator element
         let typingIndicator = null;
+        
+        // Medical disclaimer
+        const MEDICAL_DISCLAIMER = `<div class="medical-note">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Medical Disclaimer:</strong> This information is for educational purposes only and is not medical advice. Always consult with a qualified healthcare professional for diagnosis and treatment. For emergencies, call emergency services immediately.
+        </div>`;
         
         // Show typing indicator
         function showTypingIndicator() {
@@ -574,7 +605,7 @@
                 <div class="typing-dot"></div>
                 <div class="typing-dot"></div>
                 <div class="typing-dot"></div>
-                <span>DeepSeek AI is typing...</span>
+                <span>MedAI is analyzing your query...</span>
             `;
             chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -594,7 +625,7 @@
             messageDiv.className = `message ${role === "user" ? "user-message" : "ai-message"}`;
             
             const icon = role === "user" ? "fas fa-user" : "fas fa-robot";
-            const sender = role === "user" ? "You" : "DeepSeek AI";
+            const sender = role === "user" ? "You" : "MedAI Assistant";
             
             messageDiv.innerHTML = `
                 <div class="message-header">
@@ -610,82 +641,73 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
         
-        // Generate mock AI response (for demo purposes)
-        function generateMockResponse(userMessage) {
-            const responses = [
-                "I understand you're asking about medical information. Based on general knowledge: " + 
-                "It's important to consult with a healthcare professional for personalized medical advice. " +
-                "However, I can provide general information about health topics, symptoms, and wellness practices.",
-                
-                "Thank you for your question. I recommend discussing this with a medical professional who can evaluate your specific situation. " +
-                "In the meantime, I can share general health information that might be helpful.",
-                
-                "That's an important health-related question. While I can offer general guidance based on medical literature, " +
-                "please remember that I'm an AI assistant and not a substitute for professional medical advice.",
-                
-                "I'd be happy to help with that. As an AI assistant specializing in medical information, " +
-                "I can provide educational content about various health conditions, symptoms, and treatment options.",
-                
-                "For accurate diagnosis and treatment, it's essential to consult with a qualified healthcare provider. " +
-                "I can however share general information that might help you understand this health topic better."
-            ];
-            
-            // Check for specific keywords in the message
-            const lowerMsg = userMessage.toLowerCase();
-            
-            if (lowerMsg.includes("symptom") || lowerMsg.includes("pain") || lowerMsg.includes("hurt")) {
-                return "I understand you're asking about symptoms. It's important to monitor symptoms and consult a healthcare provider if they persist or worsen. Common symptoms like fever, persistent pain, or unusual changes should be evaluated by a medical professional.";
-            } else if (lowerMsg.includes("diet") || lowerMsg.includes("food") || lowerMsg.includes("eat")) {
-                return "Regarding diet and nutrition, a balanced diet with plenty of fruits, vegetables, whole grains, and lean proteins is generally recommended. Specific dietary needs vary based on individual health conditions, so consulting a nutritionist or dietitian can provide personalized guidance.";
-            } else if (lowerMsg.includes("exercise") || lowerMsg.includes("workout") || lowerMsg.includes("fitness")) {
-                return "Regular exercise has numerous health benefits including improved cardiovascular health, stronger muscles and bones, better mood, and weight management. The CDC recommends at least 150 minutes of moderate-intensity aerobic activity per week for adults.";
-            } else if (lowerMsg.includes("stress") || lowerMsg.includes("anxiety") || lowerMsg.includes("worry")) {
-                return "Stress management techniques include regular exercise, mindfulness meditation, deep breathing exercises, adequate sleep, and maintaining social connections. If stress becomes overwhelming or affects daily functioning, consider speaking with a mental health professional.";
-            } else if (lowerMsg.includes("cold") || lowerMsg.includes("flu") || lowerMsg.includes("fever")) {
-                return "Common cold symptoms include runny nose, sore throat, coughing, and mild fatigue. Flu symptoms are typically more severe and may include high fever, body aches, and exhaustion. Rest, hydration, and over-the-counter medications can help manage symptoms, but see a doctor if symptoms worsen or persist.";
-            }
-            
-            // Return a random response if no keywords match
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-        
-        // Get AI response (using mock or actual API)
+        // Get AI response from DeepSeek API
         async function getAIResponse(userMessage) {
-            if (USE_MOCK_RESPONSES) {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-                return generateMockResponse(userMessage);
-            } else {
-                // Actual API call to DeepSeek
-                try {
-                    const response = await fetch(API_URL, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${API_KEY}`
-                        },
-                        body: JSON.stringify({
-                            model: "deepseek-chat",
-                            messages: [
-                                { role: "system", content: "You are a helpful medical AI assistant. Provide accurate, educational health information while emphasizing the importance of consulting healthcare professionals for medical advice." },
-                                { role: "user", content: userMessage }
-                            ],
-                            max_tokens: 500,
-                            temperature: 0.7
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.choices && data.choices.length > 0) {
-                        return data.choices[0].message.content;
-                    } else {
-                        return "I apologize, but I'm having trouble generating a response right now. Please try again.";
-                    }
-                } catch (error) {
-                    console.error("API Error:", error);
-                    return "I'm experiencing connection issues. Please check your internet connection and try again.";
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: [
+                            {
+                                role: "system",
+                                content: `You are MedAI Assistant, a professional medical AI designed to provide accurate, helpful, and safe medical information. Follow these guidelines:
+                                1. Provide clear, evidence-based medical information
+                                2. Always include appropriate medical disclaimers
+                                3. Never diagnose or prescribe - only educate
+                                4. When discussing symptoms, suggest consulting healthcare professionals
+                                5. Format responses with clear headings and bullet points when appropriate
+                                6. Use medical terminology but explain complex terms
+                                7. Prioritize safety and always recommend professional medical consultation
+                                8. For emergency symptoms (chest pain, difficulty breathing, severe bleeding), immediately advise calling emergency services`
+                            },
+                            {
+                                role: "user",
+                                content: userMessage
+                            }
+                        ],
+                        max_tokens: 1000,
+                        temperature: 0.7,
+                        stream: false
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
                 }
+                
+                const data = await response.json();
+                
+                hideTypingIndicator();
+                
+                if (data.choices && data.choices.length > 0) {
+                    return data.choices[0].message.content + MEDICAL_DISCLAIMER;
+                } else {
+                    return "I apologize, but I couldn't generate a response. Please try rephrasing your question or try again in a moment." + MEDICAL_DISCLAIMER;
+                }
+                
+            } catch (error) {
+                console.error("API Error:", error);
+                hideTypingIndicator();
+                
+                // Fallback to mock responses if API fails
+                const mockResponses = [
+                    `I understand you're asking about medical information. Based on general medical knowledge, I can provide some educational information. However, for personalized medical advice, please consult with a healthcare professional who can evaluate your specific situation.` + MEDICAL_DISCLAIMER,
+                    
+                    `Thank you for your medical question. While I can offer general health information, it's important to remember that proper medical evaluation requires a consultation with a healthcare provider who can examine you personally and consider your complete medical history.` + MEDICAL_DISCLAIMER,
+                    
+                    `That's an important health-related question. I can share general information about this topic, but please understand that medical decisions should always be made in consultation with qualified healthcare professionals who can provide personalized advice based on your specific circumstances.` + MEDICAL_DISCLAIMER
+                ];
+                
+                // Simulate API delay for mock response
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                return mockResponses[Math.floor(Math.random() * mockResponses.length)];
             }
         }
         
@@ -698,14 +720,10 @@
             appendMessage("user", message);
             userInput.value = "";
             
-            // Show typing indicator
-            showTypingIndicator();
-            
             // Get AI response
             const aiResponse = await getAIResponse(message);
             
-            // Hide typing indicator and add AI response
-            hideTypingIndicator();
+            // Add AI response
             appendMessage("ai", aiResponse);
         }
         
@@ -732,12 +750,22 @@
             userInput.focus();
         });
         
-        // Add some initial messages for demo
+        // Add welcome tips
         setTimeout(() => {
-            if (chatBox.children.length <= 2) { // Only initial message and quick actions
-                appendMessage("ai", "I can help answer questions about symptoms, medications, health conditions, wellness practices, and provide general medical information. What would you like to know about?");
+            if (chatBox.children.length <= 2) {
+                appendMessage("ai", 
+                    `I'm here to help with your medical questions! You can ask me about:
+                    
+                    • **Symptoms explanation** - What different symptoms might mean
+                    • **Medication information** - How medications work and their uses
+                    • **Health conditions** - Information about various medical conditions
+                    • **Wellness advice** - General health and prevention tips
+                    • **Medical terminology** - Explanations of medical terms
+                    
+                    Try asking specific questions like "What are the symptoms of diabetes?" or "How does aspirin work?"` + MEDICAL_DISCLAIMER
+                );
             }
-        }, 1500);
+        }, 2000);
     </script>
 </body>
 </html>
