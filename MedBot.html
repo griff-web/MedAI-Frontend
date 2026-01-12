@@ -3,229 +3,741 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAI Assistant | </title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    <title>MedAI Assistant </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7476/7476971.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --user-bubble: #667eea;
-            --ai-bubble: #f0f2f5;
+            --primary-red: #dc2626;
+            --secondary-red: #ef4444;
+            --accent-green: #10b981;
+            --dark-green: #059669;
+            --pure-white: #ffffff;
+            --off-white: #f8fafc;
+            --light-gray: #e2e8f0;
+            --medium-gray: #94a3b8;
+            --dark-gray: #475569;
+            --pure-black: #000000;
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-heavy: 0 20px 50px rgba(0, 0, 0, 0.2);
+            --border-radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Inter', sans-serif; 
+        }
 
         body {
-            background: var(--primary-gradient);
-            height: 100vh;
+            background: linear-gradient(135deg, var(--pure-black) 0%, var(--dark-gray) 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Responsive Container */
-        .chat-card {
+        /* Animated background elements */
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.05;
+            z-index: -1;
+        }
+        
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary-red);
+            top: 10%;
+            left: 5%;
+            animation: float 20s infinite linear;
+        }
+        
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            background: var(--accent-green);
+            bottom: 10%;
+            right: 5%;
+            animation: float 25s infinite linear reverse;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, 20px) rotate(90deg); }
+            50% { transform: translate(0, 40px) rotate(180deg); }
+            75% { transform: translate(-20px, 20px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        /* Main Chat Container */
+        .chat-container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
             height: 85vh;
-            background: var(--glass-bg);
-            border-radius: 24px;
+            min-height: 600px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow-heavy);
             overflow: hidden;
             position: relative;
+            border: 1px solid var(--light-gray);
         }
 
-        /* Header with Dashboard Link */
+        /* Header with gradient */
         .header {
-            padding: 20px 25px;
-            background: white;
+            padding: 20px 30px;
+            background: linear-gradient(90deg, var(--pure-black) 0%, var(--primary-red) 100%);
+            color: var(--pure-white);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #eee;
+            border-bottom: 2px solid var(--accent-green);
+            position: relative;
+            overflow: hidden;
         }
 
-        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-green), var(--primary-red), var(--accent-green));
+            animation: slide 3s infinite linear;
+        }
+        
+        @keyframes slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
 
-        .back-btn {
-            color: #444;
-            text-decoration: none;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-green));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.2rem;
-            transition: transform 0.2s;
+            color: white;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
         }
 
-        .back-btn:hover { transform: translateX(-5px); color: #667eea; }
+        .header-text h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .header-text p {
+            font-size: 0.85rem;
+            color: var(--light-gray);
+            margin-top: 3px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
 
         /* Chat Area */
-        #chat-box {
+        .chat-area {
             flex: 1;
             overflow-y: auto;
             padding: 25px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            background: #fafafa;
+            gap: 20px;
+            background: linear-gradient(to bottom, var(--off-white), #f1f5f9);
+            position: relative;
         }
 
-        .msg {
-            max-width: 80%;
-            padding: 12px 18px;
-            border-radius: 18px;
+        /* Chat Messages */
+        .message {
+            max-width: 75%;
+            padding: 16px 22px;
+            border-radius: 22px;
             font-size: 0.95rem;
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease;
+            line-height: 1.6;
+            animation: fadeInUp 0.4s ease-out;
+            position: relative;
+            box-shadow: var(--shadow);
+            word-wrap: break-word;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        .user-msg {
+        .user-message {
             align-self: flex-end;
-            background: var(--user-bubble);
-            color: white;
-            border-bottom-right-radius: 4px;
+            background: linear-gradient(135deg, var(--primary-red), var(--secondary-red));
+            color: var(--pure-white);
+            border-bottom-right-radius: 8px;
+            border-top-left-radius: 22px;
+            border-top-right-radius: 22px;
+            border-bottom-left-radius: 22px;
+            margin-left: auto;
         }
 
-        .ai-msg {
+        .user-message::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: -8px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid var(--primary-red);
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        .ai-message {
             align-self: flex-start;
-            background: var(--ai-bubble);
-            color: #333;
-            border-bottom-left-radius: 4px;
+            background: var(--pure-white);
+            color: var(--pure-black);
+            border: 1px solid var(--light-gray);
+            border-bottom-left-radius: 8px;
+            border-top-left-radius: 22px;
+            border-top-right-radius: 22px;
+            border-bottom-right-radius: 22px;
+        }
+
+        .ai-message::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -8px;
+            width: 0;
+            height: 0;
+            border-right: 10px solid var(--pure-white);
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .user-icon, .ai-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .user-icon {
+            background: var(--pure-white);
+            color: var(--primary-red);
+        }
+
+        .ai-icon {
+            background: var(--primary-red);
+            color: var(--pure-white);
         }
 
         /* Input Area */
         .input-area {
-            padding: 20px;
-            background: white;
+            padding: 20px 30px;
+            background: var(--pure-white);
+            border-top: 1px solid var(--light-gray);
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            align-items: center;
+            position: relative;
         }
 
-        input {
+        .input-wrapper {
             flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #eee;
-            border-radius: 30px;
-            outline: none;
-            transition: border 0.3s;
+            position: relative;
         }
 
-        input:focus { border-color: #667eea; }
+        #user-input {
+            width: 100%;
+            padding: 18px 25px;
+            padding-right: 60px;
+            border: 2px solid var(--light-gray);
+            border-radius: 50px;
+            outline: none;
+            font-size: 1rem;
+            background: var(--off-white);
+            transition: var(--transition);
+            color: var(--pure-black);
+        }
 
-        button {
-            background: var(--primary-gradient);
-            color: white;
+        #user-input:focus {
+            border-color: var(--primary-red);
+            background: var(--pure-white);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .input-hint {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--medium-gray);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, var(--primary-red), var(--secondary-red));
+            color: var(--pure-white);
             border: none;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             cursor: pointer;
-            transition: 0.3s;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
         }
 
-        button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .send-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+            background: linear-gradient(135deg, var(--secondary-red), var(--primary-red));
+        }
 
-        /* Mobile Adjustments */
+        .send-button:active {
+            transform: scale(0.98);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 20px;
+            background: var(--pure-white);
+            border-radius: 20px;
+            width: fit-content;
+            border: 1px solid var(--light-gray);
+            margin-bottom: 10px;
+            align-self: flex-start;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .quick-action-btn {
+            padding: 10px 18px;
+            background: var(--pure-white);
+            border: 1px solid var(--light-gray);
+            border-radius: 50px;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-action-btn:hover {
+            background: var(--primary-red);
+            color: var(--pure-white);
+            border-color: var(--primary-red);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--medium-gray);
+            background: var(--pure-white);
+            border-top: 1px solid var(--light-gray);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 90vh;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .chat-area {
+                padding: 15px;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+            
+            .input-area {
+                padding: 15px;
+            }
+            
+            #user-input {
+                padding: 15px 20px;
+                padding-right: 50px;
+            }
+        }
+
         @media (max-width: 480px) {
-            .chat-card { height: 95vh; border-radius: 15px; }
-            .msg { max-width: 90%; }
+            .chat-container {
+                height: 95vh;
+                border-radius: 12px;
+            }
+            
+            .header-text h1 {
+                font-size: 1.2rem;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 14px 18px;
+            }
+            
+            .quick-actions {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Background Elements -->
+    <div class="bg-circle circle-1"></div>
+    <div class="bg-circle circle-2"></div>
 
-    <div class="chat-card">
+    <div class="chat-container">
+        <!-- Header -->
         <div class="header">
             <div class="header-left">
-                <a href="dash.html" class="back-btn" title="Back to Dashboard">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
-                <div>
-                    <h3 style="font-size: 1.1rem;">MedAI Assistant</h3>
-                    <span style="font-size: 0.75rem; color: #2ecc71;">● Online</span>
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="header-text">
+                        <h1>DeepSeek AI Assistant</h1>
+                        <p>Medical Intelligence & Support</p>
+                    </div>
                 </div>
             </div>
-            <i class="fas fa-ellipsis-v" style="color: #ccc;"></i>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Online & Ready</span>
+            </div>
         </div>
 
-        <div id="chat-box">
-            <div class="msg ai-msg">Hello! How can I help you today?</div>
+        <!-- Chat Area -->
+        <div class="chat-area" id="chat-box">
+            <div class="message ai-message">
+                <div class="message-header">
+                    <div class="ai-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <span>MedAI</span>
+                </div>
+                Hello! I'm MedAI Assistant. I'm here to help with medical inquiries, symptom analysis, health information, and general assistance. How can I help you today?
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="quick-action-btn" data-prompt="Explain common cold symptoms">
+                    <i class="fas fa-thermometer"></i> Cold Symptoms
+                </button>
+                <button class="quick-action-btn" data-prompt="What are the benefits of regular exercise?">
+                    <i class="fas fa-running"></i> Exercise Benefits
+                </button>
+                <button class="quick-action-btn" data-prompt="How to manage stress effectively">
+                    <i class="fas fa-brain"></i> Stress Management
+                </button>
+                <button class="quick-action-btn" data-prompt="Healthy diet recommendations">
+                    <i class="fas fa-apple-alt"></i> Healthy Diet
+                </button>
+            </div>
         </div>
 
+        <!-- Input Area -->
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Ask me anything..." autocomplete="off">
-            <button id="send-btn">
+            <div class="input-wrapper">
+                <input type="text" id="user-input" placeholder="Ask me anything about health, symptoms, or medical advice..." autocomplete="off">
+                <div class="input-hint">
+                    <i class="fas fa-arrow-up"></i> Enter to send
+                </div>
+            </div>
+            <button class="send-button" id="send-btn">
                 <i class="fas fa-paper-plane"></i>
             </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Powered by DeepSeek AI • Medical information is for educational purposes only • Consult a healthcare professional for medical advice</p>
         </div>
     </div>
 
     <script>
-        // REPLACE WITH YOUR ACTUAL KEY
-        const API_KEY = "AIzaSyAROcK27ByBWLd2WKW2jEEMg2W2HyJ-FnY"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
+        // DOM Elements
         const chatBox = document.getElementById("chat-box");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
-
-        function appendMessage(role, text) {
-            const msgDiv = document.createElement("div");
-            msgDiv.className = `msg ${role === "user" ? "user-msg" : "ai-msg"}`;
-            msgDiv.innerText = text;
-            chatBox.appendChild(msgDiv);
+        const quickActionBtns = document.querySelectorAll(".quick-action-btn");
+        
+        // Configuration - REPLACE WITH YOUR ACTUAL DEEPSEEK API
+        // For now using a mock response system
+        const USE_MOCK_RESPONSES = true; // Set to false when you have actual API
+        const API_KEY = "YOUR_DEEPSEEK_API_KEY_HERE"; // Replace with your actual DeepSeek API key
+        const API_URL = "https://api.deepseek.com/v1/chat/completions"; // Example endpoint
+        
+        // Typing indicator element
+        let typingIndicator = null;
+        
+        // Show typing indicator
+        function showTypingIndicator() {
+            if (typingIndicator) return;
+            
+            typingIndicator = document.createElement("div");
+            typingIndicator.className = "typing-indicator";
+            typingIndicator.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <span>DeepSeek AI is typing...</span>
+            `;
+            chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-
-        async function getAiResponse() {
-            const text = userInput.value.trim();
-            if (!text) return;
-
-            appendMessage("user", text);
-            userInput.value = "";
-
-            // Show a typing indicator (simple)
-            const loadingDiv = document.createElement("div");
-            loadingDiv.className = "msg ai-msg";
-            loadingDiv.innerText = "...";
-            chatBox.appendChild(loadingDiv);
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }]
-                    })
-                });
-
-                const data = await response.json();
-                chatBox.removeChild(loadingDiv); // Remove loading
-
-                if (data.candidates) {
-                    const aiText = data.candidates[0].content.parts[0].text;
-                    appendMessage("ai", aiText);
-                } else {
-                    appendMessage("ai", "I'm having trouble thinking right now.");
-                }
-            } catch (error) {
-                chatBox.removeChild(loadingDiv);
-                appendMessage("ai", "Connection error. Please check your API key.");
+        
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            if (typingIndicator) {
+                typingIndicator.remove();
+                typingIndicator = null;
             }
         }
-
-        sendBtn.addEventListener("click", getAiResponse);
+        
+        // Append message to chat
+        function appendMessage(role, text) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${role === "user" ? "user-message" : "ai-message"}`;
+            
+            const icon = role === "user" ? "fas fa-user" : "fas fa-robot";
+            const sender = role === "user" ? "You" : "DeepSeek AI";
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <div class="${role === "user" ? "user-icon" : "ai-icon"}">
+                        <i class="${icon}"></i>
+                    </div>
+                    <span>${sender}</span>
+                </div>
+                ${text}
+            `;
+            
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        // Generate mock AI response (for demo purposes)
+        function generateMockResponse(userMessage) {
+            const responses = [
+                "I understand you're asking about medical information. Based on general knowledge: " + 
+                "It's important to consult with a healthcare professional for personalized medical advice. " +
+                "However, I can provide general information about health topics, symptoms, and wellness practices.",
+                
+                "Thank you for your question. I recommend discussing this with a medical professional who can evaluate your specific situation. " +
+                "In the meantime, I can share general health information that might be helpful.",
+                
+                "That's an important health-related question. While I can offer general guidance based on medical literature, " +
+                "please remember that I'm an AI assistant and not a substitute for professional medical advice.",
+                
+                "I'd be happy to help with that. As an AI assistant specializing in medical information, " +
+                "I can provide educational content about various health conditions, symptoms, and treatment options.",
+                
+                "For accurate diagnosis and treatment, it's essential to consult with a qualified healthcare provider. " +
+                "I can however share general information that might help you understand this health topic better."
+            ];
+            
+            // Check for specific keywords in the message
+            const lowerMsg = userMessage.toLowerCase();
+            
+            if (lowerMsg.includes("symptom") || lowerMsg.includes("pain") || lowerMsg.includes("hurt")) {
+                return "I understand you're asking about symptoms. It's important to monitor symptoms and consult a healthcare provider if they persist or worsen. Common symptoms like fever, persistent pain, or unusual changes should be evaluated by a medical professional.";
+            } else if (lowerMsg.includes("diet") || lowerMsg.includes("food") || lowerMsg.includes("eat")) {
+                return "Regarding diet and nutrition, a balanced diet with plenty of fruits, vegetables, whole grains, and lean proteins is generally recommended. Specific dietary needs vary based on individual health conditions, so consulting a nutritionist or dietitian can provide personalized guidance.";
+            } else if (lowerMsg.includes("exercise") || lowerMsg.includes("workout") || lowerMsg.includes("fitness")) {
+                return "Regular exercise has numerous health benefits including improved cardiovascular health, stronger muscles and bones, better mood, and weight management. The CDC recommends at least 150 minutes of moderate-intensity aerobic activity per week for adults.";
+            } else if (lowerMsg.includes("stress") || lowerMsg.includes("anxiety") || lowerMsg.includes("worry")) {
+                return "Stress management techniques include regular exercise, mindfulness meditation, deep breathing exercises, adequate sleep, and maintaining social connections. If stress becomes overwhelming or affects daily functioning, consider speaking with a mental health professional.";
+            } else if (lowerMsg.includes("cold") || lowerMsg.includes("flu") || lowerMsg.includes("fever")) {
+                return "Common cold symptoms include runny nose, sore throat, coughing, and mild fatigue. Flu symptoms are typically more severe and may include high fever, body aches, and exhaustion. Rest, hydration, and over-the-counter medications can help manage symptoms, but see a doctor if symptoms worsen or persist.";
+            }
+            
+            // Return a random response if no keywords match
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        // Get AI response (using mock or actual API)
+        async function getAIResponse(userMessage) {
+            if (USE_MOCK_RESPONSES) {
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+                return generateMockResponse(userMessage);
+            } else {
+                // Actual API call to DeepSeek
+                try {
+                    const response = await fetch(API_URL, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: "deepseek-chat",
+                            messages: [
+                                { role: "system", content: "You are a helpful medical AI assistant. Provide accurate, educational health information while emphasizing the importance of consulting healthcare professionals for medical advice." },
+                                { role: "user", content: userMessage }
+                            ],
+                            max_tokens: 500,
+                            temperature: 0.7
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.choices && data.choices.length > 0) {
+                        return data.choices[0].message.content;
+                    } else {
+                        return "I apologize, but I'm having trouble generating a response right now. Please try again.";
+                    }
+                } catch (error) {
+                    console.error("API Error:", error);
+                    return "I'm experiencing connection issues. Please check your internet connection and try again.";
+                }
+            }
+        }
+        
+        // Handle sending a message
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            appendMessage("user", message);
+            userInput.value = "";
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Get AI response
+            const aiResponse = await getAIResponse(message);
+            
+            // Hide typing indicator and add AI response
+            hideTypingIndicator();
+            appendMessage("ai", aiResponse);
+        }
+        
+        // Event Listeners
+        sendBtn.addEventListener("click", sendMessage);
+        
         userInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") getAiResponse();
+            if (e.key === "Enter") {
+                sendMessage();
+            }
         });
+        
+        // Quick action buttons
+        quickActionBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const prompt = btn.getAttribute("data-prompt");
+                userInput.value = prompt;
+                userInput.focus();
+            });
+        });
+        
+        // Focus input on load
+        window.addEventListener("load", () => {
+            userInput.focus();
+        });
+        
+        // Add some initial messages for demo
+        setTimeout(() => {
+            if (chatBox.children.length <= 2) { // Only initial message and quick actions
+                appendMessage("ai", "I can help answer questions about symptoms, medications, health conditions, wellness practices, and provide general medical information. What would you like to know about?");
+            }
+        }, 1500);
     </script>
 </body>
 </html>
