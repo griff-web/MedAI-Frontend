@@ -3,1441 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
-    <title>MedAI | Enterprise Health Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>MedAI Assistant | </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         :root {
-            /* Kenya Heritage Palette - Professional Tones */
-            --kenya-black: #080C10;
-            --kenya-red: #E31837;
-            --kenya-green: #006039;
-            --kenya-white: #FFFFFF;
-            --kenya-gold: #FCDC04;
-            
-            /* UI System */
-            --primary: var(--kenya-green);
-            --accent: var(--kenya-red);
-            --bg-dark: #05070A;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #E0E6ED;
-            --text-muted: #94A3B8;
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --info: #3B82F6;
-            
-            --shadow-glow: 0 0 25px rgba(0, 96, 57, 0.2);
-            --shadow-deep: 0 10px 40px rgba(0, 0, 0, 0.3);
-            --radius-lg: 24px;
-            --radius-md: 16px;
-            --radius-sm: 8px;
-            
-            /* Animation speeds */
-            --transition-fast: 0.2s ease;
-            --transition-normal: 0.3s ease;
-            --transition-slow: 0.5s ease;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --user-bubble: #667eea;
+            --ai-bubble: #f0f2f5;
         }
 
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 0% 0%, rgba(0, 96, 57, 0.15) 0%, transparent 35%),
-                radial-gradient(circle at 100% 100%, rgba(227, 24, 55, 0.1) 0%, transparent 35%),
-                radial-gradient(circle at 50% 50%, rgba(252, 220, 4, 0.05) 0%, transparent 50%);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
+            background: var(--primary-gradient);
+            height: 100vh;
             display: flex;
-            flex-direction: column;
-        }
-
-        /* Animated Grid Background */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background-image: 
-                linear-gradient(var(--glass-border) 1px, transparent 1px), 
-                linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
-            background-size: 50px 50px;
-            mask-image: radial-gradient(ellipse at center, black, transparent 80%);
-            z-index: -1;
-            opacity: 0.3;
-        }
-
-        /* Particle Effect */
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.2;
-        }
-
-        /* --- Header --- */
-        .header {
-            padding: 1.5rem 5%;
-            background: rgba(8, 12, 16, 0.9);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow-deep);
-        }
-
-        .logo-group {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo-vial {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--kenya-green), #00A86B);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
-            box-shadow: var(--shadow-glow);
-            transition: var(--transition-normal);
-        }
-
-        .logo-vial:hover {
-            transform: rotate(15deg) scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 96, 57, 0.4);
-        }
-
-        .logo-text h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: linear-gradient(to right, #fff, var(--kenya-gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1.2;
-        }
-
-        .logo-text p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .header-status {
-            display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            background: var(--glass);
-            padding: 10px 18px;
-            border-radius: 100px;
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(5px);
-            transition: var(--transition-normal);
+            padding: 20px;
         }
 
-        .header-status:hover {
-            border-color: var(--kenya-green);
-            color: var(--kenya-gold);
-        }
-
-        .pulse-dot {
-            width: 10px;
-            height: 10px;
-            background: var(--kenya-green);
-            border-radius: 50%;
-            box-shadow: 0 0 12px var(--kenya-green);
-            animation: pulse 2s infinite;
-        }
-
-        /* --- Layout --- */
-        .main-engine {
-            display: grid;
-            grid-template-columns: 360px 1fr;
-            gap: 2rem;
-            padding: 2rem 5%;
-            flex: 1;
-            max-width: 1800px;
-            margin: 0 auto;
+        /* Responsive Container */
+        .chat-card {
             width: 100%;
-        }
-
-        /* --- Sidebar Panels --- */
-        .sidebar {
+            max-width: 900px;
+            height: 85vh;
+            background: var(--glass-bg);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .glass-panel {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 1.8rem;
-            backdrop-filter: blur(10px);
-            transition: var(--transition-normal);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .glass-panel:hover {
-            border-color: rgba(255, 255, 255, 0.12);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-glow), 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .panel-label {
-            color: var(--kenya-gold);
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-label i {
-            font-size: 1rem;
-        }
-
-        .disease-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .disease-btn {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            padding: 14px 12px;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: var(--transition-normal);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            text-align: center;
-        }
-
-        .disease-btn:hover {
-            background: var(--kenya-green);
-            border-color: var(--kenya-gold);
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-glow);
-            color: white;
-        }
-
-        .disease-btn i {
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-        }
-
-        /* --- Symptom Input --- */
-        .symptom-box {
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        .smart-input {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md);
-            padding: 1.2rem;
-            color: white;
-            font-family: inherit;
-            font-size: 0.95rem;
-            transition: var(--transition-normal);
-        }
-
-        .smart-input:focus {
-            outline: none;
-            border-color: var(--kenya-green);
-            box-shadow: 0 0 0 3px rgba(0, 96, 57, 0.2);
-        }
-
-        .action-btn {
-            background: linear-gradient(135deg, var(--kenya-green), #004d2e);
-            color: white;
-            border: none;
-            padding: 1.2rem;
-            border-radius: var(--radius-md);
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition-normal);
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            letter-spacing: 0.5px;
-        }
-
-        .action-btn:hover {
-            filter: brightness(1.2);
-            letter-spacing: 1px;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 96, 57, 0.3);
-        }
-
-        /* --- Quick Actions --- */
-        .quick-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-        }
-
-        .quick-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            padding: 8px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: var(--transition-fast);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .quick-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: var(--info);
-        }
-
-        /* --- Chat Terminal --- */
-        .chat-terminal {
-            display: flex;
-            flex-direction: column;
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
             overflow: hidden;
             position: relative;
-            box-shadow: var(--shadow-deep);
-            height: 78vh;
         }
 
-        .terminal-header {
-            padding: 1.2rem 1.5rem;
-            background: var(--glass);
-            border-bottom: 1px solid var(--glass-border);
+        /* Header with Dashboard Link */
+        .header {
+            padding: 20px 25px;
+            background: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            border-bottom: 1px solid #eee;
         }
 
-        .terminal-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .header-left { display: flex; align-items: center; gap: 15px; }
+
+        .back-btn {
+            color: #444;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
         }
 
-        .terminal-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: var(--transition-fast);
-        }
+        .back-btn:hover { transform: translateX(-5px); color: #667eea; }
 
-        .terminal-dot.red { background: #ff5f56; }
-        .terminal-dot.yellow { background: #ffbd2e; }
-        .terminal-dot.green { background: #27c93f; }
-
-        .terminal-dot:hover {
-            opacity: 0.8;
-            transform: scale(1.1);
-        }
-
-        .terminal-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-        }
-
-        .chat-display {
+        /* Chat Area */
+        #chat-box {
             flex: 1;
-            padding: 1.5rem;
             overflow-y: auto;
+            padding: 25px;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            position: relative;
+            gap: 15px;
+            background: #fafafa;
         }
 
         .msg {
-            max-width: 85%;
-            padding: 1.2rem 1.5rem;
-            border-radius: var(--radius-md);
-            line-height: 1.6;
-            position: relative;
-            animation: slideUp 0.4s ease-out;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
         }
 
-        .bot-msg {
-            background: var(--glass);
-            border-left: 4px solid var(--kenya-green);
-            align-self: flex-start;
-            border-top-left-radius: 4px;
-            border-bottom-left-radius: 4px;
-        }
-
-        .bot-msg::before {
-            content: "MedAI";
-            position: absolute;
-            top: -18px;
-            left: 0;
-            font-size: 0.7rem;
-            color: var(--kenya-green);
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .user-msg {
-            background: linear-gradient(135deg, rgba(227, 24, 55, 0.1), transparent);
-            border-right: 4px solid var(--kenya-red);
             align-self: flex-end;
-            text-align: left;
-            border-top-right-radius: 4px;
+            background: var(--user-bubble);
+            color: white;
             border-bottom-right-radius: 4px;
         }
 
-        .user-msg::before {
-            content: "You";
-            position: absolute;
-            top: -18px;
-            right: 0;
-            font-size: 0.7rem;
-            color: var(--kenya-red);
-            font-weight: 700;
-            letter-spacing: 0.5px;
+        .ai-msg {
+            align-self: flex-start;
+            background: var(--ai-bubble);
+            color: #333;
+            border-bottom-left-radius: 4px;
         }
 
-        /* --- Results UI --- */
-        .result-card {
-            background: rgba(13, 17, 23, 0.9);
-            border: 1px solid var(--kenya-green);
-            border-radius: var(--radius-md);
-            padding: 1.8rem;
-            margin-top: 1rem;
-            box-shadow: 0 6px 20px rgba(0, 96, 57, 0.15);
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .severity-pill {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
-        }
-
-        .high-risk { background: rgba(227, 24, 55, 0.2); color: var(--kenya-red); border: 1px solid rgba(227, 24, 55, 0.3); }
-        .medium-risk { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
-        .low-risk { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .info-item {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: var(--radius-sm);
-            padding: 1rem;
-            border-left: 3px solid var(--kenya-green);
-        }
-
-        .info-item h4 {
-            color: var(--kenya-gold);
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-item p {
-            font-size: 0.9rem;
-            color: var(--text-main);
-        }
-
-        .follow-up-questions {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px dashed var(--glass-border);
-        }
-
-        .follow-up-title {
-            color: var(--kenya-gold);
-            font-size: 0.9rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            background: white;
             display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .follow-up-buttons {
-            display: flex;
-            flex-wrap: wrap;
             gap: 10px;
         }
 
-        .follow-up-btn {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: var(--info);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: var(--transition-fast);
-        }
-
-        .follow-up-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
-            transform: translateY(-2px);
-        }
-
-        /* --- Input Area --- */
-        .input-anchor {
-            padding: 1.5rem;
-            background: rgba(8, 12, 16, 0.95);
-            border-top: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 1rem;
-            background: var(--glass);
-            padding: 8px;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--glass-border);
-            transition: var(--transition-normal);
-        }
-
-        .input-wrapper:focus-within {
-            border-color: var(--kenya-green);
-            box-shadow: 0 0 0 3px rgba(0, 96, 57, 0.2);
-        }
-
-        .terminal-input {
+        input {
             flex: 1;
-            background: transparent;
-            border: none;
-            padding: 12px 20px;
-            color: white;
+            padding: 15px 20px;
+            border: 2px solid #eee;
+            border-radius: 30px;
             outline: none;
-            font-size: 1rem;
-            font-family: inherit;
+            transition: border 0.3s;
         }
 
-        .send-pill {
-            background: linear-gradient(135deg, var(--kenya-green), #004d2e);
+        input:focus { border-color: #667eea; }
+
+        button {
+            background: var(--primary-gradient);
             color: white;
             border: none;
-            padding: 0 28px;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition-normal);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
-        }
-
-        .send-pill:hover {
-            filter: brightness(1.2);
-            letter-spacing: 0.5px;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 96, 57, 0.3);
-        }
-
-        .send-pill:active {
-            transform: translateY(0);
-        }
-
-        /* --- Typing Indicator --- */
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: 8px;
-            padding: 1rem;
-            background: var(--glass);
-            border-radius: var(--radius-md);
-            width: fit-content;
-            align-self: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--kenya-green);
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            animation: typingAnimation 1.4s infinite ease-in-out;
-        }
-
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        /* --- Animations --- */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes typingAnimation {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-10px); }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { 
-            width: 8px; 
-        }
-        
-        ::-webkit-scrollbar-track { 
-            background: transparent; 
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb { 
-            background: var(--glass-border); 
-            border-radius: 10px; 
-        }
-        
-        ::-webkit-scrollbar-thumb:hover { 
-            background: rgba(255, 255, 255, 0.2); 
-        }
-
-        /* --- Footer --- */
-        .footer {
-            padding: 1.5rem 5%;
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--glass-border);
-            background: rgba(8, 12, 16, 0.8);
-            backdrop-filter: blur(10px);
-        }
-
-        .warning-banner {
-            background: rgba(227, 24, 55, 0.1);
-            border: 1px solid rgba(227, 24, 55, 0.3);
-            color: var(--kenya-red);
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            font-size: 0.8rem;
-            text-align: center;
-            margin-top: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
         }
 
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .main-engine { 
-                grid-template-columns: 1fr; 
-                gap: 1.5rem;
-            }
-            
-            .sidebar {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 1.5rem;
-            }
-            
-            .chat-terminal {
-                height: 70vh;
-            }
-        }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
 
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem 5%;
-            }
-            
-            .msg {
-                max-width: 95%;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .disease-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .chat-terminal {
-                height: 65vh;
-            }
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .chat-card { height: 95vh; border-radius: 15px; }
+            .msg { max-width: 90%; }
         }
     </style>
 </head>
 <body>
 
-    <div id="particles-js"></div>
-
-    <header class="header">
-        <div class="logo-group">
-    <a href="dash.html" class="logo-vial-btn" title="Go to Dashboard">
-        <div class="logo-vial">⚕</div>
-    </a>
-    <div class="logo-text">
-        <h1>MedAI <span style="color:var(--kenya-red)">CORE</span></h1>
-        <p>KENYA ENTERPRISE HEALTH ENGINE </p>
-    </div>
-</div>
-        <div class="header-status">
-            <div class="pulse-dot"></div>
-            <span>BIOMETRIC ENGINE: ONLINE</span>
-            <i class="fas fa-shield-alt"></i>
+    <div class="chat-card">
+        <div class="header">
+            <div class="header-left">
+                <a href="dash.html" class="back-btn" title="Back to Dashboard">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h3 style="font-size: 1.1rem;">MedAI Assistant</h3>
+                    <span style="font-size: 0.75rem; color: #2ecc71;">● Online</span>
+                </div>
+            </div>
+            <i class="fas fa-ellipsis-v" style="color: #ccc;"></i>
         </div>
-    </header>
 
-    <main class="main-engine">
-        <section class="sidebar">
-            <div class="glass-panel">
-                <span class="panel-label"><i class="fas fa-disease"></i> Diagnostic Libraries</span>
-                <div class="disease-grid">
-                    <button class="disease-btn" onclick="analyze('malaria')">
-                        <i class="fas fa-bug"></i>
-                        Malaria
-                    </button>
-                    <button class="disease-btn" onclick="analyze('hiv')">
-                        <i class="fas fa-virus"></i>
-                        HIV/AIDS
-                    </button>
-                    <button class="disease-btn" onclick="analyze('typhoid')">
-                        <i class="fas fa-temperature-high"></i>
-                        Typhoid
-                    </button>
-                    <button class="disease-btn" onclick="analyze('tuberculosis')">
-                        <i class="fas fa-lungs"></i>
-                        Tuberculosis
-                    </button>
-                    <button class="disease-btn" onclick="analyze('cholera')">
-                        <i class="fas fa-tint"></i>
-                        Cholera
-                    </button>
-                    <button class="disease-btn" onclick="analyze('hepatitis')">
-                        <i class="fas fa-liver"></i>
-                        Hepatitis B
-                    </button>
-                    <button class="disease-btn" onclick="analyze('covid')">
-                        <i class="fas fa-head-side-cough"></i>
-                        COVID-19
-                    </button>
-                    <button class="disease-btn" onclick="analyze('diabetes')">
-                        <i class="fas fa-syringe"></i>
-                        Diabetes
-                    </button>
-                </div>
-            </div>
+        <div id="chat-box">
+            <div class="msg ai-msg">Hello! How can I help you today?</div>
+        </div>
 
-            <div class="glass-panel">
-                <span class="panel-label"><i class="fas fa-stethoscope"></i> Symptom Analyzer</span>
-                <div class="symptom-box">
-                    <input type="text" id="symp-input" class="smart-input" placeholder="e.g. Sharp headache, dry cough, fever...">
-                    <button class="action-btn" onclick="processSymptoms()">
-                        <i class="fas fa-search-medical"></i>
-                        INITIATE ANALYSIS
-                    </button>
-                </div>
-                <div class="quick-actions">
-                    <div class="quick-btn" onclick="askQuestion('What should I do for a fever?')">
-                        <i class="fas fa-thermometer-full"></i> Fever
-                    </div>
-                    <div class="quick-btn" onclick="askQuestion('How to treat headache?')">
-                        <i class="fas fa-head-side-virus"></i> Headache
-                    </div>
-                    <div class="quick-btn" onclick="askQuestion('Remedies for cough')">
-                        <i class="fas fa-lungs-virus"></i> Cough
-                    </div>
-                    <div class="quick-btn" onclick="askQuestion('Fatigue and weakness causes')">
-                        <i class="fas fa-tired"></i> Fatigue
-                    </div>
-                </div>
-            </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Ask me anything..." autocomplete="off">
+            <button id="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
 
-            <div class="glass-panel">
-                <span class="panel-label"><i class="fas fa-user-md"></i> Doctor's Advice</span>
-                <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem;">
-                    Remember to always consult with a healthcare professional for accurate diagnosis and treatment. 
-                    MedAI provides informational support only.
-                </p>
-                <div class="quick-actions">
-                    <div class="quick-btn" onclick="askQuestion('When should I see a doctor?')">
-                        <i class="fas fa-calendar-check"></i> When to See Doctor
-                    </div>
-                    <div class="quick-btn" onclick="askQuestion('What is preventive healthcare?')">
-                        <i class="fas fa-shield-virus"></i> Prevention Tips
-                    </div>
-                </div>
-            </div>
-
-            <div class="warning-banner">
-                <i class="fas fa-exclamation-triangle"></i>
-                NON-DIAGNOSTIC AI: FOR INFORMATIONAL USE ONLY. CONSULT A LICENSED PRACTITIONER.
-            </div>
-        </section>
-
-        <section class="chat-terminal">
-            <div class="terminal-header">
-                <div class="terminal-controls">
-                    <div class="terminal-dot red"></div>
-                    <div class="terminal-dot yellow"></div>
-                    <div class="terminal-dot green"></div>
-                </div>
-                <div class="terminal-title">ENCRYPTED_SESSION_LOG • PATIENT_CONFIDENTIAL</div>
-                <div style="font-size: 0.8rem; color: var(--kenya-green);">
-                    <i class="fas fa-lock"></i> SECURE
-                </div>
-            </div>
-
-            <div class="chat-display" id="chat-flow">
-                <div class="msg bot-msg">
-                    <strong>SYSTEM INITIALIZED</strong><br>
-                    <p>Hello, I'm MedAI. I'm here to provide medical information and answer your health-related questions.</p>
-                    <p>How can I assist you today? You can:</p>
-                    <ul style="margin-top: 10px; padding-left: 20px;">
-                        <li>Click on a disease to learn more about it</li>
-                        <li>Describe your symptoms for analysis</li>
-                        <li>Ask me any health-related question</li>
-                    </ul>
-                    <p style="margin-top: 15px; font-style: italic; color: var(--kenya-gold);">
-                        <i class="fas fa-info-circle"></i> Remember: I provide informational support only. Always consult a healthcare professional for medical advice.
-                    </p>
-                </div>
-            </div>
-            
-            <div class="typing-indicator" id="typing-indicator">
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <span style="font-size: 0.85rem; color: var(--text-muted);">MedAI is thinking...</span>
-            </div>
-
-            <div class="input-anchor">
-                <div class="input-wrapper">
-                    <input type="text" id="user-query" class="terminal-input" placeholder="Ask a medical question or describe symptoms..." onkeypress="handleKeyPress(event)">
-                    <button class="send-pill" onclick="sendQuery()">
-                        <i class="fas fa-paper-plane"></i>
-                        SEND
-                    </button>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">
-                        Press <kbd>Enter</kbd> to send • <kbd>Shift</kbd>+<kbd>Enter</kbd> for new line
-                    </div>
-                    <button onclick="clearChat()" style="background: none; border: none; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                        <i class="fas fa-trash-alt"></i> Clear Chat
-                    </button>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <p>MedAI Core • Enterprise Health Engine v5.2 • © 2023 Ministry of Health (Kenya) Collaboration</p>
-        <p style="margin-top: 5px; font-size: 0.7rem;">This AI assistant provides health information only and is not a substitute for professional medical advice.</p>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // Enhanced medical database with comprehensive information
-        const medicalDB = {
-            malaria: {
-                name: "Malaria",
-                severity: "High",
-                symptoms: ["Cyclical Fever (every 48-72 hours)", "Shaking Chills", "Muscle Pain", "Headache", "Fatigue", "Nausea/Vomiting", "Sweating"],
-                causes: ["Plasmodium parasite transmitted through Anopheles mosquito bites"],
-                treatments: ["ACT (Artemisinin-based Combination Therapy)", "Quinine for severe cases", "Primaquine for P. vivax/P. ovale"],
-                prevention: ["LLIN Bed Nets", "Indoor Residual Spraying", "Antimalarial prophylaxis for travelers", "Mosquito repellents"],
-                diagnosis: ["Blood smear microscopy", "Rapid diagnostic tests (RDTs)", "PCR testing"],
-                complications: ["Cerebral malaria", "Severe anemia", "Respiratory distress", "Organ failure"],
-                followUpQuestions: [
-                    "How can I prevent malaria when traveling?",
-                    "What are the side effects of antimalarial drugs?",
-                    "How long does malaria treatment take?",
-                    "Can malaria recur after treatment?"
-                ]
-            },
-            hiv: {
-                name: "HIV/AIDS",
-                severity: "Chronic/High",
-                symptoms: ["Night Sweats", "Lymph Node Swelling", "Rapid Weight Loss", "Recurrent Fever", "Persistent Diarrhea", "Oral Thrush", "Skin Rashes"],
-                causes: ["Human Immunodeficiency Virus transmission through blood, sexual contact, or mother-to-child"],
-                treatments: ["ART (Antiretroviral Therapy)", "Dolutegravir-based regimens", "Protease inhibitors", "Integrase inhibitors"],
-                prevention: ["PrEP (Pre-exposure Prophylaxis)", "PEP (Post-exposure Prophylaxis)", "Safe sexual practices", "Sterile needle use"],
-                diagnosis: ["HIV antibody tests", "Antigen/antibody tests", "Nucleic acid tests"],
-                complications: ["Opportunistic infections", "HIV-associated neurocognitive disorders", "Wasting syndrome", "Certain cancers"],
-                followUpQuestions: [
-                    "What is the difference between HIV and AIDS?",
-                    "How effective is PrEP?",
-                    "Can HIV be cured?",
-                    "What are the side effects of ART?"
-                ]
-            },
-            typhoid: {
-                name: "Typhoid Fever",
-                severity: "Medium",
-                symptoms: ["Prolonged High Fever", "Headache", "Abdominal Pain", "Constipation or Diarrhea", "Rose Spots on Trunk", "Weakness", "Loss of Appetite"],
-                causes: ["Salmonella Typhi bacteria from contaminated food/water"],
-                treatments: ["Antibiotics (Ciprofloxacin, Azithromycin, Ceftriaxone)", "Adequate hydration", "Symptomatic treatment"],
-                prevention: ["Typhoid vaccination", "Safe food and water practices", "Proper sanitation", "Hand hygiene"],
-                diagnosis: ["Blood culture", "Stool culture", "Bone marrow culture (most sensitive)"],
-                complications: ["Intestinal perforation", "Gastrointestinal hemorrhage", "Encephalopathy", "Relapse"],
-                followUpQuestions: [
-                    "How long is typhoid contagious?",
-                    "What foods should be avoided with typhoid?",
-                    "How effective is the typhoid vaccine?",
-                    "Can typhoid recur?"
-                ]
-            },
-            tuberculosis: {
-                name: "Tuberculosis (TB)",
-                severity: "High",
-                symptoms: ["Persistent Cough (3+ weeks)", "Chest Pain", "Coughing up Blood", "Unintended Weight Loss", "Night Sweats", "Fever", "Fatigue"],
-                causes: ["Mycobacterium tuberculosis bacteria, airborne transmission"],
-                treatments: ["First-line drugs: Isoniazid, Rifampin, Ethambutol, Pyrazinamide", "MDR-TB requires specialized regimens", "DOTS (Directly Observed Treatment)"],
-                prevention: ["BCG vaccination", "Early detection and treatment", "Infection control measures", "Preventive therapy for high-risk"],
-                diagnosis: ["Sputum smear microscopy", "TB culture", "GeneXpert MTB/RIF", "Chest X-ray"],
-                complications: ["Miliary TB (disseminated)", "TB meningitis", "Drug-resistant TB", "Permanent lung damage"],
-                followUpQuestions: [
-                    "What is the difference between latent and active TB?",
-                    "How long is TB treatment?",
-                    "Is TB curable?",
-                    "How can I prevent spreading TB to others?"
-                ]
-            },
-            cholera: {
-                name: "Cholera",
-                severity: "High",
-                symptoms: ["Profuse Watery Diarrhea", "Vomiting", "Leg Cramps", "Rapid Dehydration", "Sunken Eyes", "Dry Mouth", "Low Blood Pressure"],
-                causes: ["Vibrio cholerae bacteria from contaminated water/food"],
-                treatments: ["Oral Rehydration Solution (ORS)", "Intravenous fluids for severe cases", "Antibiotics (Doxycycline, Azithromycin)", "Zinc supplementation for children"],
-                prevention: ["Safe water and sanitation", "Oral cholera vaccines", "Proper food hygiene", "Handwashing with soap"],
-                diagnosis: ["Stool culture", "Rapid diagnostic tests"],
-                complications: ["Severe dehydration", "Electrolyte imbalance", "Kidney failure", "Shock"],
-                followUpQuestions: [
-                    "How is cholera transmitted?",
-                    "What should I drink if I have cholera?",
-                    "How can I prevent cholera when traveling?",
-                    "Is there a vaccine for cholera?"
-                ]
-            },
-            hepatitis: {
-                name: "Hepatitis B",
-                severity: "Chronic/High",
-                symptoms: ["Jaundice (yellow skin/eyes)", "Dark Urine", "Fatigue", "Abdominal Pain", "Loss of Appetite", "Nausea", "Joint Pain"],
-                causes: ["Hepatitis B virus through blood, sexual contact, or mother-to-child transmission"],
-                treatments: ["Antiviral medications (Tenofovir, Entecavir)", "Regular monitoring", "Liver transplant in advanced cases"],
-                prevention: ["Hepatitis B vaccination", "Safe injection practices", "Safe sex", "Screening of blood products"],
-                diagnosis: ["HBsAg test", "Liver function tests", "HBV DNA test", "Liver biopsy in some cases"],
-                complications: ["Chronic hepatitis", "Cirrhosis", "Liver cancer", "Liver failure"],
-                followUpQuestions: [
-                    "What's the difference between Hepatitis A, B, and C?",
-                    "How effective is the hepatitis B vaccine?",
-                    "Can hepatitis B be cured?",
-                    "How is chronic hepatitis B managed?"
-                ]
-            },
-            covid: {
-                name: "COVID-19",
-                severity: "Variable",
-                symptoms: ["Fever or Chills", "Cough", "Shortness of Breath", "Fatigue", "Muscle/Body Aches", "Loss of Taste/Smell", "Sore Throat", "Headache"],
-                causes: ["SARS-CoV-2 virus, primarily respiratory droplets"],
-                treatments: ["Antivirals (Paxlovid, Remdesivir)", "Symptomatic treatment", "Monoclonal antibodies for high-risk", "Hospitalization for severe cases"],
-                prevention: ["COVID-19 vaccination", "Mask-wearing in crowded places", "Hand hygiene", "Social distancing", "Good ventilation"],
-                diagnosis: ["PCR test", "Rapid antigen test", "Antibody test"],
-                complications: ["Long COVID", "Pneumonia", "Blood clots", "Multisystem inflammatory syndrome"],
-                followUpQuestions: [
-                    "What are the current COVID-19 variants?",
-                    "How often should I get COVID-19 boosters?",
-                    "What treatments are available for COVID-19?",
-                    "How long does immunity from vaccination last?"
-                ]
-            },
-            diabetes: {
-                name: "Diabetes Mellitus",
-                severity: "Chronic/High",
-                symptoms: ["Increased Thirst", "Frequent Urination", "Extreme Hunger", "Unexplained Weight Loss", "Fatigue", "Blurred Vision", "Slow-Healing Sores"],
-                causes: ["Type 1: Autoimmune destruction of insulin-producing cells", "Type 2: Insulin resistance and relative insulin deficiency"],
-                treatments: ["Insulin therapy (Type 1)", "Oral medications (Metformin, etc.)", "Lifestyle modifications", "Blood glucose monitoring"],
-                prevention: ["Healthy diet", "Regular physical activity", "Maintaining healthy weight", "Regular health check-ups"],
-                diagnosis: ["Fasting blood glucose", "HbA1c test", "Oral glucose tolerance test"],
-                complications: ["Cardiovascular disease", "Nerve damage (neuropathy)", "Kidney damage (nephropathy)", "Eye damage (retinopathy)", "Foot damage"],
-                followUpQuestions: [
-                    "What's the difference between Type 1 and Type 2 diabetes?",
-                    "What foods should diabetics avoid?",
-                    "How often should I check my blood sugar?",
-                    "Can diabetes be reversed?"
-                ]
-            }
-        };
+        // REPLACE WITH YOUR ACTUAL KEY
+        const API_KEY = "AIzaSyAROcK27ByBWLd2WKW2jEEMg2W2HyJ-FnY"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-        // Conversation state tracking
-        let conversationState = {
-            lastDisease: null,
-            symptomContext: null,
-            followUpOptions: []
-        };
+        const chatBox = document.getElementById("chat-box");
+        const userInput = document.getElementById("user-input");
+        const sendBtn = document.getElementById("send-btn");
 
-        // DOM elements
-        const chatFlow = document.getElementById('chat-flow');
-        const userQueryInput = document.getElementById('user-query');
-        const sympInput = document.getElementById('symp-input');
-        const typingIndicator = document.getElementById('typing-indicator');
+        function appendMessage(role, text) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `msg ${role === "user" ? "user-msg" : "ai-msg"}`;
+            msgDiv.innerText = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
-        // Initialize particles.js
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof particlesJS !== 'undefined') {
-                particlesJS('particles-js', {
-                    particles: {
-                        number: { value: 40, density: { enable: true, value_area: 800 } },
-                        color: { value: "#006039" },
-                        shape: { type: "circle" },
-                        opacity: { value: 0.3, random: true },
-                        size: { value: 3, random: true },
-                        line_linked: {
-                            enable: true,
-                            distance: 150,
-                            color: "#006039",
-                            opacity: 0.1,
-                            width: 1
-                        },
-                        move: { enable: true, speed: 1 }
-                    },
-                    interactivity: {
-                        detect_on: "canvas",
-                        events: {
-                            onhover: { enable: true, mode: "repulse" },
-                            onclick: { enable: true, mode: "push" }
-                        }
-                    }
+        async function getAiResponse() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            appendMessage("user", text);
+            userInput.value = "";
+
+            // Show a typing indicator (simple)
+            const loadingDiv = document.createElement("div");
+            loadingDiv.className = "msg ai-msg";
+            loadingDiv.innerText = "...";
+            chatBox.appendChild(loadingDiv);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: text }] }]
+                    })
                 });
-            }
-        });
 
-        // Function to add message to chat
-        function addMessage(content, type, delay = 0) {
-            if (delay > 0) {
-                showTypingIndicator();
-                setTimeout(() => {
-                    hideTypingIndicator();
-                    createMessage(content, type);
-                }, delay);
-            } else {
-                createMessage(content, type);
-            }
-        }
+                const data = await response.json();
+                chatBox.removeChild(loadingDiv); // Remove loading
 
-        function createMessage(content, type) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `msg ${type}-msg`;
-            msgDiv.innerHTML = content;
-            chatFlow.appendChild(msgDiv);
-            chatFlow.scrollTop = chatFlow.scrollHeight;
-        }
-
-        // Typing indicator functions
-        function showTypingIndicator() {
-            typingIndicator.style.display = 'flex';
-            chatFlow.scrollTop = chatFlow.scrollHeight;
-        }
-
-        function hideTypingIndicator() {
-            typingIndicator.style.display = 'none';
-        }
-
-        // Analyze disease function
-        function analyze(diseaseKey) {
-            const data = medicalDB[diseaseKey];
-            if (!data) {
-                addMessage(`Disease profile for <strong>${diseaseKey}</strong> is currently being updated.`, 'bot', 800);
-                return;
-            }
-
-            conversationState.lastDisease = diseaseKey;
-            
-            // Update the follow-up questions
-            conversationState.followUpOptions = data.followUpQuestions || [];
-            
-            const html = `
-                <div class="result-card">
-                    <span class="severity-pill ${data.severity === 'High' ? 'high-risk' : data.severity === 'Medium' ? 'medium-risk' : 'low-risk'}">${data.severity} Risk</span>
-                    <h2 style="color: var(--kenya-gold); margin-bottom: 15px; font-size: 1.5rem;">${data.name}</h2>
-                    
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <h4><i class="fas fa-exclamation-circle"></i> Core Symptoms</h4>
-                            <p>${data.symptoms.join(', ')}</p>
-                        </div>
-                        <div class="info-item">
-                            <h4><i class="fas fa-vial"></i> Diagnosis</h4>
-                            <p>${data.diagnosis.join(', ')}</p>
-                        </div>
-                        <div class="info-item">
-                            <h4><i class="fas fa-capsules"></i> Treatments</h4>
-                            <p>${data.treatments.join(', ')}</p>
-                        </div>
-                        <div class="info-item">
-                            <h4><i class="fas fa-shield-alt"></i> Prevention</h4>
-                            <p>${data.prevention.join(', ')}</p>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: var(--radius-sm);">
-                        <p><strong>Causes:</strong> ${data.causes}</p>
-                        ${data.complications ? `<p style="margin-top: 10px;"><strong>Possible Complications:</strong> ${Array.isArray(data.complications) ? data.complications.join(', ') : data.complications}</p>` : ''}
-                    </div>
-                    
-                    ${conversationState.followUpOptions.length > 0 ? `
-                    <div class="follow-up-questions">
-                        <div class="follow-up-title">
-                            <i class="fas fa-question-circle"></i> Related Questions You Might Have
-                        </div>
-                        <div class="follow-up-buttons">
-                            ${conversationState.followUpOptions.map(question => 
-                                `<button class="follow-up-btn" onclick="askQuestion('${question}')">${question}</button>`
-                            ).join('')}
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
-            
-            addMessage(html, 'bot', 1000);
-        }
-
-        // Process symptoms function
-        function processSymptoms() {
-            const val = sympInput.value.trim();
-            if (!val) {
-                addMessage("Please enter symptoms for analysis.", 'bot', 800);
-                return;
-            }
-            
-            addMessage(`<strong>Symptoms entered:</strong> ${val}`, 'user');
-            sympInput.value = '';
-            conversationState.symptomContext = val;
-            
-            // Show typing indicator
-            showTypingIndicator();
-            
-            // Simulate AI analysis
-            setTimeout(() => {
-                hideTypingIndicator();
-                
-                // Basic symptom matching
-                const symptoms = val.toLowerCase();
-                let matchedDiseases = [];
-                
-                for (const [key, disease] of Object.entries(medicalDB)) {
-                    const diseaseSymptoms = disease.symptoms.join(' ').toLowerCase();
-                    // Simple keyword matching (in a real app, this would be more sophisticated)
-                    if (diseaseSymptoms.includes(symptoms) || symptoms.includes(key.toLowerCase())) {
-                        matchedDiseases.push(disease.name);
-                    }
-                }
-                
-                if (matchedDiseases.length > 0) {
-                    addMessage(`
-                        <div class="result-card">
-                            <h3 style="color: var(--kenya-gold); margin-bottom: 15px;"><i class="fas fa-search"></i> Symptom Analysis Results</h3>
-                            <p>Based on your symptoms "<em>${val}</em>", I've identified potential correlations with the following conditions:</p>
-                            <ul style="margin-top: 15px; padding-left: 20px;">
-                                ${matchedDiseases.map(disease => `<li><strong>${disease}</strong> - Click the disease button on the left for detailed information</li>`).join('')}
-                            </ul>
-                            <p style="margin-top: 15px; color: var(--kenya-red); font-weight: 600;">
-                                <i class="fas fa-exclamation-triangle"></i> This is not a diagnosis. Please consult a healthcare professional for proper evaluation.
-                            </p>
-                            <div class="follow-up-questions" style="margin-top: 20px;">
-                                <div class="follow-up-title">
-                                    <i class="fas fa-stethoscope"></i> Next Steps
-                                </div>
-                                <div class="follow-up-buttons">
-                                    <button class="follow-up-btn" onclick="askQuestion('When should I see a doctor for these symptoms?')">When to see a doctor?</button>
-                                    <button class="follow-up-btn" onclick="askQuestion('What are general home remedies for my symptoms?')">Home remedies</button>
-                                    <button class="follow-up-btn" onclick="askQuestion('What tests might be needed for these symptoms?')">Possible tests</button>
-                                </div>
-                            </div>
-                        </div>
-                    `, 'bot');
+                if (data.candidates) {
+                    const aiText = data.candidates[0].content.parts[0].text;
+                    appendMessage("ai", aiText);
                 } else {
-                    addMessage(`
-                        <div class="result-card">
-                            <h3 style="color: var(--kenya-gold); margin-bottom: 15px;"><i class="fas fa-search"></i> Symptom Analysis</h3>
-                            <p>I've analyzed your symptoms: "<em>${val}</em>". While I couldn't match them to specific conditions in my database, here's my advice:</p>
-                            <ol style="margin-top: 15px; padding-left: 20px;">
-                                <li><strong>Monitor your symptoms:</strong> Keep track of when they occur and any patterns</li>
-                                <li><strong>Stay hydrated:</strong> Drink plenty of water</li>
-                                <li><strong>Rest:</strong> Allow your body to recover</li>
-                                <li><strong>Consult a professional:</strong> If symptoms persist or worsen, see a doctor</li>
-                            </ol>
-                            <p style="margin-top: 15px; color: var(--kenya-red); font-weight: 600;">
-                                <i class="fas fa-exclamation-triangle"></i> Important: I cannot diagnose medical conditions. Please seek professional medical advice.
-                            </p>
-                        </div>
-                    `, 'bot');
+                    appendMessage("ai", "I'm having trouble thinking right now.");
                 }
-            }, 2000);
-        }
-
-        // Send query function
-        function sendQuery() {
-            const query = userQueryInput.value.trim();
-            if (!query) return;
-            
-            addMessage(query, 'user');
-            userQueryInput.value = '';
-            
-            // Process the query
-            processUserQuery(query);
-        }
-
-        // Process user query
-        function processUserQuery(query) {
-            showTypingIndicator();
-            
-            // Simulate AI processing delay
-            setTimeout(() => {
-                hideTypingIndicator();
-                
-                const lowerQuery = query.toLowerCase();
-                
-                // Check if it's a greeting
-                if (lowerQuery.includes('hello') || lowerQuery.includes('hi ') || lowerQuery.includes('hey')) {
-                    addMessage(`
-                        Hello! I'm MedAI, your medical information assistant. How can I help you today? 
-                        You can ask me about symptoms, diseases, treatments, or general health questions.
-                    `, 'bot');
-                    return;
-                }
-                
-                // Check if it's a thank you
-                if (lowerQuery.includes('thank')) {
-                    addMessage(`
-                        You're welcome! I'm glad I could help. Remember, I'm here to provide information, 
-                        but always consult with a healthcare professional for medical advice.
-                    `, 'bot');
-                    return;
-                }
-                
-                // Check for specific question patterns
-                let response = '';
-                
-                if (lowerQuery.includes('fever') || lowerQuery.includes('temperature')) {
-                    response = `
-                        <div class="result-card">
-                            <h3 style="color: var(--kenya-gold); margin-bottom: 15px;">Fever Information</h3>
-                            <p>A fever is a temporary increase in body temperature, often due to an illness.</p>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <h4>When to Worry</h4>
-                                    <p>• Adults: Fever above 103°F (39.4°C)<br>• Children: Any fever in infants under 3 months<br>• Fever lasting more than 3 days</p>
-                                </div>
-                                <div class="info-item">
-                                    <h4>Home Care</h4>
-                                    <p>• Stay hydrated<br>• Rest<br>• Over-the-counter fever reducers (acetaminophen, ibuprofen)<br>• Light clothing</p>
-                                </div>
-                            </div>
-                            <p style="margin-top: 15px; font-weight: 600;">Seek medical attention if fever is accompanied by severe headache, stiff neck, shortness of breath, or confusion.</p>
-                        </div>
-                    `;
-                } else if (lowerQuery.includes('headache')) {
-                    response = `
-                        <div class="result-card">
-                            <h3 style="color: var(--kenya-gold); margin-bottom: 15px;">Headache Information</h3>
-                            <p>Headaches can have various causes from tension to more serious conditions.</p>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <h4>Types</h4>
-                                    <p>• Tension headaches (most common)<br>• Migraines<br>• Cluster headaches<br>• Sinus headaches</p>
-                                </div>
-                                <div class="info-item">
-                                    <h4>When to See a Doctor</h4>
-                                    <p>• Sudden, severe headache<br>• Headache after head injury<br>• Headache with fever, stiff neck, confusion<br>• Headaches that worsen over time</p>
-                                </div>
-                            </div>
-                            <p style="margin-top: 15px;">For tension headaches: rest, hydration, over-the-counter pain relievers, and stress management may help.</p>
-                        </div>
-                    `;
-                } else if (lowerQuery.includes('cough')) {
-                    response = `
-                        <div class="result-card">
-                            <h3 style="color: var(--kenya-gold); margin-bottom: 15px;">Cough Information</h3>
-                            <p>Coughing is a reflex to clear your airways. It can be acute (short-term) or chronic (lasting 8+ weeks).</p>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <h4>Common Causes</h4>
-                                    <p>• Viral infections (cold, flu)<br>• Allergies<br>• Asthma<br>• GERD<br>• Smoking</p>
-                                </div>
-                                <div class="info-item">
-                                    <h4>When to See a Doctor</h4>
-                                    <p>• Coughing up blood<br>• Shortness of breath<br>• Fever > 100.4°F<br>• Cough lasting more than 3 weeks<br>• Unintended weight loss</p>
-                                </div>
-                            </div>
-                            <p style="margin-top: 15px;">Home remedies: honey (for adults and children over 1), humidifier, staying hydrated, and throat lozenges.</p>
-                        </div>
-                    `;
-                } else if (lowerQuery.includes('when') && lowerQuery.includes('doctor')) {
-                    response = `
-                        <div class="result-card">
-                            <h3 style="color: var(--kenya-gold); margin-bottom: 15px;">When to See a Doctor</h3>
-                            <p>It's important to seek medical attention for:</p>
-                            <ul style="margin-top: 15px; padding-left: 20px;">
-                                <li><strong>Emergency symptoms:</strong> Chest pain, difficulty breathing, severe bleeding, sudden weakness or numbness, severe headache</li>
-                                <li><strong>High fever:</strong> Above 103°F (39.4°C) in adults or any fever in infants under 3 months</li>
-                                <li><strong>Persistent symptoms:</strong> Symptoms that last longer than expected or worsen over time</li>
-                                <li><strong>Unexplained weight loss:</strong> Losing weight without trying</li>
-                                <li><strong>Changes in consciousness:</strong> Confusion, fainting, seizures</li>
-                                <li><strong>Severe pain:</strong> Any severe or sudden pain</li>
-                                <li><strong>Injury:</strong> Head injuries, deep cuts, broken bones</li>
-                            </ul>
-                            <p style="margin-top: 15px; color: var(--kenya-red); font-weight: 600;">
-                                When in doubt, it's always better to consult a healthcare professional.
-                            </p>
-                        </div>
-                    `;
-                } else {
-                    // General response for other queries
-                    response = `
-                        <div class="result-card">
-                            <h3 style="color: var(--kenya-gold); margin-bottom: 15px;">Medical Information Request</h3>
-                            <p>Thank you for your question: <em>"${query}"</em></p>
-                            <p>I've analyzed your query and here's what I can tell you:</p>
-                            <ul style="margin-top: 15px; padding-left: 20px;">
-                                <li>For specific disease information, please click on the disease buttons on the left</li>
-                                <li>For symptom analysis, use the symptom analyzer above</li>
-                                <li>For medication questions, always consult a pharmacist or doctor</li>
-                                <li>In case of emergency, seek immediate medical attention</li>
-                            </ul>
-                            <div class="follow-up-questions" style="margin-top: 20px;">
-                                <div class="follow-up-title">
-                                    <i class="fas fa-lightbulb"></i> Suggested Next Steps
-                                </div>
-                                <div class="follow-up-buttons">
-                                    <button class="follow-up-btn" onclick="analyze('malaria')">Learn about Malaria</button>
-                                    <button class="follow-up-btn" onclick="analyze('covid')">COVID-19 Information</button>
-                                    <button class="follow-up-btn" onclick="askQuestion('How to maintain good health?')">General Health Tips</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                addMessage(response, 'bot');
-            }, 1500);
-        }
-
-        // Ask a specific question
-        function askQuestion(question) {
-            userQueryInput.value = question;
-            sendQuery();
-        }
-
-        // Handle key press in input
-        function handleKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendQuery();
+            } catch (error) {
+                chatBox.removeChild(loadingDiv);
+                appendMessage("ai", "Connection error. Please check your API key.");
             }
         }
 
-        // Clear chat function
-        function clearChat() {
-            if (confirm("Are you sure you want to clear the chat history?")) {
-                chatFlow.innerHTML = `
-                    <div class="msg bot-msg">
-                        <strong>SYSTEM INITIALIZED</strong><br>
-                        <p>Chat history cleared. How can I assist you today?</p>
-                        <p>You can:</p>
-                        <ul style="margin-top: 10px; padding-left: 20px;">
-                            <li>Click on a disease to learn more about it</li>
-                            <li>Describe your symptoms for analysis</li>
-                            <li>Ask me any health-related question</li>
-                        </ul>
-                    </div>
-                `;
-                
-                // Reset conversation state
-                conversationState = {
-                    lastDisease: null,
-                    symptomContext: null,
-                    followUpOptions: []
-                };
-            }
-        }
-
-        // Initialize with a welcome message
-        window.addEventListener('load', function() {
-            // Small delay for better UX
-            setTimeout(() => {
-                if (chatFlow.children.length <= 1) {
-                    addMessage("Welcome to MedAI. I'm here to provide reliable medical information. How can I assist you today?", 'bot');
-                }
-            }, 500);
+        sendBtn.addEventListener("click", getAiResponse);
+        userInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") getAiResponse();
         });
     </script>
 </body>
