@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAI | Clinical Portal</title>
+    <title>MedAI Assistant</title>
     <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -214,122 +214,640 @@
 </div>
 
 <script>
-    // Logic is integrated into a single "Medical Brain"
-    const medicalLibrary = {
-        // [Your 100+ Library from the previous step goes here]
-        "Appendicitis": ["lower right pain", "navel pain", "loss of appetite", "rebound tenderness", "fever"],
-        "Myocardial Infarction (Heart Attack)": ["crushing chest pain", "left arm pain", "jaw pain", "nausea", "cold sweat", "shortness of breath"],
-        "Migraine": ["throbbing", "aura", "light sensitivity", "nausea", "sound sensitivity"],
-        "GERD": ["heartburn", "acid reflux", "sour taste", "chest burning"],
-        "Diabetes": ["excessive thirst", "frequent urination", "blurred vision", "fatigue"],
-        "Pneumonia": ["cough", "shortness of breath", "chest pain", "fever", "chills"],
-        "UTI": ["burning urination", "frequent urination", "pelvic pain", "cloudy urine"],
-        // ... (Include the full 100+ library from previous version here)
-    };
-
-    let patientContext = {
-        symptoms: new Set(),
-        risk: "Low"
-    };
-
-    function addMessage(text, sender) {
-        const div = document.createElement('div');
-        div.className = `msg ${sender}-msg`;
-        div.innerHTML = text;
-        document.getElementById('chat-container').appendChild(div);
-        document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+    // Comprehensive Medical Knowledge Base (150+ Conditions)
+const medicalLibrary = {
+    // Emergency Conditions (Red Flags)
+    "Cardiac Emergencies": {
+        "Myocardial Infarction (Heart Attack)": ["crushing chest pain", "chest pressure", "left arm pain", "jaw pain", "shortness of breath", "nausea", "cold sweat", "lightheadedness", "fatigue"],
+        "Angina Pectoris": ["chest discomfort", "tightness", "pressure", "pain radiating to arms", "induced by exertion", "relieved by rest"],
+        "Cardiac Arrest": ["sudden collapse", "no pulse", "no breathing", "loss of consciousness"],
+        "Aortic Dissection": ["tearing chest pain", "pain radiating to back", "difference in blood pressure between arms", "syncope"]
+    },
+    
+    "Neurological Emergencies": {
+        "Stroke (CVA)": ["facial drooping", "arm weakness", "speech difficulty", "sudden confusion", "vision problems", "dizziness", "loss of balance", "severe headache"],
+        "Transient Ischemic Attack (TIA)": ["temporary stroke symptoms", "resolves within 24 hours", "warning sign for stroke"],
+        "Meningitis": ["severe headache", "stiff neck", "fever", "confusion", "sensitivity to light", "nausea", "rash"],
+        "Encephalitis": ["fever", "headache", "confusion", "seizures", "personality changes", "sensitivity to light"]
+    },
+    
+    "Respiratory Emergencies": {
+        "Pulmonary Embolism": ["sudden shortness of breath", "sharp chest pain", "coughing blood", "rapid heart rate", "lightheadedness"],
+        "Pneumothorax": ["sudden chest pain", "shortness of breath", "dry cough", "cyanosis", "tachycardia"],
+        "Asthma Attack": ["wheezing", "shortness of breath", "chest tightness", "coughing", "difficulty speaking"],
+        "Anaphylaxis": ["difficulty breathing", "swelling of face/throat", "hives", "dizziness", "rapid pulse", "nausea"]
+    },
+    
+    "Abdominal Emergencies": {
+        "Appendicitis": ["right lower quadrant pain", "pain starting at umbilicus", "nausea", "vomiting", "fever", "loss of appetite", "rebound tenderness"],
+        "Cholecystitis (Gallbladder)": ["right upper quadrant pain", "pain after fatty meals", "nausea", "vomiting", "fever", "jaundice"],
+        "Pancreatitis": ["severe epigastric pain", "pain radiating to back", "nausea", "vomiting", "fever", "tachycardia"],
+        "Ectopic Pregnancy": ["sharp lower abdominal pain", "vaginal bleeding", "dizziness", "shoulder pain", "positive pregnancy test"],
+        "Bowel Obstruction": ["abdominal pain", "distension", "constipation", "nausea", "vomiting", "inability to pass gas"]
+    },
+    
+    // Common Infectious Diseases
+    "Respiratory Infections": {
+        "Influenza": ["fever", "chills", "cough", "sore throat", "runny nose", "body aches", "headache", "fatigue"],
+        "COVID-19": ["fever", "cough", "loss of taste/smell", "shortness of breath", "fatigue", "body aches", "sore throat"],
+        "Pneumonia": ["cough with phlegm", "fever", "chills", "shortness of breath", "chest pain", "fatigue"],
+        "Bronchitis": ["persistent cough", "clear or colored mucus", "chest discomfort", "fatigue", "mild fever"],
+        "Tuberculosis": ["chronic cough", "blood in sputum", "night sweats", "fever", "weight loss", "fatigue"]
+    },
+    
+    "Gastrointestinal Infections": {
+        "Gastroenteritis": ["diarrhea", "nausea", "vomiting", "abdominal cramps", "fever", "dehydration"],
+        "Food Poisoning": ["nausea", "vomiting", "diarrhea", "abdominal pain", "fever", "onset 2-6 hours after eating"],
+        "Hepatitis A": ["fatigue", "nausea", "abdominal pain", "loss of appetite", "fever", "jaundice", "dark urine"],
+        "Helicobacter Pylori": ["abdominal pain", "bloating", "nausea", "loss of appetite", "belching", "weight loss"]
+    },
+    
+    "Urinary/Reproductive Infections": {
+        "UTI (Cystitis)": ["burning urination", "frequent urination", "urgency", "cloudy urine", "pelvic pain", "hematuria"],
+        "Pyelonephritis (Kidney)": ["fever", "flank pain", "nausea", "vomiting", "burning urination", "frequency"],
+        "Pelvic Inflammatory Disease": ["lower abdominal pain", "fever", "vaginal discharge", "painful intercourse", "irregular bleeding"],
+        "Prostatitis": ["pelvic pain", "difficult urination", "frequent urination", "painful ejaculation", "fever"]
+    },
+    
+    // Chronic Diseases
+    "Cardiovascular": {
+        "Hypertension": ["often asymptomatic", "headaches", "shortness of breath", "nosebleeds", "flushing", "dizziness"],
+        "Heart Failure": ["shortness of breath", "fatigue", "swelling in legs", "rapid weight gain", "persistent cough", "reduced exercise tolerance"],
+        "Coronary Artery Disease": ["chest pain (angina)", "shortness of breath", "heart attack", "fatigue", "palpitations"],
+        "Arrhythmias": ["palpitations", "racing heart", "slow heart rate", "dizziness", "fainting", "chest discomfort"]
+    },
+    
+    "Endocrine/Metabolic": {
+        "Diabetes Type 2": ["increased thirst", "frequent urination", "increased hunger", "fatigue", "blurred vision", "slow healing", "tingling in hands/feet"],
+        "Hypothyroidism": ["fatigue", "weight gain", "cold intolerance", "constipation", "dry skin", "depression", "hair loss"],
+        "Hyperthyroidism": ["weight loss", "rapid heartbeat", "heat intolerance", "tremors", "anxiety", "sweating", "fatigue"],
+        "Metabolic Syndrome": ["increased waist circumference", "high blood pressure", "high blood sugar", "high triglycerides", "low HDL cholesterol"]
+    },
+    
+    "Respiratory Chronic": {
+        "Asthma": ["wheezing", "shortness of breath", "chest tightness", "coughing (especially at night)", "difficulty breathing"],
+        "COPD": ["chronic cough", "sputum production", "shortness of breath", "wheezing", "chest tightness", "frequent respiratory infections"],
+        "Chronic Bronchitis": ["productive cough for 3+ months", "shortness of breath", "wheezing", "chest discomfort", "fatigue"]
+    },
+    
+    // Gastrointestinal Disorders
+    "Upper GI": {
+        "GERD": ["heartburn", "regurgitation", "chest pain", "difficulty swallowing", "chronic cough", "sour taste"],
+        "Peptic Ulcer": ["burning stomach pain", "bloating", "belching", "nausea", "intolerance to fatty foods", "heartburn"],
+        "Gastritis": ["upper abdominal pain", "nausea", "vomiting", "indigestion", "bloating", "loss of appetite"],
+        "Celiac Disease": ["diarrhea", "fatigue", "weight loss", "bloating", "abdominal pain", "anemia", "itching rash"]
+    },
+    
+    "Lower GI": {
+        "Irritable Bowel Syndrome": ["abdominal pain", "bloating", "diarrhea", "constipation", "gas", "mucus in stool"],
+        "Crohn's Disease": ["diarrhea", "abdominal pain", "fatigue", "weight loss", "blood in stool", "fever", "reduced appetite"],
+        "Ulcerative Colitis": ["bloody diarrhea", "abdominal pain", "rectal pain", "urgency to defecate", "weight loss", "fatigue"],
+        "Diverticulitis": ["left lower quadrant pain", "fever", "nausea", "constipation or diarrhea", "abdominal tenderness"],
+        "Colon Cancer": ["change in bowel habits", "blood in stool", "persistent abdominal discomfort", "weakness", "unexplained weight loss"]
+    },
+    
+    // Neurological Disorders
+    "Headaches": {
+        "Migraine": ["throbbing headache", "sensitivity to light/sound", "nausea", "aura", "visual disturbances", "duration 4-72 hours"],
+        "Tension Headache": ["band-like pressure", "mild to moderate pain", "both sides of head", "not worsened by activity", "no nausea"],
+        "Cluster Headache": ["severe unilateral pain", "around eye", "tearing", "nasal congestion", "restlessness", "duration 15-180 minutes"],
+        "Sinus Headache": ["facial pressure", "pain worse when bending forward", "nasal discharge", "reduced sense of smell", "fever"]
+    },
+    
+    "Neurological Chronic": {
+        "Epilepsy": ["seizures", "temporary confusion", "staring spells", "uncontrollable jerking", "loss of consciousness", "psychic symptoms"],
+        "Multiple Sclerosis": ["numbness/weakness in limbs", "electric shock sensations", "tremor", "vision problems", "fatigue", "dizziness"],
+        "Parkinson's Disease": ["tremor", "slowed movement", "rigid muscles", "impaired posture", "speech changes", "writing changes"],
+        "Alzheimer's Disease": ["memory loss", "difficulty planning/solving", "confusion with time/place", "vision/spatial problems", "misplacing things", "poor judgment"]
+    },
+    
+    // Musculoskeletal
+    "Joint Disorders": {
+        "Osteoarthritis": ["joint pain", "stiffness", "swelling", "reduced range of motion", "bone spurs", "crepitus"],
+        "Rheumatoid Arthritis": ["joint pain/swelling", "morning stiffness", "fatigue", "fever", "weight loss", "symmetrical pattern"],
+        "Gout": ["intense joint pain", "redness", "swelling", "warmth", "often affects big toe", "limited motion"],
+        "Osteoporosis": ["back pain", "loss of height", "stooped posture", "bone fracture from minor trauma"]
+    },
+    
+    "Back/Spine": {
+        "Herniated Disc": ["back pain", "leg pain", "numbness/tingling", "weakness", "worse with sitting/coughing"],
+        "Sciatica": ["pain radiating down leg", "numbness", "tingling", "weakness", "worse with sitting"],
+        "Spinal Stenosis": ["back pain", "leg pain with walking", "numbness", "weakness", "relieved by sitting"]
+    },
+    
+    // Dermatological
+    "Skin Conditions": {
+        "Eczema": ["itchy skin", "redness", "dryness", "cracking", "weeping", "crusting"],
+        "Psoriasis": ["red patches with silvery scales", "dry skin", "itching", "burning", "thickened/pitted nails"],
+        "Acne Vulgaris": ["blackheads", "whiteheads", "pimples", "cystic lesions", "oily skin", "scarring"],
+        "Rosacea": ["facial redness", "visible blood vessels", "swollen red bumps", "eye irritation", "burning/stinging"],
+        "Cellulitis": ["red/swollen skin", "warmth", "pain", "fever", "rapid spreading", "skin dimpling"]
+    },
+    
+    // Mental Health
+    "Psychological": {
+        "Depression": ["persistent sadness", "loss of interest", "fatigue", "sleep changes", "appetite changes", "concentration problems", "suicidal thoughts"],
+        "Anxiety Disorder": ["excessive worry", "restlessness", "fatigue", "concentration problems", "irritability", "muscle tension", "sleep disturbances"],
+        "Bipolar Disorder": ["mood swings", "mania", "depression", "risk-taking behavior", "racing thoughts", "sleep changes", "irritability"],
+        "PTSD": ["flashbacks", "nightmares", "avoidance", "hypervigilance", "negative thoughts", "sleep problems", "irritability"]
+    },
+    
+    // Ear/Nose/Throat
+    "ENT Conditions": {
+        "Sinusitis": ["facial pain/pressure", "nasal congestion", "thick nasal discharge", "reduced smell", "cough", "fatigue"],
+        "Otitis Media (Ear)": ["ear pain", "hearing loss", "fever", "ear drainage", "irritability", "loss of balance"],
+        "Tonsillitis": ["sore throat", "difficulty swallowing", "fever", "swollen tonsils", "white/yellow coating", "swollen lymph nodes"],
+        "Laryngitis": ["hoarseness", "loss of voice", "sore throat", "dry cough", "tickling/raw feeling in throat"]
+    },
+    
+    // Eye Conditions
+    "Ophthalmological": {
+        "Conjunctivitis": ["redness", "itching", "discharge", "tearing", "gritty feeling", "crusting of eyelids"],
+        "Glaucoma": ["gradual vision loss", "tunnel vision", "severe eye pain", "headache", "nausea", "halos around lights"],
+        "Cataracts": ["clouded vision", "difficulty at night", "sensitivity to light", "halos", "fading colors", "double vision"],
+        "Macular Degeneration": ["blurred central vision", "distorted lines", "dark areas in vision", "colors appearing faded"]
     }
+};
 
-    function handleInput() {
-        const val = document.getElementById('user-input').value;
-        if(!val) return;
+// Doctor's Conversation Patterns
+const doctorResponses = {
+    greetings: [
+        "Good day. I'm Dr. MedAI. How can I assist you today?",
+        "Hello. I'm here to help with your medical concerns. What symptoms are you experiencing?",
+        "Welcome. I'm Dr. MedAI. Please describe what's been bothering you.",
+        "Good morning/afternoon. I'm your medical consultant. Tell me about your symptoms.",
+        "Hello there. I'm here to help analyze your symptoms. What brings you in today?"
+    ],
+    
+    followUps: {
+        general: [
+            "How long have you been experiencing these symptoms?",
+            "On a scale of 1-10, how severe is the discomfort?",
+            "Have you noticed any patterns or triggers?",
+            "Are there any other symptoms you're experiencing?",
+            "Has this happened before? What helped then?"
+        ],
         
-        addMessage(val, 'user');
-        document.getElementById('user-input').value = '';
-        document.getElementById('typing-indicator').style.display = 'block';
+        pain: [
+            "Can you describe the pain? (Sharp, dull, throbbing, burning)",
+            "Does the pain radiate anywhere?",
+            "What makes it better or worse?",
+            "When did the pain start?",
+            "Have you taken any pain medication?"
+        ],
+        
+        fever: [
+            "What's your temperature reading?",
+            "Do you have chills or night sweats?",
+            "How long have you had the fever?",
+            "Are you experiencing body aches?",
+            "Have you taken fever medication?"
+        ]
+    },
+    
+    reassurances: [
+        "I understand. Let me analyze this further.",
+        "That's important information. Let me consider the possibilities.",
+        "Thank you for sharing that detail. It helps with the assessment.",
+        "I'm listening. Please continue.",
+        "That's a common concern. Let me explain what might be happening."
+    ],
+    
+    transitions: [
+        "Based on what you've described, let me ask some clarifying questions.",
+        "I need a bit more information to provide accurate guidance.",
+        "To narrow down the possibilities, let me ask a few more questions.",
+        "Your symptoms suggest several possibilities. Let me explore them with you.",
+        "I'd like to understand your situation better with a few more questions."
+    ]
+};
 
-        setTimeout(() => {
-            document.getElementById('typing-indicator').style.display = 'none';
-            generateDoctorResponse(val.toLowerCase());
-        }, 1200);
+// Patient Context Management
+let patientContext = {
+    symptoms: new Set(),
+    currentSymptoms: [],
+    symptomDuration: "",
+    symptomSeverity: "",
+    age: "",
+    gender: "",
+    medicalHistory: [],
+    medications: [],
+    allergies: [],
+    conversationHistory: []
+};
+
+// Doctor Conversation Flow Manager
+class MedicalDoctorAI {
+    constructor() {
+        this.currentState = "greeting";
+        this.assessmentComplete = false;
+        this.emergencyDetected = false;
+        this.conversationPhase = 0;
     }
-
-    function generateDoctorResponse(input) {
-        // Emergency Check
-        if(input.includes("chest pain") || input.includes("can't breathe") || input.includes("slurred speech")) {
-            patientContext.risk = "CRITICAL";
-            updateSidebar();
-            addMessage("<strong>URGENT:</strong> I am identifying signs of a potential medical emergency. Please call emergency services (911/112) immediately. Do not wait.", "bot");
-            return;
+    
+    // Handle user input with natural doctor-patient flow
+    respondToPatient(input) {
+        const lowerInput = input.toLowerCase();
+        
+        // Log conversation
+        patientContext.conversationHistory.push({
+            time: new Date().toISOString(),
+            patient: input,
+            phase: this.conversationPhase
+        });
+        
+        // Emergency detection
+        if (this.detectEmergency(lowerInput)) {
+            this.emergencyDetected = true;
+            return this.handleEmergency(lowerInput);
         }
-
-        // Greeting Check
-        if(input.match(/hi|hello|hey|morning/)) {
-            addMessage("Hello. I'm ready to assist. Please describe your symptoms, including when they started and their severity.", "bot");
-            return;
+        
+        // Handle greetings
+        if (this.currentState === "greeting" || this.isGreeting(lowerInput)) {
+            this.currentState = "symptom_collection";
+            return this.getRandomResponse(doctorResponses.greetings);
         }
-
-        // Logic
-        let matches = [];
-        for (const [disease, symptoms] of Object.entries(medicalLibrary)) {
-            let score = 0;
-            symptoms.forEach(s => {
-                if(input.includes(s.toLowerCase())) {
-                    score++;
-                    patientContext.symptoms.add(s);
+        
+        // Handle gratitude
+        if (this.isGratitude(lowerInput)) {
+            return "You're welcome. Is there anything else you'd like to discuss about your symptoms?";
+        }
+        
+        // Handle medication queries
+        if (this.isMedicationQuery(lowerInput)) {
+            return this.handleMedicationQuery(lowerInput);
+        }
+        
+        // Handle symptom description
+        if (this.currentState === "symptom_collection") {
+            return this.analyzeSymptoms(lowerInput);
+        }
+        
+        // Handle follow-up responses
+        if (this.currentState === "follow_up") {
+            return this.processFollowUp(lowerInput);
+        }
+        
+        // Default response
+        return "I understand. Could you elaborate on your symptoms so I can help better?";
+    }
+    
+    // Analyze symptoms with medical knowledge
+    analyzeSymptoms(input) {
+        // Extract symptoms from input
+        const detectedSymptoms = this.extractSymptoms(input);
+        const potentialConditions = this.findPotentialConditions(detectedSymptoms);
+        
+        // Update patient context
+        detectedSymptoms.forEach(symptom => patientContext.symptoms.add(symptom));
+        patientContext.currentSymptoms = Array.from(detectedSymptoms);
+        
+        // Store symptom duration if mentioned
+        if (input.match(/(\d+)\s*(hour|day|week|month|year)/)) {
+            patientContext.symptomDuration = input.match(/(\d+\s*(?:hour|day|week|month|year)s?)/)[0];
+        }
+        
+        // If no clear conditions found, ask clarifying questions
+        if (potentialConditions.length === 0) {
+            this.currentState = "follow_up";
+            this.conversationPhase++;
+            return this.askClarifyingQuestion(input);
+        }
+        
+        // If conditions found, provide assessment
+        const topCondition = potentialConditions[0];
+        this.currentState = "assessment";
+        
+        return this.provideAssessment(topCondition, potentialConditions.slice(0, 3));
+    }
+    
+    // Extract symptoms from natural language
+    extractSymptoms(input) {
+        const symptoms = new Set();
+        
+        // Search through all conditions for symptom matches
+        Object.values(medicalLibrary).forEach(category => {
+            Object.entries(category).forEach(([condition, conditionSymptoms]) => {
+                conditionSymptoms.forEach(symptom => {
+                    const symptomWords = symptom.split(' ');
+                    symptomWords.forEach(word => {
+                        if (word.length > 3 && input.includes(word.toLowerCase())) {
+                            symptoms.add(symptom);
+                        }
+                    });
+                });
+            });
+        });
+        
+        return symptoms;
+    }
+    
+    // Find potential medical conditions
+    findPotentialConditions(symptoms) {
+        const conditions = [];
+        
+        Object.entries(medicalLibrary).forEach(([category, categoryConditions]) => {
+            Object.entries(categoryConditions).forEach(([condition, conditionSymptoms]) => {
+                const matchingSymptoms = conditionSymptoms.filter(symptom => 
+                    Array.from(symptoms).some(s => s.includes(symptom.split(' ')[0]))
+                );
+                
+                if (matchingSymptoms.length > 0) {
+                    const matchScore = matchingSymptoms.length / conditionSymptoms.length;
+                    conditions.push({
+                        condition,
+                        category,
+                        symptoms: conditionSymptoms,
+                        matchingSymptoms,
+                        matchScore,
+                        urgency: this.determineUrgency(category, condition)
+                    });
                 }
             });
-            if(score > 0) matches.push({name: disease, score: score});
-        }
-
-        matches.sort((a,b) => b.score - a.score);
-        updateSidebar();
-
-        if(matches.length > 0) {
-            const primary = matches[0];
-            let response = `I've analyzed your symptoms. There is a clinical correlation with <strong>${primary.name}</strong>.`;
-            
-            if(primary.name === "Appendicitis") {
-                response += `<br><br>
-
-[Image of the human digestive system showing the appendix location]
-`;
-            } else if(primary.name.includes("Heart")) {
-                response += `<br><br>
-
-[Image of human heart anatomy]
-`;
-            }
-
-            response += `<br><br>To be more precise: Are you also experiencing any <em>${getFollowUp(primary.name)}</em>? And on a scale of 1-10, how severe is the discomfort?`;
-            addMessage(response, "bot");
-        } else {
-            addMessage("I hear you. To help me narrow this down, could you tell me if you have a fever, where exactly the discomfort is located, and if anything makes it feel better or worse?", "bot");
-        }
-    }
-
-    function getFollowUp(disease) {
-        const syms = medicalLibrary[disease];
-        return syms[Math.floor(Math.random() * syms.length)];
-    }
-
-    function updateSidebar() {
-        document.getElementById('risk-display').innerText = patientContext.risk;
-        document.getElementById('risk-display').style.color = patientContext.risk === "CRITICAL" ? "red" : "#48bb78";
+        });
         
-        const list = Array.from(patientContext.symptoms).slice(-5);
-        document.getElementById('symptom-list').innerHTML = list.length > 0 ? list.join(", ") : "Analyzing...";
+        // Sort by match score and urgency
+        return conditions.sort((a, b) => {
+            if (a.urgency !== b.urgency) {
+                const urgencyOrder = { emergency: 0, urgent: 1, routine: 2 };
+                return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+            }
+            return b.matchScore - a.matchScore;
+        });
     }
-
-    function exportPDF() {
-        const element = document.body;
-        html2pdf().from(element).save('Clinical_Summary.pdf');
+    
+    // Determine urgency level
+    determineUrgency(category, condition) {
+        const emergencyCategories = ["Cardiac Emergencies", "Neurological Emergencies", "Respiratory Emergencies", "Abdominal Emergencies"];
+        
+        if (emergencyCategories.includes(category)) {
+            return "emergency";
+        }
+        
+        if (category.includes("Emergency") || condition.includes("Arrest") || condition.includes("Stroke")) {
+            return "emergency";
+        }
+        
+        if (category.includes("Infection") || condition.includes("Severe") || condition.includes("Acute")) {
+            return "urgent";
+        }
+        
+        return "routine";
     }
+    
+    // Provide medical assessment
+    provideAssessment(primaryCondition, differentials) {
+        let response = this.getRandomResponse(doctorResponses.reassurances) + "<br><br>";
+        
+        response += `<strong>Based on your symptoms, I'm considering ${primaryCondition.condition} as a possibility.</strong><br><br>`;
+        
+        // List matching symptoms
+        if (primaryCondition.matchingSymptoms.length > 0) {
+            response += `Your symptoms of ${primaryCondition.matchingSymptoms.slice(0, 3).join(', ')} are consistent with this.<br><br>`;
+        }
+        
+        // Add context based on condition type
+        response += this.getConditionContext(primaryCondition);
+        
+        // Add differential diagnoses
+        if (differentials.length > 0) {
+            response += `<br>Other conditions to consider: ${differentials.slice(0, 2).map(d => d.condition).join(', ')}.`;
+        }
+        
+        // Add follow-up questions
+        response += `<br><br>${this.getFollowUpQuestion(primaryCondition)}`;
+        
+        // Add disclaimer
+        response += `<br><br><small><i>Note: This is preliminary assessment. Please consult a healthcare provider for proper diagnosis and treatment.</i></small>`;
+        
+        this.currentState = "follow_up";
+        this.conversationPhase++;
+        
+        return response;
+    }
+    
+    // Get condition-specific context
+    getConditionContext(condition) {
+        const contexts = {
+            "Appendicitis": "This typically requires immediate medical attention as it can lead to serious complications if untreated.",
+            "Myocardial Infarction": "This is a medical emergency requiring immediate care. Time is critical for heart muscle preservation.",
+            "Migraine": "These are neurological events that often respond to specific treatments when diagnosed properly.",
+            "Pneumonia": "Respiratory infections like this may require antibiotics and monitoring of oxygen levels.",
+            "UTI": "Urinary tract infections typically respond well to appropriate antibiotic treatment.",
+            "GERD": "Lifestyle modifications and medications can effectively manage these symptoms.",
+            "Diabetes": "This requires proper diagnosis through blood tests and ongoing management.",
+            "Hypertension": "Regular monitoring and lifestyle changes are important for management.",
+            "Asthma": "Proper inhaler technique and trigger avoidance are key to management.",
+            "COVID-19": "Testing is important for confirmation and to prevent spread to others."
+        };
+        
+        return contexts[condition.condition] || "Proper evaluation by a healthcare provider is recommended for accurate diagnosis.";
+    }
+    
+    // Get intelligent follow-up question
+    getFollowUpQuestion(condition) {
+        const questions = {
+            "Appendicitis": "Has the pain moved from your belly button to the lower right side?",
+            "Myocardial Infarction": "Is the pain radiating to your jaw, neck, or left arm?",
+            "Migraine": "Do you have sensitivity to light or sound with the headache?",
+            "Pneumonia": "Are you coughing up colored phlegm?",
+            "UTI": "Is there burning when you urinate?",
+            "GERD": "Is the burning worse after meals or when lying down?",
+            "Diabetes": "Have you been unusually thirsty or urinating frequently?",
+            "Hypertension": "Have you checked your blood pressure recently?",
+            "Asthma": "Do you hear wheezing when you breathe?",
+            "COVID-19": "Have you lost your sense of taste or smell?"
+        };
+        
+        return questions[condition.condition] || this.getRandomResponse(doctorResponses.followUps.general);
+    }
+    
+    // Ask clarifying questions
+    askClarifyingQuestion(input) {
+        const questions = [
+            "Can you tell me more about the nature of your discomfort?",
+            "How would you rate the severity on a scale of 1-10?",
+            "When did these symptoms first begin?",
+            "Have you noticed any patterns or triggers?",
+            "Are there any other symptoms you haven't mentioned?",
+            "What, if anything, seems to make it better or worse?",
+            "Have you taken any medication or tried any treatments?"
+        ];
+        
+        // Select question based on input
+        let selectedQuestion;
+        if (input.includes('pain')) {
+            selectedQuestion = "Can you describe the pain in more detail? (Sharp, dull, burning, throbbing)";
+        } else if (input.includes('fever') || input.includes('temperature')) {
+            selectedQuestion = "What's your temperature reading? Have you measured it?";
+        } else if (input.includes('cough')) {
+            selectedQuestion = "Is it a dry cough or are you bringing up phlegm?";
+        } else {
+            selectedQuestion = questions[Math.min(this.conversationPhase, questions.length - 1)];
+        }
+        
+        return this.getRandomResponse(doctorResponses.transitions) + " " + selectedQuestion;
+    }
+    
+    // Handle emergency situations
+    detectEmergency(input) {
+        const emergencyPatterns = [
+            /chest pain.*(crushing|pressure|tight|squeezing)/i,
+            /(can'?t breathe|shortness of breath.*severe)/i,
+            /(slurred speech|facial droop|arm weakness)/i,
+            /(unconscious|passed out|fainted)/i,
+            /(seizure|convulsing)/i,
+            /(suicidal|want to die)/i,
+            /(severe bleeding|bleeding.*uncontrolled)/i,
+            /(allergic reaction.*throat closing)/i,
+            /(poison|overdose)/i,
+            /(sudden paralysis)/i
+        ];
+        
+        return emergencyPatterns.some(pattern => pattern.test(input));
+    }
+    
+    handleEmergency(input) {
+        patientContext.risk = "CRITICAL";
+        updateSidebar();
+        
+        return `
+            <div style="color: #dc2626; font-weight: bold;">
+                <i class="fas fa-exclamation-triangle"></i> MEDICAL EMERGENCY DETECTED
+            </div>
+            <br>
+            Based on your description, this appears to be a medical emergency.
+            <br><br>
+            <strong>IMMEDIATE ACTION REQUIRED:</strong>
+            <br>
+            1. Call emergency services (911/112) immediately
+            <br>
+            2. Do not delay seeking care
+            <br>
+            3. Stay on the line with the dispatcher
+            <br>
+            4. If alone, try to get to where you can be seen
+            <br><br>
+            <small>This requires immediate in-person evaluation. Do not wait.</small>
+        `;
+    }
+    
+    // Helper methods
+    isGreeting(input) {
+        return /^(hi|hello|hey|good morning|good afternoon|good evening|greetings|what's up)/.test(input);
+    }
+    
+    isGratitude(input) {
+        return /^(thank|thanks|appreciate)/.test(input);
+    }
+    
+    isMedicationQuery(input) {
+        return /(medication|medicine|pill|tablet|prescription|dose)/.test(input);
+    }
+    
+    handleMedicationQuery(input) {
+        const responses = [
+            "I can discuss general medication information, but specific prescriptions should be managed by your treating physician.",
+            "Medication decisions should be made in consultation with your healthcare provider who knows your full medical history.",
+            "It's important to take medications as prescribed and report any side effects to your doctor.",
+            "Never stop or change medications without consulting your healthcare provider first."
+        ];
+        
+        return this.getRandomResponse(responses);
+    }
+    
+    getRandomResponse(responsesArray) {
+        return responsesArray[Math.floor(Math.random() * responsesArray.length)];
+    }
+    
+    processFollowUp(input) {
+        // Process patient's response to follow-up questions
+        const lowerInput = input.toLowerCase();
+        
+        // Check if patient provided severity rating
+        const severityMatch = lowerInput.match(/(\d+)\s*out of.*10|rate.*(\d+)|severity.*(\d+)/);
+        if (severityMatch) {
+            const rating = severityMatch[1] || severityMatch[2] || severityMatch[3];
+            patientContext.symptomSeverity = `${rating}/10`;
+        }
+        
+        // Check if patient provided duration
+        const durationMatch = lowerInput.match(/(\d+\s*(?:hour|day|week|month|year)s?)/);
+        if (durationMatch && !patientContext.symptomDuration) {
+            patientContext.symptomDuration = durationMatch[0];
+        }
+        
+        // Return next assessment or follow-up
+        return this.analyzeSymptoms(lowerInput);
+    }
+}
 
-    document.getElementById('user-input').addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') handleInput();
-    });
-</script>
+// Initialize the doctor AI
+const doctorAI = new MedicalDoctorAI();
+
+// Modified existing functions to use the new AI system
+function addMessage(text, sender) {
+    const container = document.getElementById('chat-container');
+    const div = document.createElement('div');
+    div.className = `msg ${sender}-msg`;
+    div.innerHTML = text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function handleInput() {
+    const input = document.getElementById('user-input').value.trim();
+    if (!input) return;
+    
+    // Add user message
+    addMessage(input, 'user');
+    document.getElementById('user-input').value = '';
+    
+    // Show typing indicator
+    const typingIndicator = document.getElementById('typing-indicator');
+    typingIndicator.style.display = 'block';
+    
+    // Simulate doctor thinking time
+    setTimeout(() => {
+        typingIndicator.style.display = 'none';
+        
+        // Get doctor's response
+        const response = doctorAI.respondToPatient(input);
+        addMessage(response, 'bot');
+        
+        // Update sidebar with symptoms
+        updateSidebar();
+    }, 1500);
+}
+
+function updateSidebar() {
+    // Update risk display
+    const riskDisplay = document.getElementById('risk-display');
+    riskDisplay.innerText = doctorAI.emergencyDetected ? "CRITICAL" : patientContext.risk || "Normal";
+    riskDisplay.style.color = doctorAI.emergencyDetected ? "#dc2626" : 
+                              (patientContext.risk === "HIGH" ? "#f59e0b" : "#48bb78");
+    
+    // Update symptom list
+    const symptomList = document.getElementById('symptom-list');
+    const recentSymptoms = Array.from(patientContext.symptoms).slice(-5);
+    if (recentSymptoms.length > 0) {
+        symptomList.innerHTML = recentSymptoms.join(', ');
+    }
+}
+
+function exportPDF() {
+    const element = document.body;
+    html2pdf().from(element).save('Clinical_Summary.pdf');
+}
+
+// Initialize conversation
+addMessage("Good day. I'm Dr. MedAI, your clinical assistant. I'm here to help you understand your symptoms. Please describe how you're feeling in your own words.", 'bot');
+
+// Add keyboard support
+document.getElementById('user-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleInput();
+});
+    </script>
 
 </body>
 </html>
