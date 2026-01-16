@@ -136,6 +136,47 @@ body {
 .nav-item.active i {
     color: var(--kenya-red);
 }
+/* ===================== NOTIFICATION SYSTEM ===================== */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transition: var(--transition);
+    animation: slideDown 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.notification.info {
+    background: var(--kenya-black);
+    border-left: 4px solid var(--kenya-white);
+}
+
+.notification.warning {
+    background: #f39c12; /* Amber */
+}
+
+.notification.error {
+    background: var(--kenya-red);
+}
+
+.notification.success {
+    background: var(--kenya-green);
+}
+
+@keyframes slideDown {
+    from { transform: translate(-50%, -100px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
 
 /* Main Content Area */
 .main-content {
