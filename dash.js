@@ -1,4 +1,4 @@
-now this js make it to match with the css please add flavour to it please make it to be perfect and also make it to draw the results from the Backend not from this js just make it perfect /**
+ /**
  * MEDAI ENTERPRISE ENGINE v1.1.0
  * Optimized for Seamless Backend Connectivity & Enterprise Use
  */
