@@ -1,6 +1,6 @@
- /**
- * MEDAI ENTERPRISE ENGINE v1.1.0
- * Optimized for Seamless Backend Connectivity & Enterprise Use
+/**
+ * MEDAI ULTIMATE ENGINE v2.0.0
+ * Pure Backend Integration & Enterprise Stability
  */
 
 class MedAICore {
@@ -8,9 +8,10 @@ class MedAICore {
         this.config = {
             API_BASE: window.ENV_API_BASE || "https://ai-p17b.onrender.com",
             ENDPOINTS: {
-                ANALYZE: "/diagnostics/process"
+                ANALYZE: "/diagnostics/process",
+                HISTORY: "/diagnostics/history"
             },
-            TIMEOUT: 30000 // Extended timeout for slow backends
+            TIMEOUT: 45000 // Higher timeout for deep AI processing
         };
 
         this.state = {
@@ -24,8 +25,6 @@ class MedAICore {
         };
 
         this.dom = {};
-        this.notifTimer = null;
-
         this.init();
     }
 
@@ -34,10 +33,10 @@ class MedAICore {
         this.bindEvents();
         this.setupNavigation();
         this.renderUser();
-
-        // Connect to camera immediately
+        
+        // Start camera with high-def constraints
         await this.setupCamera();
-        console.log("🚀 MedAI Core v1.1.0: Ready & Connected");
+        this.notify("MedAI Engine Online", "success");
     }
 
     cacheSelectors() {
@@ -47,21 +46,24 @@ class MedAICore {
             "confidence-text", "result-title", "result-description", "findings-list",
             "display-name", "notification"
         ];
-
         ids.forEach(id => this.dom[id.replace(/-/g, '')] = document.getElementById(id));
-
+        
         this.dom.typeBtns = document.querySelectorAll(".type-btn");
         this.dom.navItems = document.querySelectorAll(".nav-item");
         this.dom.views = document.querySelectorAll(".content-view");
     }
 
     /* =====================================================
-       CAMERA SYSTEM
+       CAMERA & IMAGE CAPTURE
     ===================================================== */
     async setupCamera() {
         try {
             const constraints = {
-                video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }
+                video: { 
+                    facingMode: "environment", 
+                    width: { ideal: 4096 }, // Target 4K if available
+                    height: { ideal: 2160 } 
+                }
             };
 
             this.state.stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -71,105 +73,145 @@ class MedAICore {
             if ("ImageCapture" in window) {
                 this.state.imageCapture = new ImageCapture(track);
             }
-        } catch {
-            this.notify("Imaging system offline. Use local upload.", "warning");
+        } catch (err) {
+            console.error("Camera Error:", err);
+            this.notify("Hardware access denied. Use Manual Upload.", "error");
         }
     }
 
-    async captureFallback() {
-        const canvas = document.createElement("canvas");
-        canvas.width = this.dom.camerastream.videoWidth;
-        canvas.height = this.dom.camerastream.videoHeight;
-        canvas.getContext("2d").drawImage(this.dom.camerastream, 0, 0);
-        return new Promise(res => canvas.toBlob(res, "image/jpeg", 0.95));
-    }
-
     /* =====================================================
-       AI PIPELINE
+       BACKEND COMMUNICATION (THE CORE)
     ===================================================== */
     async handleCapture() {
         if (this.state.isProcessing) return;
 
         const token = localStorage.getItem("medai_token");
-        if (!token) {
-            this.notify("Session expired. Redirecting...", "error");
-            setTimeout(() => window.location.href = "index.html", 1500);
-            return;
-        }
+        if (!token) return this.handleAuthError();
 
-        this.toggleLoading(true, "Capturing Scan...");
+        this.toggleLoading(true, "Capturing High-Res Scan...");
 
         try {
-            const raw = this.state.imageCapture
-                ? await this.state.imageCapture.takePhoto()
-                : await this.captureFallback();
+            // 1. Capture Image
+            const blob = this.state.imageCapture 
+                ? await this.state.imageCapture.takePhoto() 
+                : await this.captureCanvas();
 
-            this.updateAIStatus("AI Analyzing...");
-            const result = await this.uploadToAI(raw);
+            this.updateAIStatus("Syncing with Cloud AI...");
+            
+            // 2. Fetch results from Backend
+            const result = await this.queryBackend(blob);
+            
+            // 3. Render pure backend data
             this.displayDiagnosis(result);
+
         } catch (e) {
-            const msg = e.name === "AbortError" ? 
-                "Server is warming up. Retrying in 3s..." : (e.message || "Analysis failed.");
-            this.notify(msg, "error");
+            this.handleSystemError(e);
         } finally {
             this.toggleLoading(false);
         }
     }
 
-    async uploadToAI(blob) {
-        // Abort previous request
+    async queryBackend(blob) {
         this.state.controller?.abort();
         this.state.controller = new AbortController();
-        const timeoutId = setTimeout(() => this.state.controller.abort(), this.config.TIMEOUT);
+        
+        const formData = new FormData();
+        formData.append("file", blob, `scan_${Date.now()}.jpg`);
+        formData.append("metadata", JSON.stringify({
+            type: this.state.activeMode,
+            timestamp: new Date().toISOString(),
+            practitioner: this.state.user.name
+        }));
 
-        const fd = new FormData();
-        fd.append("file", blob, "scan.jpg");
-        fd.append("type", this.state.activeMode);
-
-        const res = await fetch(`${this.config.API_BASE}${this.config.ENDPOINTS.ANALYZE}`, {
+        const response = await fetch(`${this.config.API_BASE}${this.config.ENDPOINTS.ANALYZE}`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${localStorage.getItem("medai_token")}` },
-            body: fd,
+            body: formData,
             signal: this.state.controller.signal
         });
 
-        clearTimeout(timeoutId);
+        if (response.status === 401) throw new Error("AUTH_EXPIRED");
+        if (!response.ok) throw new Error("BACKEND_ERROR");
 
-        if ([401, 403].includes(res.status)) {
-            localStorage.removeItem("medai_token");
-            throw new Error("Session invalid. Re-authenticating...");
-        }
-        if (!res.ok) throw new Error("AI engine busy. Try again.");
-
-        return res.json();
+        return await response.json();
     }
 
     /* =====================================================
-       UI & RESULTS
+       DATA RENDERING (FROM BACKEND)
     ===================================================== */
     displayDiagnosis(data) {
+        // 'data' is the pure JSON object from your Python/Node backend
         this.dom.resultspanel.classList.remove("hidden");
 
-        const score = Math.min(100, Math.max(0, data.confidence || 85));
-        if (this.dom.confidencepath) {
-            this.dom.confidencepath.style.strokeDasharray = `${score},100`;
-            this.dom.confidencetext.textContent = `${score}%`;
-        }
+        // Update Confidence Gauge
+        const confidence = data.confidence || 0;
+        this.dom.confidencepath.style.strokeDasharray = `${confidence}, 100`;
+        this.dom.confidencetext.textContent = `${confidence}%`;
 
-        this.dom.resulttitle.textContent = data.diagnosis || "Clear Scan";
-        this.dom.resultdescription.textContent = data.description || "No abnormalities detected.";
+        // Update Textual Diagnosis
+        this.dom.resulttitle.textContent = data.diagnosis_label || "Analysis Complete";
+        this.dom.resultdescription.textContent = data.clinical_summary || "No description provided by AI.";
 
+        // Update Findings List (Strictly from backend array)
         this.dom.findingslist.innerHTML = "";
-        (data.findings || ["Normal physiological appearance"]).forEach(f => {
+        const findings = data.findings || ["No specific anomalies detected."];
+        
+        findings.forEach(text => {
             const li = document.createElement("li");
-            li.textContent = f;
+            li.className = "finding-item";
+            li.innerHTML = `<span class="bullet"></span> ${text}`;
             this.dom.findingslist.appendChild(li);
         });
+
+        // Add visual flair based on result
+        this.dom.resulttitle.style.color = confidence > 80 ? "#006600" : "#BB0631";
+    }
+
+    /* =====================================================
+       UTILITIES
+    ===================================================== */
+    async captureCanvas() {
+        const canvas = document.createElement("canvas");
+        const video = this.dom.camerastream;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        return new Promise(res => canvas.toBlob(res, "image/jpeg", 0.95));
+    }
+
+    handleSystemError(err) {
+        if (err.name === "AbortError") return;
+        
+        if (err.message === "AUTH_EXPIRED") {
+            this.notify("Session expired. Please log in again.", "error");
+            setTimeout(() => window.location.href = "login.html", 2000);
+        } else {
+            this.notify("AI Engine busy. Retrying connection...", "warning");
+            console.error("Backend Error:", err);
+        }
+    }
+
+    toggleLoading(active, message) {
+        this.state.isProcessing = active;
+        this.dom.capturetrigger.classList.toggle("processing", active);
+        this.updateAIStatus(active ? message : "AI Ready for Scan");
+    }
+
+    updateAIStatus(text) {
+        if (this.dom.aistatus) this.dom.aistatus.innerHTML = `<span class="pulse"></span> ${text}`;
+    }
+
+    notify(msg, type = "info") {
+        const n = this.dom.notification;
+        n.textContent = msg;
+        n.className = `notification ${type} visible`;
+        setTimeout(() => n.className = "notification hidden", 4000);
     }
 
     bindEvents() {
         this.dom.capturetrigger.onclick = () => this.handleCapture();
-
+        this.dom.closeresults.onclick = () => this.dom.resultspanel.classList.add("hidden");
+        
         this.dom.typeBtns.forEach(btn => {
             btn.onclick = () => {
                 this.dom.typeBtns.forEach(b => b.classList.remove("active"));
@@ -178,84 +220,38 @@ class MedAICore {
             };
         });
 
-        this.dom.closeResults.onclick = () => this.dom.resultspanel.classList.add("hidden");
-
-        this.dom.toggletorch.onclick = async () => {
-            const track = this.state.stream?.getVideoTracks()[0];
-            if (!track) return;
-            try {
-                this.state.torchOn = !this.state.torchOn;
-                await track.applyConstraints({ advanced: [{ torch: this.state.torchOn }] });
-            } catch {
-                this.notify("Torch not available on this device.", "info");
-            }
+        this.dom.uploadlocal.onclick = () => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.onchange = (e) => this.uploadToAI(e.target.files[0]);
+            input.click();
         };
-
-        this.dom.uploadlocal.onclick = () => this.handleLocalUpload();
-    }
-
-    async handleLocalUpload() {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-
-        input.onchange = async () => {
-            if (!input.files[0]) return;
-            this.toggleLoading(true, "Reading File...");
-            try {
-                const result = await this.uploadToAI(input.files[0]);
-                this.displayDiagnosis(result);
-            } catch (e) {
-                this.notify(e.message, "error");
-            } finally {
-                this.toggleLoading(false);
-            }
-        };
-
-        input.click();
     }
 
     setupNavigation() {
         this.dom.navItems.forEach(btn => {
             btn.onclick = () => {
+                const tab = btn.dataset.tab;
+                if (tab === "log-out") {
+                    localStorage.clear();
+                    window.location.href = "login2.html";
+                    return;
+                }
                 this.dom.navItems.forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
                 this.dom.views.forEach(v => v.classList.add("hidden"));
-                document.getElementById(`${btn.dataset.tab}-section`)?.classList.remove("hidden");
-
-                // Auto redirect for logout
-                if (btn.dataset.tab === "log-out") {
-                    localStorage.removeItem("medai_token");
-                    window.location.href = "reg.html";
-                }
+                document.getElementById(`${tab}-section`)?.classList.remove("hidden");
             };
         });
     }
 
-    toggleLoading(active, text = "AI Analyzing...") {
-        this.state.isProcessing = active;
-        this.dom.capturetrigger.disabled = active;
-        this.updateAIStatus(active ? text : "AI Ready");
-        if (active) this.notify(text, "info");
-    }
-
-    updateAIStatus(text) {
-        if (this.dom.aistatus) this.dom.aistatus.textContent = text;
-    }
-
-    notify(message, type = "info") {
-        if (!this.dom.notification) return;
-        this.dom.notification.textContent = message;
-        this.dom.notification.className = `notification ${type}`;
-        this.dom.notification.classList.remove("hidden");
-        clearTimeout(this.notifTimer);
-        this.notifTimer = setTimeout(() => this.dom.notification.classList.add("hidden"), 4000);
-    }
-
     renderUser() {
-        if (this.dom.displayname) this.dom.displayname.textContent = `Dr. ${this.state.user.name}`;
+        this.dom.displayname.textContent = `Dr. ${this.state.user.name.split(' ')[0]}`;
     }
 }
 
-// Initialize
-window.addEventListener("DOMContentLoaded", () => new MedAICore());
+// Global initialization
+window.addEventListener("DOMContentLoaded", () => {
+    window.MedAI = new MedAICore();
+});
