@@ -1,222 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAI Assistant |</title>
-     <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedAI</title>
+<link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <style>
-        :root {
-            /* Kenyan Flag Official Colors */
-            --ke-black: #000000;
-            --ke-red: #922529;
-            --ke-green: #008C51;
-            --ke-white: #FFFFFF;
-            --text-dark: #1a1a1a;
-            --border-color: #e0e0e0;
-        }
+<style>
+:root{
+--ke-black:#000;
+--ke-red:#922529;
+--ke-green:#008C51;
+--ke-white:#fff;
+}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body{
+margin:0;
+font-family:Inter,Arial;
+background:#f4f4f4;
+}
 
-        body {
-            background: #f4f4f4;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: var(--text-dark);
-        }
+.nav-bar{
+background:var(--ke-black);
+color:white;
+padding:15px 25px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+border-bottom:4px solid var(--ke-red);
+}
 
-        /* Header with Kenya Theme */
-        .nav-bar {
-            background: var(--ke-black);
-            padding: 15px 30px;
-            border-bottom: 4px solid var(--ke-red);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            color: white;
-        }
+.nav-left{
+display:flex;
+align-items:center;
+gap:15px;
+}
 
-        .nav-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
+.back-btn{
+color:white;
+font-size:22px;
+cursor:pointer;
+text-decoration:none;
+}
 
-        .nav-title span { color: var(--ke-red); }
+.btn-pdf{
+background:var(--ke-green);
+color:white;
+border:none;
+padding:8px 16px;
+font-weight:600;
+cursor:pointer;
+border-radius:4px;
+}
 
-        .btn-pdf { 
-            background: var(--ke-green); 
-            color: white; 
-            border: none;
-            padding: 8px 18px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+#content-to-print{
+max-width:900px;
+margin:auto;
+padding-bottom:160px;
+}
 
-        /* Chat Layout */
-        #content-to-print {
-            flex: 1;
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-            padding-bottom: 150px;
-        }
+.messages{
+padding:25px;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
 
-        .messages { padding: 30px 20px; display: flex; flex-direction: column; gap: 20px; }
+.message{
+display:flex;
+gap:12px;
+max-width:85%;
+}
 
-        .message { display: flex; gap: 12px; max-width: 85%; }
+.user-message{
+align-self:flex-end;
+flex-direction:row-reverse;
+}
 
-        .user-message { flex-direction: row-reverse; align-self: flex-end; }
+.avatar{
+width:42px;
+height:42px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+color:white;
+}
 
-        .avatar {
-            width: 45px; height: 45px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 20px;
-        }
+.ai-avatar{background:var(--ke-red);}
+.user-avatar{background:var(--ke-black);}
 
-        .ai-avatar { background: var(--ke-red); color: white; border: 2px solid var(--ke-black); }
-        .user-avatar { background: var(--ke-black); color: white; }
+.message-bubble{
+background:white;
+padding:15px 18px;
+border-radius:12px;
+line-height:1.6;
+box-shadow:0 4px 6px rgba(0,0,0,0.05);
+}
 
-        .message-bubble {
-            padding: 15px 20px;
-            border-radius: 12px;
-            line-height: 1.6;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
+.user-message .message-bubble{
+background:var(--ke-black);
+color:white;
+}
 
-        .user-message .message-bubble {
-            background: var(--ke-black);
-            color: white;
-            border-bottom-right-radius: 2px;
-        }
+.input-container{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:white;
+padding:20px;
+border-top:2px solid var(--ke-red);
+}
 
-        .ai-message .message-bubble {
-            background: white;
-            border-left: 5px solid var(--ke-green);
-            border-bottom-left-radius: 2px;
-        }
+.input-area{
+max-width:800px;
+margin:auto;
+display:flex;
+background:#eee;
+border-radius:30px;
+padding:5px 10px 5px 20px;
+}
 
-        /* Input Area */
-        .input-container-fixed {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--ke-white); padding: 20px;
-            border-top: 2px solid var(--ke-red);
-        }
+input{
+flex:1;
+border:none;
+background:transparent;
+font-size:16px;
+outline:none;
+}
 
-        .input-area {
-            max-width: 800px; margin: 0 auto;
-            display: flex; background: #eee;
-            border-radius: 30px; padding: 5px 10px 5px 20px;
-            border: 1px solid var(--border-color);
-        }
+.send-btn{
+background:var(--ke-red);
+border:none;
+color:white;
+width:40px;
+height:40px;
+border-radius:50%;
+cursor:pointer;
+}
 
-        #user-input {
-            flex: 1; height: 45px; border: none;
-            background: transparent; outline: none; font-size: 16px;
-        }
-
-        .send-btn {
-            background: var(--ke-red); color: white;
-            width: 40px; height: 40px; border-radius: 50%;
-            border: none; cursor: pointer;
-        }
-
-        .typing { color: var(--ke-green); font-weight: bold; margin: 10px 0 0 80px; display: none; }
-    </style>
+.typing{
+margin-left:80px;
+font-weight:bold;
+color:var(--ke-green);
+display:none;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="nav-bar">
-        <div class="nav-title">
-            <span>🇰🇪</span> MEDAI KENYA
-        </div>
-        <div class="nav-actions">
-            <button class="btn-pdf" id="download-pdf">SAVE REPORT</button>
-        </div>
-    </div>
+<div class="nav-bar">
+<div class="nav-left">
+<a href="dash.html" class="back-btn">←</a>
+<b> MEDAI </b>
+</div>
+<button class="btn-pdf" id="download-pdf">SAVE REPORT</button>
+</div>
 
-    <div id="content-to-print">
-        <div class="messages" id="chat-box">
-            <div class="message ai-message">
-                <div class="avatar ai-avatar">MedAI</div>
-                <div class="message-bubble">
-                    Jambo! I am your <b>MedAI Assistant</b>. I am ready to help with your health inquiries.
-                </div>
-            </div>
-        </div>
-        <div class="typing" id="typing-indicator">Analyzing health data...</div>
-    </div>
+<div id="content-to-print">
+<div class="messages" id="chat-box">
+<div class="message ai-message">
+<div class="avatar ai-avatar">🛡️</div>
+<div class="message-bubble">
+Jambo! I am <b>MedAI</b>, a health decision-support assistant.<br><br>
+Describe your symptoms and I will guide you safely.
+</div>
+</div>
+</div>
+<div class="typing" id="typing">Analyzing health data…</div>
+</div>
 
-    <div class="input-container-fixed">
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Type your symptoms here...">
-            <button class="send-btn" id="send-btn">➔</button>
-        </div>
-    </div>
+<div class="input-container">
+<div class="input-area">
+<input id="user-input" placeholder="Describe your symptoms...">
+<button class="send-btn" id="send">➔</button>
+</div>
+</div>
 
-    <script type="module">
-        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+<script>
+const chatBox=document.getElementById("chat-box");
+const typing=document.getElementById("typing");
+const input=document.getElementById("user-input");
 
-        // Your Cloud Console Key
-        const API_KEY = "AIzaSyA7blilduvBVsm_FPZ5I620WZuCrcuTKpk"; 
-        const genAI = new GoogleGenerativeAI(API_KEY);
+const knowledgeBase=[
+{keys:["fever","chills"], text:"Possible infection. Rest, hydrate, and monitor temperature."},
+{keys:["headache","migraine"], text:"May be tension or dehydration. Rest and drink fluids."},
+{keys:["cough","sore throat"], text:"Upper respiratory irritation. Warm fluids recommended."},
+{keys:["chest pain","breathing"], text:"⚠️ This may be serious. Seek immediate medical attention."},
+{keys:["stomach pain","diarrhea"], text:"Possible gastrointestinal issue. Oral rehydration advised."},
+{keys:["dizziness","fainting"], text:"May relate to low blood pressure or dehydration."},
+{keys:["rash","itching"], text:"Possible allergic reaction or skin condition."},
+{keys:["joint pain","swelling"], text:"May be inflammatory or injury-related."}
+];
 
-        const chatBox = document.getElementById("chat-box");
-        const userInput = document.getElementById("user-input");
-        const sendBtn = document.getElementById("send-btn");
-        const typingIndicator = document.getElementById("typing-indicator");
+let conversationHistory=[];
 
-        async function addMessage(text, isUser = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-            const avatar = isUser ? '<div class="avatar user-avatar">👤</div>' : '<div class="avatar ai-avatar">🛡️</div>';
-            
-            messageDiv.innerHTML = `${avatar}<div class="message-bubble">${text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>`;
-            chatBox.appendChild(messageDiv);
-            window.scrollTo(0, document.body.scrollHeight);
-        }
+function addMessage(text,isUser){
+const div=document.createElement("div");
+div.className=`message ${isUser?"user-message":"ai-message"}`;
+div.innerHTML=`<div class="avatar ${isUser?"user-avatar":"ai-avatar"}">${isUser?"👤":"🛡️"}</div>
+<div class="message-bubble">${text}</div>`;
+chatBox.appendChild(div);
+window.scrollTo(0,document.body.scrollHeight);
+conversationHistory.push({role:isUser?"User":"MedAI",text});
+}
 
-        async function handleChat() {
-            const prompt = userInput.value.trim();
-            if (!prompt) return;
+function analyze(inputText){
+const text=inputText.toLowerCase();
+for(let item of knowledgeBase){
+if(item.keys.some(k=>text.includes(k))){
+return `<b>Assessment:</b> ${item.text}<br><br>
+<b>Disclaimer:</b> This is educational information only. Consult a healthcare professional.`;
+}
+}
+return `<b>General Guidance:</b> Symptoms are unclear.<br>
+Monitor your condition and seek medical advice if concerned.<br><br>
+<b>Disclaimer:</b> Not a diagnosis.`;
+}
 
-            userInput.value = '';
-            addMessage(prompt, true);
-            typingIndicator.style.display = "block";
+function handleChat(){
+if(!input.value.trim())return;
+const userText=input.value;
+input.value="";
+addMessage(userText,true);
+typing.style.display="block";
+setTimeout(()=>{
+typing.style.display="none";
+addMessage(analyze(userText),false);
+},800);
+}
 
-            try {
-                // Using the specific Generative Language API model
-                const model = genAI.getGenerativeModel({ 
-                    model: "gemini-1.5-flash",
-                    systemInstruction: "You are a Kenyan Medical AI. Use clear, helpful language. Focus on accuracy and provide medical disclaimers in every response."
-                });
+document.getElementById("send").onclick=handleChat;
+input.addEventListener("keypress",e=>{if(e.key==="Enter")handleChat();});
 
-                const result = await model.generateContent(prompt);
-                const response = await result.response;
-                
-                typingIndicator.style.display = "none";
-                addMessage(response.text(), false);
-            } catch (error) {
-                typingIndicator.style.display = "none";
-                addMessage("Error connecting to Cloud API. Please check your console settings.");
-            }
-        }
+document.getElementById("download-pdf").onclick=()=>{
+html2pdf().from(document.getElementById("content-to-print"))
+.set({margin:10,filename:"MedAI_Health_Report.pdf"})
+.save();
+};
+</script>
 
-        sendBtn.addEventListener('click', handleChat);
-        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleChat(); });
-    </script>
 </body>
 </html>
