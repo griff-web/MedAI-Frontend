@@ -2,179 +2,832 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Diagnostic Dashboard | MedAI</title>
+    <title>MedAI Kenya - Diagnostic Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    <meta name="description" content="Advanced AI-powered medical diagnostic system with Kenyan theme">
+    <meta name="keywords" content="medical, AI, diagnostics, Kenya, healthcare, scan, analysis">
+    <meta name="author" content="MedAI Kenya">
+    
+    <!-- Favicon with Kenyan theme -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇰🇪</text></svg>">
+    <link rel="apple-touch-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
 
+    <!-- CSS Files -->
     <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="dash.css">
 
+    <!-- JavaScript Files -->
     <script src="auth.js" defer></script>
     <script src="dash.js" defer></script>
+    
+    <!-- Preconnect to API -->
+    <link rel="preconnect" href="https://ai-p17b.onrender.com">
+    <link rel="dns-prefetch" href="https://ai-p17b.onrender.com">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
+    <meta name="theme-color" content="#0A0A0A">
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MedAI Kenya">
+    
+    <!-- Microsoft Meta Tags -->
+    <meta name="msapplication-TileColor" content="#0A0A0A">
+    <meta name="msapplication-TileImage" content="/kenya-medai-144.png">
 </head>
 
 <body class="dashboard-body">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
 
-<!-- ===================== TOP NAV ===================== -->
-<nav class="dash-nav">
-    <div class="nav-brand">
-        <div class="logo">Med<span>AI</span></div>
+    <!-- Connection Status Indicator -->
+    <div id="connection-status" class="connection-status stable">
+        Status: Stable
     </div>
 
-    <div class="user-profile">
-        <div class="user-info">
-            <span class="user-name" id="display-name">Dr. Practitioner</span>
-            <span class="user-role">Medical Practitioner</span>
-        </div>
-        <div class="user-avatar">MD</div>
-    </div>
-</nav>
-
-<!-- ===================== LAYOUT ===================== -->
-<main class="dash-container">
-
-    <!-- ========== SIDEBAR ========== -->
-    <aside class="dash-sidebar">
-        <button class="nav-item active" data-tab="scanner">
-            <i class="icon-camera"></i>
-            <span>Scanner</span>
-        </button>
-
-        <button class="nav-item" data-tab="history">
-            <i class="icon-history"></i>
-            <span>History</span>
-        </button>
-
-        <button class="nav-item" data-tab="analytics">
-            <i class="icon-chart"></i>
-            <span>Analytics</span>
-        </button>
-         <button class="nav-item" data-tab="log-out" onclick="location.href='login2.html'">
-    <i class="icon-logout"></i>
-    <span>Log-out</span>
-</button>
-
-</button>
-
-    </aside>
-
-    <!-- ========== MAIN CONTENT ========== -->
-    <section class="main-content">
-
-        <!-- ===== SCANNER VIEW ===== -->
-        <div id="scanner-section" class="content-view">
-
-            <header class="view-header">
-                <h2>Live Diagnostic Scan</h2>
-                <p>Select scan type and align image in the viewfinder</p>
-            </header>
-
-            <div class="scan-type-selector">
-                <button class="type-btn active" data-type="xray">X-Ray</button>
-                <button class="type-btn" data-type="ct">CT Scan</button>
-                <button class="type-btn" data-type="mri">MRI</button>
-                <button class="type-btn" data-type="ultrasound">Ultrasound</button>
+    <!-- ===================== TOP NAV - KENYAN THEME ===================== -->
+    <nav class="dash-nav">
+        <div class="nav-brand">
+            <div class="logo">
+                <span class="logo-icon">🇰🇪</span>
+                <span class="logo-text">Med<span>AI</span> Kenya</span>
             </div>
+            <div class="hospital-badge">
+                <span class="badge-icon">🏥</span>
+                <span class="badge-text">Advanced Medical Imaging</span>
+            </div>
+        </div>
 
-            <div class="scanner-card">
-                <div class="camera-container">
-                    <video id="camera-stream" autoplay playsinline></video>
+        <div class="user-profile">
+            <div class="user-info">
+                <span class="user-name" id="display-name">Dkt. Practitioner</span>
+                <span class="user-role" id="user-role">Daktari wa Matibabu</span>
+                <span class="user-hospital" id="user-hospital">Hospitali ya Kenya</span>
+            </div>
+            <div class="user-avatar">MD</div>
+        </div>
+    </nav>
 
-                    <div class="scanner-overlay">
-                        <div class="target-box">
-                            <div class="scan-line"></div>
+    <!-- ===================== MAIN LAYOUT ===================== -->
+    <main class="dash-container" id="main-content">
+
+        <!-- ========== SIDEBAR WITH KENYAN ACCENTS ========== -->
+        <aside class="dash-sidebar">
+            <button class="nav-item active" data-tab="scanner" aria-label="Scanner">
+                <i class="icon-camera"></i>
+                <span class="nav-text">Skana</span>
+                <span class="nav-tooltip">Chukua na uchambue picha za matibabu</span>
+            </button>
+
+            <button class="nav-item" data-tab="history" aria-label="History">
+                <i class="icon-history"></i>
+                <span class="nav-text">Historia</span>
+                <span class="nav-tooltip">Angalia uchambuzi uliopita</span>
+            </button>
+
+            <button class="nav-item" data-tab="analytics" aria-label="Analytics">
+                <i class="icon-chart"></i>
+                <span class="nav-text">Takwimu</span>
+                <span class="nav-tooltip">Takwimu za utendaji wa AI</span>
+            </button>
+
+            <div class="sidebar-divider"></div>
+
+            <button class="nav-item" data-tab="log-out" aria-label="Log out">
+                <i class="icon-logout"></i>
+                <span class="nav-text">Toka</span>
+                <span class="nav-tooltip">Toka kwenye mfumo</span>
+            </button>
+            
+            <div class="kenya-sidebar-footer">
+                <div class="kenya-shield">
+                    <span>🛡️</span>
+                </div>
+                <div class="sidebar-footer-text">
+                    <span class="footer-title">MedAI Kenya</span>
+                    <span class="footer-subtitle">Afya kwa Teknolojia</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ========== MAIN CONTENT AREA ========== -->
+        <section class="main-content">
+
+            <!-- ===== SCANNER VIEW ===== -->
+            <div id="scanner-section" class="content-view">
+
+                <header class="view-header">
+                    <div class="view-header-icon">📷</div>
+                    <h2>Skana ya Matibabu ya Moja kwa Moja</h2>
+                    <p>Chagua aina ya skana na weka picha kwenye kisanduku cha kuona</p>
+                    <div class="view-header-subtitle">
+                        <span class="kenya-badge">🇰🇪 Imetengenezwa Kenya</span>
+                        <span class="ai-badge">🤖 Inatumia AI ya Kisasa</span>
+                    </div>
+                </header>
+
+                <!-- Scan Type Selector with Kenyan Colors -->
+                <div class="scan-type-selector">
+                    <div class="selector-header">
+                        <span class="selector-title">Aina za Skana</span>
+                        <span class="selector-hint">Bonyeza kuchagua</span>
+                    </div>
+                    <div class="type-buttons-container">
+                        <button class="type-btn active" data-type="xray" aria-label="X-Ray Scan">
+                            <span class="type-icon">🦴</span>
+                            <span class="type-name">X-Ray</span>
+                            <span class="type-desc">Picha za Mafupa</span>
+                        </button>
+                        <button class="type-btn" data-type="ct" aria-label="CT Scan">
+                            <span class="type-icon">🧠</span>
+                            <span class="type-name">CT Scan</span>
+                            <span class="type-desc">Tomografia</span>
+                        </button>
+                        <button class="type-btn" data-type="mri" aria-label="MRI Scan">
+                            <span class="type-icon">🔬</span>
+                            <span class="type-name">MRI</span>
+                            <span class="type-desc">Picha ya Magneti</span>
+                        </button>
+                        <button class="type-btn" data-type="ultrasound" aria-label="Ultrasound Scan">
+                            <span class="type-icon">👶</span>
+                            <span class="type-name">Ultrasound</span>
+                            <span class="type-desc">Picha ya Mawimbi ya Sauti</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scanner Card with Enhanced Features -->
+                <div class="scanner-card">
+                    <div class="scanner-header">
+                        <h3 class="scanner-title">
+                            <span class="scanner-icon">🎯</span>
+                            Kamera ya Skana
+                        </h3>
+                        <div class="scanner-stats">
+                            <span class="stat-item">
+                                <span class="stat-label">Ukubwa:</span>
+                                <span class="stat-value" id="resolution-display">1080p</span>
+                            </span>
+                            <span class="stat-item">
+                                <span class="stat-label">Mfumo:</span>
+                                <span class="stat-value" id="active-mode-display">X-Ray</span>
+                            </span>
                         </div>
                     </div>
 
-                    <div class="ai-status-badge hidden" id="ai-status">
-                        <span class="pulse-dot"></span>
-                        AI: Analyzing…
+                    <div class="camera-container">
+                        <video id="camera-stream" autoplay playsinline 
+                               aria-label="Live camera feed for medical scanning"></video>
+
+                        <div class="scanner-overlay">
+                            <div class="target-box">
+                                <div class="target-corner top-left"></div>
+                                <div class="target-corner top-right"></div>
+                                <div class="target-corner bottom-left"></div>
+                                <div class="target-corner bottom-right"></div>
+                                <div class="scan-line"></div>
+                                <div class="target-center">
+                                    <div class="center-dot"></div>
+                                    <span class="center-text">Weka hapa</span>
+                                </div>
+                            </div>
+                            
+                            <div class="scanner-grid">
+                                <div class="grid-line horizontal"></div>
+                                <div class="grid-line vertical"></div>
+                            </div>
+                        </div>
+
+                        <!-- AI Status Badge -->
+                        <div class="ai-status-badge hidden" id="ai-status" role="status" aria-live="polite">
+                            <span class="pulse-dot"></span>
+                            <span class="status-text">AI: Inapakia...</span>
+                            <span class="status-time" id="processing-time">0s</span>
+                        </div>
+
+                        <!-- Camera Instructions -->
+                        <div class="camera-instructions">
+                            <div class="instruction-item">
+                                <span class="instruction-icon">💡</span>
+                                <span class="instruction-text">Hakikisha mwanga wa kutosha</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="instruction-icon">📐</span>
+                                <span class="instruction-text">Weka picha ndani ya kisanduku cha kijani</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="instruction-icon">👁️</span>
+                                <span class="instruction-text">Hakikisha picha ni wazi na isiyo na mawingu</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Camera Controls -->
+                    <div class="camera-controls">
+                        <div class="control-group left-controls">
+                            <button id="toggle-torch" class="btn-tool" 
+                                    aria-label="Toggle flash light"
+                                    title="Washa/Zima Mwanga">
+                                <span class="tool-icon">💡</span>
+                                <span class="tool-text">Mwanga</span>
+                            </button>
+                            <button id="upload-local" class="btn-tool"
+                                    aria-label="Upload image from device"
+                                    title="Pakia Picha kutoka Faili">
+                                <span class="tool-icon">📁</span>
+                                <span class="tool-text">Pakia</span>
+                            </button>
+                        </div>
+
+                        <div class="control-group center-control">
+                            <button id="capture-trigger" class="btn-capture" 
+                                    aria-label="Capture medical scan"
+                                    title="Chukua Skana">
+                                <div class="capture-ring"></div>
+                                <div class="inner-circle">
+                                    <span class="capture-icon">📷</span>
+                                </div>
+                                <div class="capture-ripple"></div>
+                            </button>
+                            <div class="capture-hint">
+                                <span class="hint-text">Bonyeza kuchukua picha</span>
+                                <span class="hint-shortcut">(Au bonyeza nafasi)</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group right-controls">
+                            <button class="btn-tool" id="flip-camera" 
+                                    aria-label="Flip camera"
+                                    title="Geuza Kamera">
+                                <span class="tool-icon">🔄</span>
+                                <span class="tool-text">Geuza</span>
+                            </button>
+                            <button class="btn-tool" id="camera-settings"
+                                    aria-label="Camera settings"
+                                    title="Mipangilio ya Kamera">
+                                <span class="tool-icon">⚙️</span>
+                                <span class="tool-text">Mpangilio</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scan Quality Indicator -->
+                    <div class="quality-indicator">
+                        <div class="quality-bar">
+                            <div class="quality-fill" id="quality-fill"></div>
+                        </div>
+                        <div class="quality-label">
+                            <span class="quality-text">Ubora wa Picha:</span>
+                            <span class="quality-value" id="quality-value">Inapimia...</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="camera-controls">
-                    <button id="capture-trigger" class="btn-capture" title="Capture Scan">
-                        <div class="inner-circle"></div>
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="quick-action-btn" id="quick-xray">
+                        <span class="action-icon">🦴</span>
+                        <span class="action-text">X-Ray Haraka</span>
                     </button>
-                    <button id="toggle-torch" class="btn-tool" title="Toggle Flash">🔦</button>
-                    <button id="upload-local" class="btn-tool" title="Upload File">📂</button>
+                    <button class="quick-action-btn" id="quick-ct">
+                        <span class="action-icon">🧠</span>
+                        <span class="action-text">CT Haraka</span>
+                    </button>
+                    <button class="quick-action-btn" id="quick-help">
+                        <span class="action-icon">❓</span>
+                        <span class="action-text">Msaada</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== HISTORY VIEW ===== -->
+            <div id="history-section" class="content-view hidden">
+
+                <header class="view-header">
+                    <div class="view-header-icon">📋</div>
+                    <h2>Historia ya Uchambuzi</h2>
+                    <p>Angalia uchambuzi wote wa matibabu uliofanywa hapo awali</p>
+                    <div class="history-filter-controls">
+                        <select id="history-filter" class="filter-select" aria-label="Filter history by type">
+                            <option value="all">Skana Zote</option>
+                            <option value="xray">X-Ray</option>
+                            <option value="ct">CT Scan</option>
+                            <option value="mri">MRI</option>
+                            <option value="ultrasound">Ultrasound</option>
+                        </select>
+                        <select id="history-sort" class="filter-select" aria-label="Sort history">
+                            <option value="newest">Mpya zaidi</option>
+                            <option value="oldest">Kale zaidi</option>
+                            <option value="confidence">Imani (Kubwa)</option>
+                            <option value="type">Aina</option>
+                        </select>
+                        <button id="clear-history" class="btn-secondary" aria-label="Clear history">
+                            Safisha Historia
+                        </button>
+                    </div>
+                </header>
+
+                <!-- History Stats -->
+                <div class="history-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="total-scans">0</div>
+                            <div class="stat-label">Jumla ya Skana</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="successful-scans">0</div>
+                            <div class="stat-label">Skana Zilizofaulu</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="avg-confidence">0%</div>
+                            <div class="stat-label">Wastani wa Imani</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🕒</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="avg-processing">0s</div>
+                            <div class="stat-label">Wastani wa Muda</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History List -->
+                <div class="history-container">
+                    <div class="history-list-header">
+                        <span class="header-column">Tarehe</span>
+                        <span class="header-column">Aina</span>
+                        <span class="header-column">Uchambuzi</span>
+                        <span class="header-column">Imani</span>
+                        <span class="header-column">Vitendo</span>
+                    </div>
+                    <div class="history-list" id="scan-history-list">
+                        <!-- History items will be inserted here by JavaScript -->
+                        <div class="history-empty-state">
+                            <div class="empty-icon">📭</div>
+                            <h3 class="empty-title">Hakuna Historia ya Skana</h3>
+                            <p class="empty-description">Hakuna uchambuzi umehifadhiwa. Anza kwa kuchukua skana ya kwanza.</p>
+                            <button class="btn-primary" id="start-first-scan">
+                                <span class="btn-icon">📷</span>
+                                Anza Skana ya Kwanza
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- History Pagination -->
+                    <div class="history-pagination hidden" id="history-pagination">
+                        <button class="pagination-btn" id="prev-page" disabled>
+                            <span class="pagination-icon">←</span>
+                            Nyuma
+                        </button>
+                        <span class="pagination-info">
+                            <span id="current-page">1</span> ya <span id="total-pages">1</span>
+                        </span>
+                        <button class="pagination-btn" id="next-page" disabled>
+                            Mbele
+                            <span class="pagination-icon">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ANALYTICS VIEW ===== -->
+            <div id="analytics-section" class="content-view hidden">
+
+                <header class="view-header">
+                    <div class="view-header-icon">📈</div>
+                    <h2>Takwimu za Uendeshaji</h2>
+                    <p>Fahamu utendaji wa AI na mwelekeo wa uchambuzi</p>
+                    <div class="analytics-period">
+                        <span class="period-label">Kipindi:</span>
+                        <select id="analytics-period" class="period-select" aria-label="Select analytics period">
+                            <option value="7">Wiki 1</option>
+                            <option value="30" selected>Mwezi 1</option>
+                            <option value="90">Miezi 3</option>
+                            <option value="365">Mwaka 1</option>
+                            <option value="all">Wakati Wote</option>
+                        </select>
+                    </div>
+                </header>
+
+                <!-- Analytics Overview -->
+                <div class="analytics-overview">
+                    <div class="analytics-card large">
+                        <div class="card-header">
+                            <h4 class="card-title">Utendaji wa AI</h4>
+                            <span class="card-badge" id="ai-performance">Bora</span>
+                        </div>
+                        <div class="performance-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Usahihi wa Uchambuzi</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="accuracy-bar" style="width: 0%"></div>
+                                </div>
+                                <span class="metric-value" id="accuracy-value">0%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Kasi ya Uchambuzi</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="speed-bar" style="width: 0%"></div>
+                                </div>
+                                <span class="metric-value" id="speed-value">0s</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Uaminifu wa Matokeo</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="reliability-bar" style="width: 0%"></div>
+                                </div>
+                                <span class="metric-value" id="reliability-value">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-grid" id="analytics-data">
+                        <!-- Analytics cards will be inserted here by JavaScript -->
+                        <div class="analytics-card">
+                            <div class="card-header">
+                                <h4 class="card-title">Skana za Kila Aina</h4>
+                            </div>
+                            <div class="card-content">
+                                <div class="type-distribution">
+                                    <div class="distribution-item">
+                                        <span class="distribution-type">X-Ray</span>
+                                        <div class="distribution-bar">
+                                            <div class="distribution-fill xray" style="width: 0%"></div>
+                                        </div>
+                                        <span class="distribution-value">0</span>
+                                    </div>
+                                    <div class="distribution-item">
+                                        <span class="distribution-type">CT Scan</span>
+                                        <div class="distribution-bar">
+                                            <div class="distribution-fill ct" style="width: 0%"></div>
+                                        </div>
+                                        <span class="distribution-value">0</span>
+                                    </div>
+                                    <div class="distribution-item">
+                                        <span class="distribution-type">MRI</span>
+                                        <div class="distribution-bar">
+                                            <div class="distribution-fill mri" style="width: 0%"></div>
+                                        </div>
+                                        <span class="distribution-value">0</span>
+                                    </div>
+                                    <div class="distribution-item">
+                                        <span class="distribution-type">Ultrasound</span>
+                                        <div class="distribution-bar">
+                                            <div class="distribution-fill ultrasound" style="width: 0%"></div>
+                                        </div>
+                                        <span class="distribution-value">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Charts -->
+                <div class="analytics-charts">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Mwelekeo wa Uchambuzi</h4>
+                            <div class="chart-legend">
+                                <span class="legend-item">
+                                    <span class="legend-color success"></span>
+                                    Imefaulu
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-color warning"></span>
+                                    Inahitaji Ukaguzi
+                                </span>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder" id="analytics-chart">
+                            <div class="chart-empty">
+                                <span class="empty-icon">📊</span>
+                                <p class="empty-text">Takwimu zinaonyeshwa hapa</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h4 class="chart-title">Matatizo Yanayojulikana</h4>
+                        </div>
+                        <div class="common-issues" id="common-issues">
+                            <div class="issue-item">
+                                <span class="issue-name">Hakuna Matatizo</span>
+                                <span class="issue-frequency">0 mara</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- ===================== RESULTS PANEL - ENHANCED ===================== -->
+    <div id="results-panel" class="results-container hidden" role="dialog" aria-modal="true" aria-labelledby="results-title">
+        <div class="panel-header">
+            <div class="panel-title-group">
+                <div class="panel-icon">📋</div>
+                <div>
+                    <h3 id="results-title">Uchambuzi wa AI</h3>
+                    <p class="panel-subtitle" id="results-subtitle">Matokeo ya Skana ya Matibabu</p>
+                </div>
+            </div>
+            <button id="close-results" class="btn-close" aria-label="Close results">
+                <span class="close-icon">✕</span>
+            </button>
+        </div>
+
+        <div class="results-body">
+
+            <!-- Scan Metadata -->
+            <div class="scan-metadata">
+                <div class="metadata-item">
+                    <span class="metadata-label">Aina ya Skana:</span>
+                    <span class="metadata-value" id="scan-type-result">X-Ray</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Tarehe:</span>
+                    <span class="metadata-value" id="scan-date-result">-</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Muda wa Uchambuzi:</span>
+                    <span class="metadata-value" id="scan-duration-result">-</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">ID ya Uchambuzi:</span>
+                    <span class="metadata-value" id="scan-id-result">-</span>
+                </div>
+            </div>
+
+            <!-- Analysis Summary -->
+            <div class="analysis-summary">
+                <div class="confidence-score">
+                    <svg viewBox="0 0 36 36" class="circular-chart" aria-labelledby="confidence-label">
+                        <title id="confidence-label">Confidence Score</title>
+                        <path class="circle-bg"
+                              d="M18 2.0845
+                                 a 15.9155 15.9155 0 0 1 0 31.831
+                                 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="circle"
+                              id="confidence-path"
+                              stroke-dasharray="0, 100"
+                              d="M18 2.0845
+                                 a 15.9155 15.9155 0 0 1 0 31.831
+                                 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div class="percentage-container">
+                        <div class="percentage" id="confidence-text" aria-live="polite">0%</div>
+                        <div class="confidence-label">Imani ya AI</div>
+                    </div>
+                </div>
+
+                <div class="diagnosis-label">
+                    <div class="diagnosis-header">
+                        <span class="diagnosis-icon">🏥</span>
+                        <h4 id="result-title">Inachambua...</h4>
+                    </div>
+                    <p id="result-description">Subiri uchambuzi ukamilike.</p>
+                    
+                    <div class="severity-indicator">
+                        <span class="severity-label">Ukali:</span>
+                        <span class="severity-badge" id="severity-badge">
+                            <span class="badge-dot"></span>
+                            Inachunguzwa
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinical Findings -->
+            <div class="clinical-findings">
+                <div class="findings-header">
+                    <h5>
+                        <span class="findings-icon">🔍</span>
+                        Matokeo Muhimu
+                    </h5>
+                    <span class="findings-count" id="findings-count">0 Matokeo</span>
+                </div>
+                <ul id="findings-list" class="findings-list" aria-label="Clinical findings">
+                    <li class="finding-placeholder">
+                        <span class="finding-icon">⏳</span>
+                        <span class="finding-text">Mfumo unangoja uchambuzi...</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="recommendations">
+                <h5 class="recommendations-title">
+                    <span class="recommendations-icon">💡</span>
+                    Mapendekezo
+                </h5>
+                <div class="recommendations-list" id="recommendations-list">
+                    <div class="recommendation-item">
+                        <span class="recommendation-icon">✅</span>
+                        <span class="recommendation-text">Kumbuka: Mapendekezo yataonekana baada ya uchambuzi</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-footer">
+                <button class="btn-secondary" id="save-report">
+                    <span class="btn-icon">💾</span>
+                    Hifadhi Ripoti
+                </button>
+                <button class="btn-primary" id="generate-pdf">
+                    <span class="btn-icon">📄</span>
+                    Toa Ripoti (PDF)
+                </button>
+                <button class="btn-secondary" id="share-results">
+                    <span class="btn-icon">📤</span>
+                    Shiriki Matokeo
+                </button>
+            </div>
+            
+            <!-- Scan Preview -->
+            <div class="scan-preview">
+                <div class="preview-header">
+                    <h6>Hakiki ya Skana</h6>
+                    <button class="btn-text" id="view-full-image">
+                        Angalia Kamili
+                    </button>
+                </div>
+                <div class="preview-image" id="scan-preview-image">
+                    <div class="preview-placeholder">
+                        <span class="placeholder-icon">🖼️</span>
+                        <span class="placeholder-text">Hakiki ya picha itaonekana hapa</span>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- ===== HISTORY VIEW (READY FOR DATA) ===== -->
-        <div id="history-section" class="content-view hidden">
-            <header class="view-header">
-                <h2>Scan History</h2>
-                <p>Previous diagnostic analyses</p>
-            </header>
-        </div>
-
-        <!-- ===== ANALYTICS VIEW (READY FOR DATA) ===== -->
-        <div id="analytics-section" class="content-view hidden">
-            <header class="view-header">
-                <h2>Analytics</h2>
-                <p>AI performance and scan insights</p>
-            </header>
-        </div>
-
-    </section>
-</main>
-
-<!-- ===================== RESULTS PANEL ===================== -->
-<div id="results-panel" class="results-container hidden">
-    <div class="panel-header">
-        <h3>AI Diagnostic Analysis</h3>
-        <button id="close-results">✕</button>
     </div>
 
-    <div class="results-body">
+    <!-- ===================== MEDBOT FAB - KENYAN THEME ===================== -->
+    <a href="MedBot.html" class="medbot-fab" id="MedBot-btn" 
+       aria-label="Open MedBot AI Assistant" title="Fungua Msaidizi wa AI">
+        <span class="bot-icon">🤖</span>
+        <span class="bot-text">MedBot</span>
+        <div class="fab-ping"></div>
+        <div class="fab-badge" id="medbot-notifications">0</div>
+    </a>
 
-        <div class="analysis-summary">
-            <div class="confidence-score">
-                <svg viewBox="0 0 36 36" class="circular-chart">
-                    <path class="circle-bg"
-                          d="M18 2.0845
-                             a 15.9155 15.9155 0 0 1 0 31.831
-                             a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path class="circle"
-                          id="confidence-path"
-                          stroke-dasharray="0, 100"
-                          d="M18 2.0845
-                             a 15.9155 15.9155 0 0 1 0 31.831
-                             a 15.9155 15.9155 0 0 1 0 -31.831" />
-                </svg>
-                <div class="percentage" id="confidence-text">0%</div>
-            </div>
-
-            <div class="diagnosis-label">
-                <h4 id="result-title">Analyzing…</h4>
-                <p id="result-description">Awaiting scan capture.</p>
-            </div>
+    <!-- ===================== NOTIFICATION SYSTEM ===================== -->
+    <div id="notification" class="notification hidden" role="alert" aria-live="assertive">
+        <div class="notification-content">
+            <span class="notification-icon"></span>
+            <span class="notification-message"></span>
         </div>
-
-        <div class="clinical-findings">
-            <h5>Key Findings</h5>
-            <ul id="findings-list">
-                <li>System ready for scan input.</li>
-            </ul>
-        </div>
-
-        <div class="action-footer">
-            <button class="btn-primary">Generate Report (PDF)</button>
-        </div>
-
+        <button class="notification-close" aria-label="Dismiss notification">
+            <span>✕</span>
+        </button>
     </div>
-</div>
 
-<!-- ===================== MEDBOT FAB ===================== -->
-<a href="MedBot.html" class="medbot-fab" id="MedBot-btn">
-    <span class="bot-icon">🤖</span>
-    <div class="fab-ping"></div>
-</a>
+    <!-- ===================== MODAL FOR IMAGE VIEW ===================== -->
+    <div id="image-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modal-title">Hakiki Kamili ya Picha</h4>
+                <button class="modal-close" id="close-modal" aria-label="Close modal">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="full-scan-image" src="" alt="Full scan image" class="modal-image">
+            </div>
+        </div>
+    </div>
 
-<!-- ===================== NOTIFICATION ===================== -->
-<div id="notification" class="notification hidden"></div>
+    <!-- ===================== OFFLINE INDICATOR ===================== -->
+    <div id="offline-indicator" class="offline-indicator hidden" role="alert">
+        <div class="offline-content">
+            <span class="offline-icon">📴</span>
+            <span class="offline-text">Umepoteza muunganisho wa intaneti. Baadhi ya huduma hazipatikani.</span>
+        </div>
+    </div>
+
+    <!-- ===================== QUICK HELP MODAL ===================== -->
+    <div id="help-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <div class="modal-content help-modal">
+            <div class="modal-header">
+                <h4 id="help-title">Msaada wa MedAI</h4>
+                <button class="modal-close" id="close-help" aria-label="Close help">
+                    ✕
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h5>Jinsi ya Kutumia</h5>
+                    <ol class="help-steps">
+                        <li>Chagua aina ya skana unayotaka (X-Ray, CT, MRI, Ultrasound)</li>
+                        <li>Weka kifaa cha skana ndani ya kisanduku cha kijani</li>
+                        <li>Bonyeza kitufe cha kuchukua picha (mduara mwekundu)</li>
+                        <li>Ngoje uchambuzi wa AI ukamilike</li>
+                        <li>Angalia matokeo na upokee mapendekezo</li>
+                    </ol>
+                </div>
+                <div class="help-section">
+                    <h5>Vidokezo vya Ubora</h5>
+                    <ul class="help-tips">
+                        <li>Hakikisha mwanga wa kutosha</li>
+                        <li>Weka picha wima na isiyo na mawingu</li>
+                        <li>Usiwe na kitu chochote kinachozuia mbele ya picha</li>
+                        <li>Weka kwa umbali unaofaa (30-50cm)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== KEYBOARD SHORTCUTS INFO ===================== -->
+    <div id="shortcuts-info" class="shortcuts-info hidden">
+        <div class="shortcuts-content">
+            <h5>Njia za Mkato za Kibodi</h5>
+            <div class="shortcuts-grid">
+                <div class="shortcut-item">
+                    <kbd>Spasi</kbd>
+                    <span>Chukua Picha</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>T</kbd>
+                    <span>Geuza Mwanga</kbd>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>U</kbd>
+                    <span>Pakia Picha</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Esc</kbd>
+                    <span>Funga Paneli</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== KENYA FLAG DECORATION ===================== -->
+    <div class="kenya-flag-decoration">
+        <div class="flag-stripe black"></div>
+        <div class="flag-stripe red"></div>
+        <div class="flag-stripe green"></div>
+        <div class="flag-shield">
+            <span>🛡️</span>
+        </div>
+    </div>
+
+    <!-- Inline styles for immediate visual feedback -->
+    <style>
+        /* Temporary styles for immediate visual feedback */
+        .kenya-flag-decoration {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 60px;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+        
+        .flag-stripe {
+            position: absolute;
+            width: 100%;
+            height: 33.33%;
+        }
+        
+        .flag-stripe.black { top: 0; background: #000000; }
+        .flag-stripe.red { top: 33.33%; background: #BB0000; }
+        .flag-stripe.green { top: 66.66%; background: #006600; }
+        
+        .flag-shield {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+        }
+        
+        /* Loading animation for immediate feedback */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        body {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
 
 </body>
 </html>
