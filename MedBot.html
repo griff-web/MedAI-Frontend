@@ -180,320 +180,281 @@ Describe your symptoms and I will guide you safely.
 <button class="send-btn" id="send">➔</button>
 </div>
 </div>
-
 <script>
 const chatBox = document.getElementById("chat-box");
 const typing = document.getElementById("typing");
 const input = document.getElementById("user-input");
 
-let conversationContext = [];
+let lastTopic = null;
 
 /* ================= GREETINGS ================= */
-const greetings = [
-  "hi", "hello", "hey", "jambo", "good morning", "good afternoon", "good evening"
-];
+const greetings = ["hi","hello","hey","jambo","good morning","good afternoon","good evening"];
 
-/* ================= MEDICAL KNOWLEDGE BASE (20 CONDITIONS) ================= */
-const medicalKnowledge = [
-  {
-    keys: ["fever", "chills", "sweating"],
-    response: `
-Thank you for explaining your symptoms. Fever with chills may be associated with infections such as flu, malaria, or other viral illnesses.
+/* ================= MEDICAL KNOWLEDGE BASE (50 CONDITIONS) ================= */
+const conditions = [
+{topic:"fever", keys:["fever","hot","chills"], response:`
+Thank you for sharing that. Fever is usually the body's response to infection.
 
-<b>General guidance:</b>
-• Rest and hydrate well  
-• Monitor your temperature  
-• Seek medical care if fever lasts more than 2–3 days  
+To guide you better, may I ask:
+• How long have you had the fever?
+• Is it associated with headache, chills, or body aches?
 
-<b>Disclaimer:</b> This is not a diagnosis.
-`
-  },
-  {
-    keys: ["headache", "migraine"],
-    response: `
-Headaches can occur due to stress, dehydration, eye strain, or infections.
+<b>General advice:</b> Rest, hydrate well, and monitor temperature.
+<b>Important:</b> Seek medical care if fever lasts more than 2–3 days.
+`},
 
-<b>General guidance:</b>
-• Rest in a quiet place  
-• Drink water  
-• Avoid screens temporarily  
+{topic:"headache", keys:["headache","migraine"], response:`
+I understand. Headaches can have many causes including stress, dehydration, or infection.
 
-<b>Seek care if:</b> headache is severe, sudden, or persistent.
-`
-  },
-  {
-    keys: ["cough", "sore throat"],
-    response: `
-A cough with sore throat may indicate a respiratory infection or irritation.
+May I ask:
+• Is the pain mild or severe?
+• Is it on one side or the whole head?
+• Any nausea or vision problems?
 
-<b>General guidance:</b>
-• Warm fluids  
-• Rest your voice  
-• Avoid smoke and dust  
+Seek care if the headache is sudden, severe, or persistent.
+`},
 
-<b>Seek care if:</b> breathing becomes difficult.
-`
-  },
-  {
-    keys: ["chest pain", "shortness of breath"],
-    response: `
-⚠️ Chest pain or difficulty breathing can be serious.
+{topic:"cough", keys:["cough","sore throat"], response:`
+Thank you. A cough with sore throat often relates to respiratory irritation or infection.
 
-<b>Action required:</b>
+To clarify:
+• Is the cough dry or productive?
+• Any fever or chest pain?
+
+Warm fluids and rest may help. Seek care if breathing becomes difficult.
+`},
+
+{topic:"chest", keys:["chest pain","breathing","shortness"], response:`
+⚠️ I am concerned about these symptoms.
+
+Chest pain or difficulty breathing may be serious.
 Please seek immediate medical attention or visit the nearest hospital.
+`},
 
-<b>Disclaimer:</b> This assistant cannot manage emergencies.
-`
-  },
-  {
-    keys: ["stomach pain", "abdominal pain"],
-    response: `
-Abdominal pain may result from indigestion, infection, or other conditions.
+{topic:"stomach", keys:["stomach pain","abdominal"], response:`
+Abdominal pain can arise from digestion issues, infection, or inflammation.
 
-<b>General guidance:</b>
-• Light meals  
-• Adequate hydration  
+To help further:
+• Where exactly is the pain?
+• Is it constant or cramping?
+• Any vomiting or diarrhea?
 
-<b>Seek care if:</b> pain is severe, persistent, or worsening.
-`
-  },
-  {
-    keys: ["diarrhea"],
-    response: `
-Diarrhea is often caused by infection or contaminated food or water.
+Seek care if pain is severe or worsening.
+`},
 
-<b>General guidance:</b>
-• Oral rehydration solution (ORS)  
-• Avoid dehydration  
+{topic:"diarrhea", keys:["diarrhea","loose stool"], response:`
+Diarrhea is commonly caused by infection or contaminated food/water.
 
-<b>Seek care if:</b> blood is present or dehydration occurs.
-`
-  },
-  {
-    keys: ["vomiting", "nausea"],
-    response: `
-Nausea and vomiting may occur with infections or stomach irritation.
+Please tell me:
+• How many times per day?
+• Any blood or fever?
 
-<b>General guidance:</b>
-• Small sips of fluids  
-• Rest  
+Oral rehydration is important. Seek care if dehydration occurs.
+`},
 
-<b>Seek care if:</b> vomiting persists or worsens.
-`
-  },
-  {
-    keys: ["dizziness", "fainting"],
-    response: `
-Dizziness may be related to dehydration, low blood pressure, or fatigue.
+{topic:"vomiting", keys:["vomiting","nausea"], response:`
+Nausea and vomiting may indicate stomach irritation or infection.
 
-<b>General guidance:</b>
-• Sit or lie down  
-• Hydrate  
+I’d like to know:
+• How long has this been happening?
+• Are you able to keep fluids down?
 
-<b>Seek care if:</b> fainting occurs.
-`
-  },
-  {
-    keys: ["rash", "itching"],
-    response: `
-Skin rashes can be caused by allergies, infections, or irritation.
+Persistent vomiting requires medical attention.
+`},
 
-<b>General guidance:</b>
-• Avoid scratching  
-• Observe changes  
+{topic:"dizziness", keys:["dizzy","dizziness","faint"], response:`
+Dizziness may be due to dehydration, low blood pressure, or fatigue.
 
-<b>Seek care if:</b> rash spreads rapidly or is painful.
-`
-  },
-  {
-    keys: ["joint pain", "swelling"],
-    response: `
-Joint pain may result from strain, inflammation, or infection.
+Please clarify:
+• Does it happen when standing?
+• Any loss of consciousness?
 
-<b>General guidance:</b>
-• Rest the joint  
-• Gentle movement  
+Seek care if fainting occurs.
+`},
 
-<b>Seek care if:</b> swelling is severe or persistent.
-`
-  },
-  {
-    keys: ["back pain"],
-    response: `
-Back pain is commonly caused by muscle strain or posture issues.
+{topic:"rash", keys:["rash","itching","skin"], response:`
+Skin rashes may be allergic, infectious, or inflammatory.
 
-<b>General guidance:</b>
-• Gentle stretching  
-• Avoid heavy lifting  
+May I ask:
+• Where is the rash located?
+• Is it painful or itchy?
 
-<b>Seek care if:</b> pain is severe or long-lasting.
-`
-  },
-  {
-    keys: ["fatigue", "tired"],
-    response: `
-Fatigue can occur due to stress, illness, or poor sleep.
+Seek care if rash spreads rapidly or is painful.
+`},
 
-<b>General guidance:</b>
-• Adequate rest  
-• Balanced meals  
+{topic:"joint", keys:["joint pain","swelling","arthritis"], response:`
+Joint pain can result from strain, inflammation, or infection.
 
-<b>Seek care if:</b> fatigue persists.
-`
-  },
-  {
-    keys: ["burning urination", "urination pain"],
-    response: `
-Pain during urination may suggest a urinary tract infection.
+To understand better:
+• Which joint is affected?
+• Any swelling or redness?
 
-<b>General guidance:</b>
-• Increase water intake  
+Seek care if pain persists or worsens.
+`},
 
-<b>Seek care for:</b> proper medical evaluation.
-`
-  },
-  {
-    keys: ["eye pain", "red eyes"],
-    response: `
+{topic:"back", keys:["back pain"], response:`
+Back pain is often due to muscle strain or posture issues.
+
+Questions:
+• Lower or upper back?
+• Any numbness or weakness?
+
+Seek care if pain is severe or persistent.
+`},
+
+{topic:"fatigue", keys:["fatigue","tired","weak"], response:`
+Fatigue can occur due to illness, stress, or poor sleep.
+
+To guide you:
+• How long have you felt this way?
+• Any weight loss or fever?
+
+Persistent fatigue should be evaluated.
+`},
+
+{topic:"urinary", keys:["urination pain","burning urine"], response:`
+Painful urination may indicate a urinary tract infection.
+
+Please share:
+• Any fever or lower abdominal pain?
+• Frequency of urination?
+
+Medical evaluation is recommended.
+`},
+
+{topic:"eye", keys:["eye pain","red eye","vision"], response:`
 Eye discomfort may result from infection or strain.
 
-<b>General guidance:</b>
-• Avoid touching eyes  
-• Limit screen use  
+Please tell me:
+• Any discharge or vision changes?
 
-<b>Seek care if:</b> vision changes occur.
-`
-  },
-  {
-    keys: ["ear pain"],
-    response: `
+Seek care if vision is affected.
+`},
+
+{topic:"ear", keys:["ear pain"], response:`
 Ear pain may be due to infection or pressure changes.
 
-<b>General guidance:</b>
-• Keep ear dry  
+Seek care if pain worsens or hearing is affected.
+`},
 
-<b>Seek care if:</b> pain worsens.
-`
-  },
-  {
-    keys: ["weight loss"],
-    response: `
-Unintentional weight loss may require medical evaluation.
+{topic:"weight", keys:["weight loss"], response:`
+Unintentional weight loss should be medically evaluated.
 
-<b>Recommendation:</b>
-Consult a healthcare professional.
-`
-  },
-  {
-    keys: ["high blood pressure"],
-    response: `
+I recommend consulting a healthcare professional.
+`},
+
+{topic:"bp", keys:["high blood pressure","hypertension"], response:`
 High blood pressure often has no symptoms but requires monitoring.
 
-<b>Advice:</b>
-• Regular check-ups  
-• Healthy lifestyle  
+Regular medical checkups are important.
+`},
 
-<b>Seek care:</b> for proper assessment.
-`
-  },
-  {
-    keys: ["diabetes"],
-    response: `
-Diabetes is a chronic condition requiring medical management.
+{topic:"diabetes", keys:["diabetes","high sugar"], response:`
+Diabetes requires long-term medical management.
 
-<b>Advice:</b>
-• Regular monitoring  
-• Follow medical guidance
-`
-  },
-  {
-    keys: ["asthma", "wheezing"],
-    response: `
+Follow medical guidance and regular monitoring.
+`},
+
+{topic:"asthma", keys:["asthma","wheezing"], response:`
 Asthma affects breathing and may cause wheezing.
 
-<b>Seek care if:</b> breathing difficulty increases.
-`
-  },
-  {
-    keys: ["malaria"],
-    response: `
+Seek urgent care if breathing worsens.
+`},
+
+{topic:"malaria", keys:["malaria"], response:`
 Malaria commonly presents with fever, chills, and body aches.
 
-<b>Action:</b>
-Visit a health facility for testing and treatment.
-`
-  }
+Testing at a health facility is essential.
+`},
+
+/* ---------- ADDITIONAL CONDITIONS ---------- */
+{keys:["flu","influenza"],response:"Flu is a viral illness causing fever, cough, and body aches. Rest and hydration are important."},
+{keys:["covid"],response:"COVID-19 may cause fever, cough, fatigue, and breathing difficulty. Seek testing if suspected."},
+{keys:["anemia"],response:"Anemia may cause fatigue and dizziness. Blood tests are required."},
+{keys:["depression"],response:"Persistent sadness or loss of interest should be discussed with a healthcare professional."},
+{keys:["anxiety"],response:"Anxiety can cause physical and emotional symptoms. Support and evaluation help."},
+{keys:["thyroid"],response:"Thyroid disorders affect metabolism and energy levels."},
+{keys:["ulcer"],response:"Stomach ulcers may cause burning pain. Medical evaluation needed."},
+{keys:["appendicitis"],response:"Severe right-lower abdominal pain requires urgent care."},
+{keys:["pneumonia"],response:"Pneumonia causes cough, fever, and breathing difficulty."},
+{keys:["tuberculosis","tb"],response:"TB causes chronic cough, fever, and weight loss. Testing is required."},
+{keys:["hepatitis"],response:"Hepatitis affects the liver and may cause jaundice."},
+{keys:["kidney"],response:"Kidney issues may cause swelling or urination changes."},
+{keys:["stroke"],response:"Sudden weakness or speech difficulty is an emergency."},
+{keys:["heart attack"],response:"Chest pain with sweating or nausea is an emergency."},
+{keys:["allergy"],response:"Allergies cause itching, sneezing, or rashes."},
+{keys:["eczema"],response:"Eczema causes chronic itchy skin."},
+{keys:["gastritis"],response:"Gastritis causes stomach discomfort and nausea."},
+{keys:["sinusitis"],response:"Sinusitis causes facial pain and congestion."},
+{keys:["tonsillitis"],response:"Tonsillitis causes sore throat and fever."},
+{keys:["uti"],response:"UTI causes burning urination and frequency."}
 ];
 
-/* ================= CORE FUNCTIONS ================= */
-
-function addMessage(text, isUser) {
-  const div = document.createElement("div");
-  div.className = `message ${isUser ? "user-message" : "ai-message"}`;
-  div.innerHTML = `
-    <div class="avatar ${isUser ? "user-avatar" : "ai-avatar"}">
-      ${isUser ? "👤" : "🛡️"}
-    </div>
-    <div class="message-bubble">${text}</div>
-  `;
-  chatBox.appendChild(div);
-  window.scrollTo(0, document.body.scrollHeight);
+/* ================= CORE LOGIC ================= */
+function addMessage(text,isUser){
+const div=document.createElement("div");
+div.className=`message ${isUser?"user-message":"ai-message"}`;
+div.innerHTML=`<div class="avatar ${isUser?"user-avatar":"ai-avatar"}">${isUser?"👤":"🛡️"}</div>
+<div class="message-bubble">${text}</div>`;
+chatBox.appendChild(div);
+window.scrollTo(0,document.body.scrollHeight);
 }
 
-function getDoctorStyleResponse(text) {
-  const lower = text.toLowerCase();
+function doctorResponse(text){
+const lower=text.toLowerCase();
 
-  if (greetings.some(g => lower.includes(g))) {
-    return `
-Hello! I’m glad you reached out.  
-I’m here to provide general health guidance in a calm and professional manner.
+if(greetings.some(g=>lower.includes(g))){
+return `Hello. I’m glad you reached out.
 
-How can I assist you today?
-`;
-  }
-
-  for (let item of medicalKnowledge) {
-    if (item.keys.some(k => lower.includes(k))) {
-      return item.response;
-    }
-  }
-
-  return `
-Thank you for sharing that information.
-
-At the moment, your symptoms are not specific enough for clear guidance.
-Please monitor your condition and consult a qualified healthcare professional if you are concerned.
-
-<b>Disclaimer:</b> This assistant provides educational information only.
-`;
+I’m here to listen carefully and provide general medical guidance.
+Please tell me what symptoms or concerns you’re experiencing.`;
 }
 
-function handleChat() {
-  if (!input.value.trim()) return;
-
-  const userText = input.value;
-  input.value = "";
-  addMessage(userText, true);
-  typing.style.display = "block";
-
-  setTimeout(() => {
-    typing.style.display = "none";
-    addMessage(getDoctorStyleResponse(userText), false);
-  }, 900);
+for(let c of conditions){
+if(c.keys && c.keys.some(k=>lower.includes(k))){
+lastTopic=c.topic||null;
+return c.response;
+}
 }
 
-/* ================= EVENTS ================= */
-document.getElementById("send").onclick = handleChat;
-input.addEventListener("keypress", e => {
-  if (e.key === "Enter") handleChat();
-});
+if(lastTopic){
+return `Thank you for that information.
 
-document.getElementById("download-pdf").onclick = () => {
-  html2pdf()
-    .from(document.getElementById("content-to-print"))
-    .set({ filename: "MedAI_Conversation_Report.pdf", margin: 10 })
-    .save();
+To understand this better, could you tell me:
+• When did the symptoms start?
+• Are they improving or worsening?
+
+This helps guide safe medical advice.`;
+}
+
+return `Thank you for sharing.
+
+Your concern is noted. If symptoms persist, worsen, or worry you, please consult a qualified healthcare professional.
+
+<b>Disclaimer:</b> Educational guidance only.`;
+}
+
+function handleChat(){
+if(!input.value.trim())return;
+const userText=input.value;
+input.value="";
+addMessage(userText,true);
+typing.style.display="block";
+setTimeout(()=>{
+typing.style.display="none";
+addMessage(doctorResponse(userText),false);
+},900);
+}
+
+document.getElementById("send").onclick=handleChat;
+input.addEventListener("keypress",e=>{if(e.key==="Enter")handleChat();});
+
+document.getElementById("download-pdf").onclick=()=>{
+html2pdf().from(document.getElementById("content-to-print"))
+.set({filename:"MedAI_Doctor_Consultation_Report.pdf",margin:10})
+.save();
 };
 </script>
+
 </body>
 </html>
