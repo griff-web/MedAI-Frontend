@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MedAI</title>
+<title>MedAI Assistant</title>
 <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -182,67 +182,318 @@ Describe your symptoms and I will guide you safely.
 </div>
 
 <script>
-const chatBox=document.getElementById("chat-box");
-const typing=document.getElementById("typing");
-const input=document.getElementById("user-input");
+const chatBox = document.getElementById("chat-box");
+const typing = document.getElementById("typing");
+const input = document.getElementById("user-input");
 
-const knowledgeBase=[
-{keys:["fever","chills"], text:"Possible infection. Rest, hydrate, and monitor temperature."},
-{keys:["headache","migraine"], text:"May be tension or dehydration. Rest and drink fluids."},
-{keys:["cough","sore throat"], text:"Upper respiratory irritation. Warm fluids recommended."},
-{keys:["chest pain","breathing"], text:"⚠️ This may be serious. Seek immediate medical attention."},
-{keys:["stomach pain","diarrhea"], text:"Possible gastrointestinal issue. Oral rehydration advised."},
-{keys:["dizziness","fainting"], text:"May relate to low blood pressure or dehydration."},
-{keys:["rash","itching"], text:"Possible allergic reaction or skin condition."},
-{keys:["joint pain","swelling"], text:"May be inflammatory or injury-related."}
+let conversationContext = [];
+
+/* ================= GREETINGS ================= */
+const greetings = [
+  "hi", "hello", "hey", "jambo", "good morning", "good afternoon", "good evening"
 ];
 
-let conversationHistory=[];
+/* ================= MEDICAL KNOWLEDGE BASE (20 CONDITIONS) ================= */
+const medicalKnowledge = [
+  {
+    keys: ["fever", "chills", "sweating"],
+    response: `
+Thank you for explaining your symptoms. Fever with chills may be associated with infections such as flu, malaria, or other viral illnesses.
 
-function addMessage(text,isUser){
-const div=document.createElement("div");
-div.className=`message ${isUser?"user-message":"ai-message"}`;
-div.innerHTML=`<div class="avatar ${isUser?"user-avatar":"ai-avatar"}">${isUser?"👤":"🛡️"}</div>
-<div class="message-bubble">${text}</div>`;
-chatBox.appendChild(div);
-window.scrollTo(0,document.body.scrollHeight);
-conversationHistory.push({role:isUser?"User":"MedAI",text});
+<b>General guidance:</b>
+• Rest and hydrate well  
+• Monitor your temperature  
+• Seek medical care if fever lasts more than 2–3 days  
+
+<b>Disclaimer:</b> This is not a diagnosis.
+`
+  },
+  {
+    keys: ["headache", "migraine"],
+    response: `
+Headaches can occur due to stress, dehydration, eye strain, or infections.
+
+<b>General guidance:</b>
+• Rest in a quiet place  
+• Drink water  
+• Avoid screens temporarily  
+
+<b>Seek care if:</b> headache is severe, sudden, or persistent.
+`
+  },
+  {
+    keys: ["cough", "sore throat"],
+    response: `
+A cough with sore throat may indicate a respiratory infection or irritation.
+
+<b>General guidance:</b>
+• Warm fluids  
+• Rest your voice  
+• Avoid smoke and dust  
+
+<b>Seek care if:</b> breathing becomes difficult.
+`
+  },
+  {
+    keys: ["chest pain", "shortness of breath"],
+    response: `
+⚠️ Chest pain or difficulty breathing can be serious.
+
+<b>Action required:</b>
+Please seek immediate medical attention or visit the nearest hospital.
+
+<b>Disclaimer:</b> This assistant cannot manage emergencies.
+`
+  },
+  {
+    keys: ["stomach pain", "abdominal pain"],
+    response: `
+Abdominal pain may result from indigestion, infection, or other conditions.
+
+<b>General guidance:</b>
+• Light meals  
+• Adequate hydration  
+
+<b>Seek care if:</b> pain is severe, persistent, or worsening.
+`
+  },
+  {
+    keys: ["diarrhea"],
+    response: `
+Diarrhea is often caused by infection or contaminated food or water.
+
+<b>General guidance:</b>
+• Oral rehydration solution (ORS)  
+• Avoid dehydration  
+
+<b>Seek care if:</b> blood is present or dehydration occurs.
+`
+  },
+  {
+    keys: ["vomiting", "nausea"],
+    response: `
+Nausea and vomiting may occur with infections or stomach irritation.
+
+<b>General guidance:</b>
+• Small sips of fluids  
+• Rest  
+
+<b>Seek care if:</b> vomiting persists or worsens.
+`
+  },
+  {
+    keys: ["dizziness", "fainting"],
+    response: `
+Dizziness may be related to dehydration, low blood pressure, or fatigue.
+
+<b>General guidance:</b>
+• Sit or lie down  
+• Hydrate  
+
+<b>Seek care if:</b> fainting occurs.
+`
+  },
+  {
+    keys: ["rash", "itching"],
+    response: `
+Skin rashes can be caused by allergies, infections, or irritation.
+
+<b>General guidance:</b>
+• Avoid scratching  
+• Observe changes  
+
+<b>Seek care if:</b> rash spreads rapidly or is painful.
+`
+  },
+  {
+    keys: ["joint pain", "swelling"],
+    response: `
+Joint pain may result from strain, inflammation, or infection.
+
+<b>General guidance:</b>
+• Rest the joint  
+• Gentle movement  
+
+<b>Seek care if:</b> swelling is severe or persistent.
+`
+  },
+  {
+    keys: ["back pain"],
+    response: `
+Back pain is commonly caused by muscle strain or posture issues.
+
+<b>General guidance:</b>
+• Gentle stretching  
+• Avoid heavy lifting  
+
+<b>Seek care if:</b> pain is severe or long-lasting.
+`
+  },
+  {
+    keys: ["fatigue", "tired"],
+    response: `
+Fatigue can occur due to stress, illness, or poor sleep.
+
+<b>General guidance:</b>
+• Adequate rest  
+• Balanced meals  
+
+<b>Seek care if:</b> fatigue persists.
+`
+  },
+  {
+    keys: ["burning urination", "urination pain"],
+    response: `
+Pain during urination may suggest a urinary tract infection.
+
+<b>General guidance:</b>
+• Increase water intake  
+
+<b>Seek care for:</b> proper medical evaluation.
+`
+  },
+  {
+    keys: ["eye pain", "red eyes"],
+    response: `
+Eye discomfort may result from infection or strain.
+
+<b>General guidance:</b>
+• Avoid touching eyes  
+• Limit screen use  
+
+<b>Seek care if:</b> vision changes occur.
+`
+  },
+  {
+    keys: ["ear pain"],
+    response: `
+Ear pain may be due to infection or pressure changes.
+
+<b>General guidance:</b>
+• Keep ear dry  
+
+<b>Seek care if:</b> pain worsens.
+`
+  },
+  {
+    keys: ["weight loss"],
+    response: `
+Unintentional weight loss may require medical evaluation.
+
+<b>Recommendation:</b>
+Consult a healthcare professional.
+`
+  },
+  {
+    keys: ["high blood pressure"],
+    response: `
+High blood pressure often has no symptoms but requires monitoring.
+
+<b>Advice:</b>
+• Regular check-ups  
+• Healthy lifestyle  
+
+<b>Seek care:</b> for proper assessment.
+`
+  },
+  {
+    keys: ["diabetes"],
+    response: `
+Diabetes is a chronic condition requiring medical management.
+
+<b>Advice:</b>
+• Regular monitoring  
+• Follow medical guidance
+`
+  },
+  {
+    keys: ["asthma", "wheezing"],
+    response: `
+Asthma affects breathing and may cause wheezing.
+
+<b>Seek care if:</b> breathing difficulty increases.
+`
+  },
+  {
+    keys: ["malaria"],
+    response: `
+Malaria commonly presents with fever, chills, and body aches.
+
+<b>Action:</b>
+Visit a health facility for testing and treatment.
+`
+  }
+];
+
+/* ================= CORE FUNCTIONS ================= */
+
+function addMessage(text, isUser) {
+  const div = document.createElement("div");
+  div.className = `message ${isUser ? "user-message" : "ai-message"}`;
+  div.innerHTML = `
+    <div class="avatar ${isUser ? "user-avatar" : "ai-avatar"}">
+      ${isUser ? "👤" : "🛡️"}
+    </div>
+    <div class="message-bubble">${text}</div>
+  `;
+  chatBox.appendChild(div);
+  window.scrollTo(0, document.body.scrollHeight);
 }
 
-function analyze(inputText){
-const text=inputText.toLowerCase();
-for(let item of knowledgeBase){
-if(item.keys.some(k=>text.includes(k))){
-return `<b>Assessment:</b> ${item.text}<br><br>
-<b>Disclaimer:</b> This is educational information only. Consult a healthcare professional.`;
-}
-}
-return `<b>General Guidance:</b> Symptoms are unclear.<br>
-Monitor your condition and seek medical advice if concerned.<br><br>
-<b>Disclaimer:</b> Not a diagnosis.`;
+function getDoctorStyleResponse(text) {
+  const lower = text.toLowerCase();
+
+  if (greetings.some(g => lower.includes(g))) {
+    return `
+Hello! I’m glad you reached out.  
+I’m here to provide general health guidance in a calm and professional manner.
+
+How can I assist you today?
+`;
+  }
+
+  for (let item of medicalKnowledge) {
+    if (item.keys.some(k => lower.includes(k))) {
+      return item.response;
+    }
+  }
+
+  return `
+Thank you for sharing that information.
+
+At the moment, your symptoms are not specific enough for clear guidance.
+Please monitor your condition and consult a qualified healthcare professional if you are concerned.
+
+<b>Disclaimer:</b> This assistant provides educational information only.
+`;
 }
 
-function handleChat(){
-if(!input.value.trim())return;
-const userText=input.value;
-input.value="";
-addMessage(userText,true);
-typing.style.display="block";
-setTimeout(()=>{
-typing.style.display="none";
-addMessage(analyze(userText),false);
-},800);
+function handleChat() {
+  if (!input.value.trim()) return;
+
+  const userText = input.value;
+  input.value = "";
+  addMessage(userText, true);
+  typing.style.display = "block";
+
+  setTimeout(() => {
+    typing.style.display = "none";
+    addMessage(getDoctorStyleResponse(userText), false);
+  }, 900);
 }
 
-document.getElementById("send").onclick=handleChat;
-input.addEventListener("keypress",e=>{if(e.key==="Enter")handleChat();});
+/* ================= EVENTS ================= */
+document.getElementById("send").onclick = handleChat;
+input.addEventListener("keypress", e => {
+  if (e.key === "Enter") handleChat();
+});
 
-document.getElementById("download-pdf").onclick=()=>{
-html2pdf().from(document.getElementById("content-to-print"))
-.set({margin:10,filename:"MedAI_Health_Report.pdf"})
-.save();
+document.getElementById("download-pdf").onclick = () => {
+  html2pdf()
+    .from(document.getElementById("content-to-print"))
+    .set({ filename: "MedAI_Conversation_Report.pdf", margin: 10 })
+    .save();
 };
 </script>
-
 </body>
 </html>
