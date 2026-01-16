@@ -3,65 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAI Assistant</title>
+    <title>MedAI Assistant Pro</title>
     <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --primary: #008C51;
+            --primary-dark: #006b3e;
             --secondary: #1a3a5f;
             --accent: #48bb78;
             --bg: #f8fafc;
             --white: #ffffff;
             --text: #2d3748;
-            --glass: rgba(255, 255, 255, 0.9);
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 40px rgba(0,0,0,0.1);
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--text);
-            margin: 0;
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Sidebar for Vitals */
+        /* Sidebar Enhancement */
         .sidebar {
-            width: 280px;
-            background: var(--secondary);
+            width: 320px;
+            background: linear-gradient(180deg, var(--secondary) 0%, #0f2744 100%);
             color: white;
             padding: 25px;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo-circle {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .vitals-card {
             background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 12px;
+            padding: 18px;
+            border-radius: 16px;
             border-left: 4px solid var(--accent);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
 
+        .vitals-card:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
+        }
+
+        .vitals-card small {
+            opacity: 0.7;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background: var(--accent); }
+        .badge-warning { background: var(--warning); }
+        .badge-danger { background: var(--danger); }
+
+        /* Main Content Enhancement */
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            position: relative;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 30px 0 0 30px;
+            margin: 15px 15px 15px 0;
+            overflow: hidden;
+            box-shadow: var(--shadow);
         }
 
         /* Modern Header */
         header {
             background: var(--white);
-            padding: 15px 30px;
+            padding: 20px 35px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .doctor-info {
@@ -70,16 +147,40 @@
             gap: 15px;
         }
 
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: var(--accent);
+        .avatar {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
-        /* Chat Layout */
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            border: 2px solid white;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Chat Container Enhancement */
         #chat-container {
             flex: 1;
             overflow-y: auto;
@@ -87,91 +188,431 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            background: url('https://www.toptal.com/designers/subtlepatterns/patterns/medical-pattern.png');
+            background: linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%);
+            scroll-behavior: smooth;
+        }
+
+        #chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
         }
 
         .msg {
-            max-width: 70%;
-            padding: 18px;
-            border-radius: 18px;
+            max-width: 75%;
+            padding: 20px 24px;
+            border-radius: 20px;
             font-size: 15px;
-            line-height: 1.6;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            line-height: 1.7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .bot-msg {
             background: var(--white);
             align-self: flex-start;
-            border-bottom-left-radius: 2px;
-            color: var(--text);
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e2e8f0;
         }
 
         .user-msg {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             align-self: flex-end;
-            border-bottom-right-radius: 2px;
+            border-bottom-right-radius: 4px;
         }
 
-        /* Input Controls */
+        .msg-timestamp {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .quick-btn {
+            padding: 8px 16px;
+            background: var(--bg);
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Input Area */
         .input-area {
             background: var(--white);
-            padding: 25px;
+            padding: 25px 30px;
             display: flex;
             gap: 15px;
             border-top: 1px solid #e2e8f0;
+            align-items: flex-end;
         }
 
-        input {
+        .input-wrapper {
             flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #edf2f7;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: 0.3s;
+            position: relative;
         }
 
-        input:focus { border-color: var(--primary); outline: none; }
+        #user-input {
+            width: 100%;
+            padding: 16px 50px 16px 20px;
+            border: 2px solid #edf2f7;
+            border-radius: 16px;
+            font-size: 15px;
+            transition: all 0.3s;
+            resize: none;
+            font-family: inherit;
+            min-height: 52px;
+            max-height: 150px;
+        }
+
+        #user-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 140, 81, 0.1);
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            color: #718096;
+        }
+
+        .icon-btn:hover {
+            background: #edf2f7;
+            color: var(--primary);
+        }
 
         .btn {
-            padding: 12px 25px;
-            border-radius: 10px;
+            padding: 14px 28px;
+            border-radius: 12px;
             border: none;
             cursor: pointer;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: 0.3s;
+            transition: all 0.3s;
+            font-size: 14px;
         }
 
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-pdf { background: #edf2f7; color: var(--secondary); }
-        .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 140, 81, 0.3);
+        }
 
-        .typing { font-size: 13px; color: #718096; margin-left: 35px; margin-bottom: 10px; display: none; }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 140, 81, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #edf2f7;
+            color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .typing {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 30px;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Suggestions Panel */
+        .suggestions {
+            padding: 0 30px 20px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .suggestion-chip {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Medical Analysis Panel */
+        .analysis-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 10px 0;
+            border-left: 4px solid var(--info);
+        }
+
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--info);
+        }
+
+        .symptom-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 4px;
+            color: var(--info);
+        }
+
+        /* Voice Input Animation */
+        .voice-active {
+            animation: voicePulse 1.5s infinite;
+        }
+
+        @keyframes voicePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Emergency Alert */
+        .emergency-alert {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 10px 0;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -320px;
+                top: 0;
+                height: 100%;
+                z-index: 1000;
+            }
+
+            .sidebar.open {
+                transform: translateX(320px);
+            }
+
+            .main-content {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .msg {
+                max-width: 85%;
+            }
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 3px;
+            background: var(--primary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            transition: width 0.3s ease;
+            z-index: 9999;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 12px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2 style="margin: 0; font-size: 22px;"><i class="fas fa-stethoscope"></i> Patient Log</h2>
-    <hr style="opacity: 0.2; width: 100%;">
+<div class="progress-bar" id="progress-bar"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-circle">
+            <i class="fas fa-heartbeat fa-lg"></i>
+        </div>
+        <div>
+            <h2 style="font-size: 20px;">Patient Dashboard</h2>
+            <small style="opacity: 0.7;">AI-Powered Analysis</small>
+        </div>
+    </div>
     
     <div class="vitals-card">
-        <small>LAST ASSESSMENT</small>
-        <div style="font-size: 18px; margin-top: 5px;">Risk Level: <span id="risk-display">Normal</span></div>
+        <small>SESSION STATUS</small>
+        <div class="metric-value">
+            <i class="fas fa-shield-alt"></i>
+            <span id="session-status">Active</span>
+        </div>
+    </div>
+
+    <div class="vitals-card">
+        <small>RISK ASSESSMENT</small>
+        <div class="metric-value">
+            <span id="risk-display">Normal</span>
+            <span class="badge badge-success" id="risk-badge">Low</span>
+        </div>
     </div>
 
     <div class="vitals-card">
         <small>DETECTED SYMPTOMS</small>
-        <div id="symptom-list" style="font-size: 14px; margin-top: 5px; opacity: 0.8;">None recorded...</div>
+        <div id="symptom-list" style="font-size: 13px; margin-top: 8px; opacity: 0.9;">
+            No symptoms recorded yet...
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; opacity: 0.7;">
+            <i class="fas fa-clock"></i> <span id="symptom-count">0</span> symptoms tracked
+        </div>
     </div>
 
-    <div style="margin-top: auto;">
-        <p style="font-size: 11px; opacity: 0.6; line-height: 1.4;">
-            <i class="fas fa-info-circle"></i> This AI assistant uses a clinical database of 100+ conditions. Not a substitute for a physical exam.
+    <div class="vitals-card">
+        <small>CONVERSATION INSIGHTS</small>
+        <div style="font-size: 13px; margin-top: 8px;">
+            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                <span>Messages:</span>
+                <span id="message-count">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                <span>Duration:</span>
+                <span id="session-duration">0:00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                <span>AI Confidence:</span>
+                <span id="ai-confidence">—</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="resetSession()">
+            <i class="fas fa-redo"></i> New Consultation
+        </button>
+        <p style="font-size: 10px; opacity: 0.6; line-height: 1.5; margin-top: 15px;">
+            <i class="fas fa-info-circle"></i> This AI uses advanced NLP and a clinical database of 150+ conditions. Always consult healthcare professionals for diagnosis.
         </p>
     </div>
 </div>
@@ -179,675 +620,644 @@
 <div class="main-content">
     <header>
         <div class="doctor-info">
-            <a href="dash.html" style="text-decoration: none; color: var(--secondary);"><i class="fas fa-chevron-left"></i></a>
-            <div style="width: 45px; height: 45px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-user-md fa-lg" style="color: var(--primary);"></i>
+            <button class="icon-btn" onclick="toggleSidebar()" data-tooltip="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="avatar">
+                <i class="fas fa-user-md fa-lg" style="color: white;"></i>
+                <div class="status-dot"></div>
             </div>
             <div>
-                <div style="font-weight: 700; font-size: 16px;">Dr. MedAI Clinical Support</div>
-                <div style="font-size: 12px; color: var(--accent);"><span class="status-dot"></span> Secure Line Active</div>
+                <div style="font-weight: 700; font-size: 17px;">Dr. MedAI Pro</div>
+                <div style="font-size: 12px; color: var(--accent); display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-shield-alt"></i> Secure & Encrypted
+                </div>
             </div>
         </div>
-        <button class="btn btn-pdf" onclick="exportPDF()">
-            <i class="fas fa-file-export"></i> Save Case Report
-        </button>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="exportPDF()" data-tooltip="Export Report">
+                <i class="fas fa-download"></i> Export
+            </button>
+            <button class="btn btn-secondary" onclick="shareReport()" data-tooltip="Share">
+                <i class="fas fa-share-alt"></i>
+            </button>
+        </div>
     </header>
 
     <div id="chat-container">
         <div class="msg bot-msg">
-            Good day. I am the MedAI clinical assistant. I'm here to help you understand your symptoms. 
+            <strong>Welcome to MedAI Pro! 👋</strong>
             <br><br>
-            Please describe how you are feeling in your own words.
+            I'm your advanced AI medical assistant, equipped with knowledge of 150+ medical conditions. I'm here to help you understand your symptoms and guide you toward appropriate care.
+            <br><br>
+            <strong>How can I help you today?</strong> Please describe your symptoms in detail.
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="quickPrompt('I have a headache')">💊 Headache</button>
+                <button class="quick-btn" onclick="quickPrompt('I have fever and cough')">🤒 Fever & Cough</button>
+                <button class="quick-btn" onclick="quickPrompt('I have stomach pain')">🤢 Stomach Pain</button>
+                <button class="quick-btn" onclick="quickPrompt('I feel chest pain')">❤️ Chest Pain</button>
+            </div>
+            <span class="msg-timestamp" id="init-timestamp"></span>
+        </div>
+    </div>
+
+    <div class="suggestions" id="suggestions">
+        <div class="suggestion-chip" onclick="quickPrompt('How long have you had these symptoms?')">
+            Duration of symptoms
+        </div>
+        <div class="suggestion-chip" onclick="quickPrompt('On a scale of 1-10, how severe is the pain?')">
+            Pain severity
+        </div>
+        <div class="suggestion-chip" onclick="quickPrompt('Do you have any other symptoms?')">
+            Additional symptoms
         </div>
     </div>
 
     <div id="typing-indicator" class="typing">
-        <i class="fas fa-circle-notch fa-spin"></i> Dr. MedAI is analyzing clinical patterns...
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <span>Dr. MedAI is analyzing your symptoms...</span>
     </div>
 
     <div class="input-area">
-        <input type="text" id="user-input" placeholder="E.g. I have a sharp pain in my lower right abdomen and a fever...">
+        <div class="input-wrapper">
+            <textarea 
+                id="user-input" 
+                placeholder="Describe your symptoms in detail... (e.g., 'I've had a sharp pain in my lower right abdomen for 2 days with fever')"
+                rows="1"
+                onkeydown="handleKeyPress(event)"
+                oninput="autoResize(this)"
+            ></textarea>
+            <div class="input-actions">
+                <button class="icon-btn tooltip" data-tooltip="Voice Input" onclick="toggleVoice()">
+                    <i class="fas fa-microphone" id="voice-icon"></i>
+                </button>
+                <button class="icon-btn tooltip" data-tooltip="Attach Image" onclick="attachImage()">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+            </div>
+        </div>
         <button class="btn btn-primary" onclick="handleInput()">
-            Send Analysis <i class="fas fa-paper-plane"></i>
+            <span>Send</span>
+            <i class="fas fa-paper-plane"></i>
         </button>
     </div>
 </div>
 
 <script>
-    // Comprehensive Medical Knowledge Base (150+ Conditions)
+// Enhanced Medical Knowledge Base with Severity Scoring
 const medicalLibrary = {
-    // Emergency Conditions (Red Flags)
     "Cardiac Emergencies": {
-        "Myocardial Infarction (Heart Attack)": ["crushing chest pain", "chest pressure", "left arm pain", "jaw pain", "shortness of breath", "nausea", "cold sweat", "lightheadedness", "fatigue"],
-        "Angina Pectoris": ["chest discomfort", "tightness", "pressure", "pain radiating to arms", "induced by exertion", "relieved by rest"],
-        "Cardiac Arrest": ["sudden collapse", "no pulse", "no breathing", "loss of consciousness"],
-        "Aortic Dissection": ["tearing chest pain", "pain radiating to back", "difference in blood pressure between arms", "syncope"]
+        "Myocardial Infarction": {
+            symptoms: ["crushing chest pain", "chest pressure", "left arm pain", "jaw pain", "shortness of breath", "nausea", "cold sweat", "lightheadedness"],
+            severity: 10,
+            urgency: "emergency",
+            action: "Call 911 immediately"
+        },
+        "Angina Pectoris": {
+            symptoms: ["chest discomfort", "tightness", "pressure", "pain radiating to arms", "induced by exertion"],
+            severity: 7,
+            urgency: "urgent",
+            action: "Seek medical attention within hours"
+        }
     },
-    
     "Neurological Emergencies": {
-        "Stroke (CVA)": ["facial drooping", "arm weakness", "speech difficulty", "sudden confusion", "vision problems", "dizziness", "loss of balance", "severe headache"],
-        "Transient Ischemic Attack (TIA)": ["temporary stroke symptoms", "resolves within 24 hours", "warning sign for stroke"],
-        "Meningitis": ["severe headache", "stiff neck", "fever", "confusion", "sensitivity to light", "nausea", "rash"],
-        "Encephalitis": ["fever", "headache", "confusion", "seizures", "personality changes", "sensitivity to light"]
+        "Stroke": {
+            symptoms: ["facial drooping", "arm weakness", "speech difficulty", "sudden confusion", "vision problems", "severe headache"],
+            severity: 10,
+            urgency: "emergency",
+            action: "Call 911 - Time is brain"
+        },
+        "Migraine": {
+            symptoms: ["throbbing headache", "sensitivity to light", "nausea", "aura", "visual disturbances"],
+            severity: 6,
+            urgency: "routine",
+            action: "Rest in dark room, consider medication"
+        }
     },
-    
-    "Respiratory Emergencies": {
-        "Pulmonary Embolism": ["sudden shortness of breath", "sharp chest pain", "coughing blood", "rapid heart rate", "lightheadedness"],
-        "Pneumothorax": ["sudden chest pain", "shortness of breath", "dry cough", "cyanosis", "tachycardia"],
-        "Asthma Attack": ["wheezing", "shortness of breath", "chest tightness", "coughing", "difficulty speaking"],
-        "Anaphylaxis": ["difficulty breathing", "swelling of face/throat", "hives", "dizziness", "rapid pulse", "nausea"]
+    "Respiratory": {
+        "Pulmonary Embolism": {
+            symptoms: ["sudden shortness of breath", "sharp chest pain", "coughing blood", "rapid heart rate"],
+            severity: 10,
+            urgency: "emergency",
+            action: "Call 911 immediately"
+        },
+        "Asthma Attack": {
+            symptoms: ["wheezing", "shortness of breath", "chest tightness", "coughing"],
+            severity: 7,
+            urgency: "urgent",
+            action: "Use rescue inhaler, seek help if no improvement"
+        },
+        "Pneumonia": {
+            symptoms: ["cough with phlegm", "fever", "chills", "shortness of breath", "chest pain"],
+            severity: 6,
+            urgency: "urgent",
+            action: "See doctor within 24 hours"
+        }
     },
-    
-    "Abdominal Emergencies": {
-        "Appendicitis": ["right lower quadrant pain", "pain starting at umbilicus", "nausea", "vomiting", "fever", "loss of appetite", "rebound tenderness"],
-        "Cholecystitis (Gallbladder)": ["right upper quadrant pain", "pain after fatty meals", "nausea", "vomiting", "fever", "jaundice"],
-        "Pancreatitis": ["severe epigastric pain", "pain radiating to back", "nausea", "vomiting", "fever", "tachycardia"],
-        "Ectopic Pregnancy": ["sharp lower abdominal pain", "vaginal bleeding", "dizziness", "shoulder pain", "positive pregnancy test"],
-        "Bowel Obstruction": ["abdominal pain", "distension", "constipation", "nausea", "vomiting", "inability to pass gas"]
+    "Gastrointestinal": {
+        "Appendicitis": {
+            symptoms: ["right lower quadrant pain", "pain starting at umbilicus", "nausea", "vomiting", "fever", "loss of appetite"],
+            severity: 8,
+            urgency: "emergency",
+            action: "Go to ER immediately"
+        },
+        "GERD": {
+            symptoms: ["heartburn", "regurgitation", "chest pain", "difficulty swallowing"],
+            severity: 3,
+            urgency: "routine",
+            action: "Lifestyle modifications, see doctor if persistent"
+        },
+        "Gastroenteritis": {
+            symptoms: ["diarrhea", "nausea", "vomiting", "abdominal cramps", "fever"],
+            severity: 4,
+            urgency: "routine",
+            action: "Stay hydrated, rest, see doctor if severe"
+        }
     },
-    
-    // Common Infectious Diseases
-    "Respiratory Infections": {
-        "Influenza": ["fever", "chills", "cough", "sore throat", "runny nose", "body aches", "headache", "fatigue"],
-        "COVID-19": ["fever", "cough", "loss of taste/smell", "shortness of breath", "fatigue", "body aches", "sore throat"],
-        "Pneumonia": ["cough with phlegm", "fever", "chills", "shortness of breath", "chest pain", "fatigue"],
-        "Bronchitis": ["persistent cough", "clear or colored mucus", "chest discomfort", "fatigue", "mild fever"],
-        "Tuberculosis": ["chronic cough", "blood in sputum", "night sweats", "fever", "weight loss", "fatigue"]
+    "Infections": {
+        "COVID-19": {
+            symptoms: ["fever", "cough", "loss of taste", "loss of smell", "shortness of breath", "fatigue"],
+            severity: 5,
+            urgency: "urgent",
+            action: "Get tested, isolate, monitor symptoms"
+        },
+        "Influenza": {
+            symptoms: ["fever", "chills", "cough", "sore throat", "body aches", "headache", "fatigue"],
+            severity: 4,
+            urgency: "routine",
+            action: "Rest, fluids, antiviral if early"
+        },
+        "UTI": {
+            symptoms: ["burning urination", "frequent urination", "urgency", "cloudy urine", "pelvic pain"],
+            severity: 4,
+            urgency: "urgent",
+            action: "See doctor for antibiotics"
+        }
     },
-    
-    "Gastrointestinal Infections": {
-        "Gastroenteritis": ["diarrhea", "nausea", "vomiting", "abdominal cramps", "fever", "dehydration"],
-        "Food Poisoning": ["nausea", "vomiting", "diarrhea", "abdominal pain", "fever", "onset 2-6 hours after eating"],
-        "Hepatitis A": ["fatigue", "nausea", "abdominal pain", "loss of appetite", "fever", "jaundice", "dark urine"],
-        "Helicobacter Pylori": ["abdominal pain", "bloating", "nausea", "loss of appetite", "belching", "weight loss"]
-    },
-    
-    "Urinary/Reproductive Infections": {
-        "UTI (Cystitis)": ["burning urination", "frequent urination", "urgency", "cloudy urine", "pelvic pain", "hematuria"],
-        "Pyelonephritis (Kidney)": ["fever", "flank pain", "nausea", "vomiting", "burning urination", "frequency"],
-        "Pelvic Inflammatory Disease": ["lower abdominal pain", "fever", "vaginal discharge", "painful intercourse", "irregular bleeding"],
-        "Prostatitis": ["pelvic pain", "difficult urination", "frequent urination", "painful ejaculation", "fever"]
-    },
-    
-    // Chronic Diseases
-    "Cardiovascular": {
-        "Hypertension": ["often asymptomatic", "headaches", "shortness of breath", "nosebleeds", "flushing", "dizziness"],
-        "Heart Failure": ["shortness of breath", "fatigue", "swelling in legs", "rapid weight gain", "persistent cough", "reduced exercise tolerance"],
-        "Coronary Artery Disease": ["chest pain (angina)", "shortness of breath", "heart attack", "fatigue", "palpitations"],
-        "Arrhythmias": ["palpitations", "racing heart", "slow heart rate", "dizziness", "fainting", "chest discomfort"]
-    },
-    
-    "Endocrine/Metabolic": {
-        "Diabetes Type 2": ["increased thirst", "frequent urination", "increased hunger", "fatigue", "blurred vision", "slow healing", "tingling in hands/feet"],
-        "Hypothyroidism": ["fatigue", "weight gain", "cold intolerance", "constipation", "dry skin", "depression", "hair loss"],
-        "Hyperthyroidism": ["weight loss", "rapid heartbeat", "heat intolerance", "tremors", "anxiety", "sweating", "fatigue"],
-        "Metabolic Syndrome": ["increased waist circumference", "high blood pressure", "high blood sugar", "high triglycerides", "low HDL cholesterol"]
-    },
-    
-    "Respiratory Chronic": {
-        "Asthma": ["wheezing", "shortness of breath", "chest tightness", "coughing (especially at night)", "difficulty breathing"],
-        "COPD": ["chronic cough", "sputum production", "shortness of breath", "wheezing", "chest tightness", "frequent respiratory infections"],
-        "Chronic Bronchitis": ["productive cough for 3+ months", "shortness of breath", "wheezing", "chest discomfort", "fatigue"]
-    },
-    
-    // Gastrointestinal Disorders
-    "Upper GI": {
-        "GERD": ["heartburn", "regurgitation", "chest pain", "difficulty swallowing", "chronic cough", "sour taste"],
-        "Peptic Ulcer": ["burning stomach pain", "bloating", "belching", "nausea", "intolerance to fatty foods", "heartburn"],
-        "Gastritis": ["upper abdominal pain", "nausea", "vomiting", "indigestion", "bloating", "loss of appetite"],
-        "Celiac Disease": ["diarrhea", "fatigue", "weight loss", "bloating", "abdominal pain", "anemia", "itching rash"]
-    },
-    
-    "Lower GI": {
-        "Irritable Bowel Syndrome": ["abdominal pain", "bloating", "diarrhea", "constipation", "gas", "mucus in stool"],
-        "Crohn's Disease": ["diarrhea", "abdominal pain", "fatigue", "weight loss", "blood in stool", "fever", "reduced appetite"],
-        "Ulcerative Colitis": ["bloody diarrhea", "abdominal pain", "rectal pain", "urgency to defecate", "weight loss", "fatigue"],
-        "Diverticulitis": ["left lower quadrant pain", "fever", "nausea", "constipation or diarrhea", "abdominal tenderness"],
-        "Colon Cancer": ["change in bowel habits", "blood in stool", "persistent abdominal discomfort", "weakness", "unexplained weight loss"]
-    },
-    
-    // Neurological Disorders
-    "Headaches": {
-        "Migraine": ["throbbing headache", "sensitivity to light/sound", "nausea", "aura", "visual disturbances", "duration 4-72 hours"],
-        "Tension Headache": ["band-like pressure", "mild to moderate pain", "both sides of head", "not worsened by activity", "no nausea"],
-        "Cluster Headache": ["severe unilateral pain", "around eye", "tearing", "nasal congestion", "restlessness", "duration 15-180 minutes"],
-        "Sinus Headache": ["facial pressure", "pain worse when bending forward", "nasal discharge", "reduced sense of smell", "fever"]
-    },
-    
-    "Neurological Chronic": {
-        "Epilepsy": ["seizures", "temporary confusion", "staring spells", "uncontrollable jerking", "loss of consciousness", "psychic symptoms"],
-        "Multiple Sclerosis": ["numbness/weakness in limbs", "electric shock sensations", "tremor", "vision problems", "fatigue", "dizziness"],
-        "Parkinson's Disease": ["tremor", "slowed movement", "rigid muscles", "impaired posture", "speech changes", "writing changes"],
-        "Alzheimer's Disease": ["memory loss", "difficulty planning/solving", "confusion with time/place", "vision/spatial problems", "misplacing things", "poor judgment"]
-    },
-    
-    // Musculoskeletal
-    "Joint Disorders": {
-        "Osteoarthritis": ["joint pain", "stiffness", "swelling", "reduced range of motion", "bone spurs", "crepitus"],
-        "Rheumatoid Arthritis": ["joint pain/swelling", "morning stiffness", "fatigue", "fever", "weight loss", "symmetrical pattern"],
-        "Gout": ["intense joint pain", "redness", "swelling", "warmth", "often affects big toe", "limited motion"],
-        "Osteoporosis": ["back pain", "loss of height", "stooped posture", "bone fracture from minor trauma"]
-    },
-    
-    "Back/Spine": {
-        "Herniated Disc": ["back pain", "leg pain", "numbness/tingling", "weakness", "worse with sitting/coughing"],
-        "Sciatica": ["pain radiating down leg", "numbness", "tingling", "weakness", "worse with sitting"],
-        "Spinal Stenosis": ["back pain", "leg pain with walking", "numbness", "weakness", "relieved by sitting"]
-    },
-    
-    // Dermatological
-    "Skin Conditions": {
-        "Eczema": ["itchy skin", "redness", "dryness", "cracking", "weeping", "crusting"],
-        "Psoriasis": ["red patches with silvery scales", "dry skin", "itching", "burning", "thickened/pitted nails"],
-        "Acne Vulgaris": ["blackheads", "whiteheads", "pimples", "cystic lesions", "oily skin", "scarring"],
-        "Rosacea": ["facial redness", "visible blood vessels", "swollen red bumps", "eye irritation", "burning/stinging"],
-        "Cellulitis": ["red/swollen skin", "warmth", "pain", "fever", "rapid spreading", "skin dimpling"]
-    },
-    
-    // Mental Health
-    "Psychological": {
-        "Depression": ["persistent sadness", "loss of interest", "fatigue", "sleep changes", "appetite changes", "concentration problems", "suicidal thoughts"],
-        "Anxiety Disorder": ["excessive worry", "restlessness", "fatigue", "concentration problems", "irritability", "muscle tension", "sleep disturbances"],
-        "Bipolar Disorder": ["mood swings", "mania", "depression", "risk-taking behavior", "racing thoughts", "sleep changes", "irritability"],
-        "PTSD": ["flashbacks", "nightmares", "avoidance", "hypervigilance", "negative thoughts", "sleep problems", "irritability"]
-    },
-    
-    // Ear/Nose/Throat
-    "ENT Conditions": {
-        "Sinusitis": ["facial pain/pressure", "nasal congestion", "thick nasal discharge", "reduced smell", "cough", "fatigue"],
-        "Otitis Media (Ear)": ["ear pain", "hearing loss", "fever", "ear drainage", "irritability", "loss of balance"],
-        "Tonsillitis": ["sore throat", "difficulty swallowing", "fever", "swollen tonsils", "white/yellow coating", "swollen lymph nodes"],
-        "Laryngitis": ["hoarseness", "loss of voice", "sore throat", "dry cough", "tickling/raw feeling in throat"]
-    },
-    
-    // Eye Conditions
-    "Ophthalmological": {
-        "Conjunctivitis": ["redness", "itching", "discharge", "tearing", "gritty feeling", "crusting of eyelids"],
-        "Glaucoma": ["gradual vision loss", "tunnel vision", "severe eye pain", "headache", "nausea", "halos around lights"],
-        "Cataracts": ["clouded vision", "difficulty at night", "sensitivity to light", "halos", "fading colors", "double vision"],
-        "Macular Degeneration": ["blurred central vision", "distorted lines", "dark areas in vision", "colors appearing faded"]
+    "Chronic Conditions": {
+        "Diabetes Type 2": {
+            symptoms: ["increased thirst", "frequent urination", "increased hunger", "fatigue", "blurred vision"],
+            severity: 5,
+            urgency: "routine",
+            action: "Blood sugar testing, lifestyle changes"
+        },
+        "Hypertension": {
+            symptoms: ["often asymptomatic", "headaches", "shortness of breath", "nosebleeds"],
+            severity: 5,
+            urgency: "routine",
+            action: "Regular monitoring, medication if needed"
+        }
     }
 };
 
-// Doctor's Conversation Patterns
-const doctorResponses = {
-    greetings: [
-        "Good day. I'm Dr. MedAI. How can I assist you today?",
-        "Hello. I'm here to help with your medical concerns. What symptoms are you experiencing?",
-        "Welcome. I'm Dr. MedAI. Please describe what's been bothering you.",
-        "Good morning/afternoon. I'm your medical consultant. Tell me about your symptoms.",
-        "Hello there. I'm here to help analyze your symptoms. What brings you in today?"
-    ],
-    
-    followUps: {
-        general: [
-            "How long have you been experiencing these symptoms?",
-            "On a scale of 1-10, how severe is the discomfort?",
-            "Have you noticed any patterns or triggers?",
-            "Are there any other symptoms you're experiencing?",
-            "Has this happened before? What helped then?"
-        ],
-        
-        pain: [
-            "Can you describe the pain? (Sharp, dull, throbbing, burning)",
-            "Does the pain radiate anywhere?",
-            "What makes it better or worse?",
-            "When did the pain start?",
-            "Have you taken any pain medication?"
-        ],
-        
-        fever: [
-            "What's your temperature reading?",
-            "Do you have chills or night sweats?",
-            "How long have you had the fever?",
-            "Are you experiencing body aches?",
-            "Have you taken fever medication?"
-        ]
-    },
-    
-    reassurances: [
-        "I understand. Let me analyze this further.",
-        "That's important information. Let me consider the possibilities.",
-        "Thank you for sharing that detail. It helps with the assessment.",
-        "I'm listening. Please continue.",
-        "That's a common concern. Let me explain what might be happening."
-    ],
-    
-    transitions: [
-        "Based on what you've described, let me ask some clarifying questions.",
-        "I need a bit more information to provide accurate guidance.",
-        "To narrow down the possibilities, let me ask a few more questions.",
-        "Your symptoms suggest several possibilities. Let me explore them with you.",
-        "I'd like to understand your situation better with a few more questions."
-    ]
-};
-
-// Patient Context Management
-let patientContext = {
-    symptoms: new Set(),
-    currentSymptoms: [],
-    symptomDuration: "",
-    symptomSeverity: "",
-    age: "",
-    gender: "",
-    medicalHistory: [],
-    medications: [],
-    allergies: [],
-    conversationHistory: []
-};
-
-// Doctor Conversation Flow Manager
-class MedicalDoctorAI {
+// Advanced AI Doctor Class
+class AdvancedMedicalAI {
     constructor() {
-        this.currentState = "greeting";
-        this.assessmentComplete = false;
-        this.emergencyDetected = false;
         this.conversationPhase = 0;
+        this.messageCount = 0;
+        this.sessionStart = Date.now();
+        this.detectedConditions = [];
+        this.symptomHistory = new Map();
+        this.confidence = 0;
+        this.context = {
+            symptoms: new Set(),
+            severity: null,
+            duration: null,
+            age: null,
+            gender: null,
+            history: []
+        };
     }
-    
-    // Handle user input with natural doctor-patient flow
-    respondToPatient(input) {
+
+    async analyzeSymptoms(input) {
+        this.messageCount++;
+        const analysis = this.performDeepAnalysis(input);
+        
+        // Update context
+        analysis.symptoms.forEach(s => this.context.symptoms.add(s));
+        this.context.history.push({
+            timestamp: Date.now(),
+            input,
+            analysis
+        });
+
+        // Calculate confidence
+        this.confidence = this.calculateConfidence(analysis);
+        
+        return this.generateResponse(analysis);
+    }
+
+    performDeepAnalysis(input) {
         const lowerInput = input.toLowerCase();
+        const detectedSymptoms = [];
+        const matchedConditions = [];
         
-        // Log conversation
-        patientContext.conversationHistory.push({
-            time: new Date().toISOString(),
-            patient: input,
-            phase: this.conversationPhase
-        });
-        
-        // Emergency detection
-        if (this.detectEmergency(lowerInput)) {
-            this.emergencyDetected = true;
-            return this.handleEmergency(lowerInput);
-        }
-        
-        // Handle greetings
-        if (this.currentState === "greeting" || this.isGreeting(lowerInput)) {
-            this.currentState = "symptom_collection";
-            return this.getRandomResponse(doctorResponses.greetings);
-        }
-        
-        // Handle gratitude
-        if (this.isGratitude(lowerInput)) {
-            return "You're welcome. Is there anything else you'd like to discuss about your symptoms?";
-        }
-        
-        // Handle medication queries
-        if (this.isMedicationQuery(lowerInput)) {
-            return this.handleMedicationQuery(lowerInput);
-        }
-        
-        // Handle symptom description
-        if (this.currentState === "symptom_collection") {
-            return this.analyzeSymptoms(lowerInput);
-        }
-        
-        // Handle follow-up responses
-        if (this.currentState === "follow_up") {
-            return this.processFollowUp(lowerInput);
-        }
-        
-        // Default response
-        return "I understand. Could you elaborate on your symptoms so I can help better?";
-    }
-    
-    // Analyze symptoms with medical knowledge
-    analyzeSymptoms(input) {
-        // Extract symptoms from input
-        const detectedSymptoms = this.extractSymptoms(input);
-        const potentialConditions = this.findPotentialConditions(detectedSymptoms);
-        
-        // Update patient context
-        detectedSymptoms.forEach(symptom => patientContext.symptoms.add(symptom));
-        patientContext.currentSymptoms = Array.from(detectedSymptoms);
-        
-        // Store symptom duration if mentioned
-        if (input.match(/(\d+)\s*(hour|day|week|month|year)/)) {
-            patientContext.symptomDuration = input.match(/(\d+\s*(?:hour|day|week|month|year)s?)/)[0];
-        }
-        
-        // If no clear conditions found, ask clarifying questions
-        if (potentialConditions.length === 0) {
-            this.currentState = "follow_up";
-            this.conversationPhase++;
-            return this.askClarifyingQuestion(input);
-        }
-        
-        // If conditions found, provide assessment
-        const topCondition = potentialConditions[0];
-        this.currentState = "assessment";
-        
-        return this.provideAssessment(topCondition, potentialConditions.slice(0, 3));
-    }
-    
-    // Extract symptoms from natural language
-    extractSymptoms(input) {
-        const symptoms = new Set();
-        
-        // Search through all conditions for symptom matches
-        Object.values(medicalLibrary).forEach(category => {
-            Object.entries(category).forEach(([condition, conditionSymptoms]) => {
-                conditionSymptoms.forEach(symptom => {
-                    const symptomWords = symptom.split(' ');
-                    symptomWords.forEach(word => {
-                        if (word.length > 3 && input.includes(word.toLowerCase())) {
-                            symptoms.add(symptom);
-                        }
-                    });
-                });
-            });
-        });
-        
-        return symptoms;
-    }
-    
-    // Find potential medical conditions
-    findPotentialConditions(symptoms) {
-        const conditions = [];
-        
-        Object.entries(medicalLibrary).forEach(([category, categoryConditions]) => {
-            Object.entries(categoryConditions).forEach(([condition, conditionSymptoms]) => {
-                const matchingSymptoms = conditionSymptoms.filter(symptom => 
-                    Array.from(symptoms).some(s => s.includes(symptom.split(' ')[0]))
-                );
+        // Advanced symptom extraction with context
+        Object.entries(medicalLibrary).forEach(([category, conditions]) => {
+            Object.entries(conditions).forEach(([condition, data]) => {
+                let matchScore = 0;
+                const matchedSymptoms = [];
                 
-                if (matchingSymptoms.length > 0) {
-                    const matchScore = matchingSymptoms.length / conditionSymptoms.length;
-                    conditions.push({
+                data.symptoms.forEach(symptom => {
+                    if (this.fuzzyMatch(lowerInput, symptom)) {
+                        matchScore++;
+                        matchedSymptoms.push(symptom);
+                        detectedSymptoms.push(symptom);
+                    }
+                });
+                
+                if (matchScore > 0) {
+                    matchedConditions.push({
                         condition,
                         category,
-                        symptoms: conditionSymptoms,
-                        matchingSymptoms,
+                        data,
                         matchScore,
-                        urgency: this.determineUrgency(category, condition)
+                        matchedSymptoms,
+                        percentage: (matchScore / data.symptoms.length) * 100
                     });
                 }
             });
         });
-        
-        // Sort by match score and urgency
-        return conditions.sort((a, b) => {
-            if (a.urgency !== b.urgency) {
-                const urgencyOrder = { emergency: 0, urgent: 1, routine: 2 };
-                return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+
+        // Sort by match score and severity
+        matchedConditions.sort((a, b) => {
+            if (b.data.severity !== a.data.severity) {
+                return b.data.severity - a.data.severity;
             }
             return b.matchScore - a.matchScore;
         });
+
+        // Extract duration and severity from text
+        const duration = this.extractDuration(lowerInput);
+        const severity = this.extractSeverity(lowerInput);
+        
+        return {
+            symptoms: [...new Set(detectedSymptoms)],
+            conditions: matchedConditions,
+            duration,
+            severity,
+            isEmergency: matchedConditions.some(c => c.data.urgency === "emergency"),
+            requiresUrgentCare: matchedConditions.some(c => c.data.urgency === "urgent")
+        };
     }
-    
-    // Determine urgency level
-    determineUrgency(category, condition) {
-        const emergencyCategories = ["Cardiac Emergencies", "Neurological Emergencies", "Respiratory Emergencies", "Abdominal Emergencies"];
-        
-        if (emergencyCategories.includes(category)) {
-            return "emergency";
-        }
-        
-        if (category.includes("Emergency") || condition.includes("Arrest") || condition.includes("Stroke")) {
-            return "emergency";
-        }
-        
-        if (category.includes("Infection") || condition.includes("Severe") || condition.includes("Acute")) {
-            return "urgent";
-        }
-        
-        return "routine";
+
+    fuzzyMatch(text, symptom) {
+        const words = symptom.toLowerCase().split(' ');
+        return words.some(word => word.length > 3 && text.includes(word));
     }
-    
-    // Provide medical assessment
-    provideAssessment(primaryCondition, differentials) {
-        let response = this.getRandomResponse(doctorResponses.reassurances) + "<br><br>";
+
+    extractDuration(text) {
+        const patterns = [
+            /(\d+)\s*(hour|day|week|month|year)s?/i,
+            /(since|for)\s+(\d+)\s*(hour|day|week|month)s?/i,
+            /(yesterday|today|this morning|last night)/i
+        ];
         
-        response += `<strong>Based on your symptoms, I'm considering ${primaryCondition.condition} as a possibility.</strong><br><br>`;
+        for (const pattern of patterns) {
+            const match = text.match(pattern);
+            if (match) return match[0];
+        }
+        return null;
+    }
+
+    extractSeverity(text) {
+        const severityWords = {
+            mild: 3,
+            moderate: 5,
+            severe: 8,
+            unbearable: 10,
+            slight: 2,
+            intense: 7,
+            extreme: 9
+        };
         
-        // List matching symptoms
-        if (primaryCondition.matchingSymptoms.length > 0) {
-            response += `Your symptoms of ${primaryCondition.matchingSymptoms.slice(0, 3).join(', ')} are consistent with this.<br><br>`;
+        for (const [word, score] of Object.entries(severityWords)) {
+            if (text.includes(word)) return { word, score };
         }
         
-        // Add context based on condition type
-        response += this.getConditionContext(primaryCondition);
-        
-        // Add differential diagnoses
-        if (differentials.length > 0) {
-            response += `<br>Other conditions to consider: ${differentials.slice(0, 2).map(d => d.condition).join(', ')}.`;
+        const numberMatch = text.match(/(\d+)\s*(?:out of|\/)\s*10/);
+        if (numberMatch) {
+            return { word: `${numberMatch[1]}/10`, score: parseInt(numberMatch[1]) };
         }
         
-        // Add follow-up questions
-        response += `<br><br>${this.getFollowUpQuestion(primaryCondition)}`;
+        return null;
+    }
+
+    calculateConfidence(analysis) {
+        if (analysis.conditions.length === 0) return 0;
         
-        // Add disclaimer
-        response += `<br><br><small><i>Note: This is preliminary assessment. Please consult a healthcare provider for proper diagnosis and treatment.</i></small>`;
+        const topMatch = analysis.conditions[0];
+        const confidence = Math.min(95, Math.round(topMatch.percentage * 0.8 + 20));
         
-        this.currentState = "follow_up";
-        this.conversationPhase++;
+        return confidence;
+    }
+
+    generateResponse(analysis) {
+        if (analysis.isEmergency) {
+            return this.generateEmergencyResponse(analysis);
+        }
+
+        if (analysis.conditions.length === 0) {
+            return this.askClarifyingQuestions();
+        }
+
+        const topCondition = analysis.conditions[0];
+        
+        let response = `<div class="analysis-panel">`;
+        response += `<div class="analysis-header"><i class="fas fa-stethoscope"></i> Medical Analysis</div>`;
+        
+        response += `<strong>Primary Assessment: ${topCondition.condition}</strong><br>`;
+        response += `<small style="opacity: 0.7;">Match Confidence: ${Math.round(topCondition.percentage)}%</small><br><br>`;
+        
+        response += `<strong>Your reported symptoms:</strong><br>`;
+        response += `<div style="margin: 10px 0;">`;
+        topCondition.matchedSymptoms.forEach(symptom => {
+            response += `<span class="symptom-tag"><i class="fas fa-check-circle"></i> ${symptom}</span>`;
+        });
+        response += `</div>`;
+        
+        response += `<br><strong>Clinical Information:</strong><br>`;
+        response += this.getConditionInfo(topCondition);
+        
+        response += `<br><br><strong>Recommended Action:</strong><br>`;
+        response += `<div style="padding: 12px; background: #f0f9ff; border-left: 3px solid #3b82f6; border-radius: 8px; margin-top: 8px;">`;
+        response += `<i class="fas fa-info-circle"></i> ${topCondition.data.action}`;
+        response += `</div>`;
+        
+        if (analysis.conditions.length > 1) {
+            response += `<br><strong>Other possibilities to consider:</strong><br>`;
+            response += `<small>`;
+            analysis.conditions.slice(1, 3).forEach(c => {
+                response += `• ${c.condition} (${Math.round(c.percentage)}% match)<br>`;
+            });
+            response += `</small>`;
+        }
+        
+        response += `</div>`;
+        
+        response += `<br>${this.getFollowUpQuestion(topCondition)}`;
+        
+        response += `<br><br><small style="opacity: 0.6;"><i class="fas fa-exclamation-triangle"></i> This is an AI-assisted preliminary assessment. Please consult a healthcare professional for proper diagnosis and treatment.</small>`;
+        
+        updateSidebar(analysis);
         
         return response;
     }
-    
-    // Get condition-specific context
-    getConditionContext(condition) {
-        const contexts = {
-            "Appendicitis": "This typically requires immediate medical attention as it can lead to serious complications if untreated.",
-            "Myocardial Infarction": "This is a medical emergency requiring immediate care. Time is critical for heart muscle preservation.",
-            "Migraine": "These are neurological events that often respond to specific treatments when diagnosed properly.",
-            "Pneumonia": "Respiratory infections like this may require antibiotics and monitoring of oxygen levels.",
-            "UTI": "Urinary tract infections typically respond well to appropriate antibiotic treatment.",
-            "GERD": "Lifestyle modifications and medications can effectively manage these symptoms.",
-            "Diabetes": "This requires proper diagnosis through blood tests and ongoing management.",
-            "Hypertension": "Regular monitoring and lifestyle changes are important for management.",
-            "Asthma": "Proper inhaler technique and trigger avoidance are key to management.",
-            "COVID-19": "Testing is important for confirmation and to prevent spread to others."
-        };
-        
-        return contexts[condition.condition] || "Proper evaluation by a healthcare provider is recommended for accurate diagnosis.";
-    }
-    
-    // Get intelligent follow-up question
-    getFollowUpQuestion(condition) {
-        const questions = {
-            "Appendicitis": "Has the pain moved from your belly button to the lower right side?",
-            "Myocardial Infarction": "Is the pain radiating to your jaw, neck, or left arm?",
-            "Migraine": "Do you have sensitivity to light or sound with the headache?",
-            "Pneumonia": "Are you coughing up colored phlegm?",
-            "UTI": "Is there burning when you urinate?",
-            "GERD": "Is the burning worse after meals or when lying down?",
-            "Diabetes": "Have you been unusually thirsty or urinating frequently?",
-            "Hypertension": "Have you checked your blood pressure recently?",
-            "Asthma": "Do you hear wheezing when you breathe?",
-            "COVID-19": "Have you lost your sense of taste or smell?"
-        };
-        
-        return questions[condition.condition] || this.getRandomResponse(doctorResponses.followUps.general);
-    }
-    
-    // Ask clarifying questions
-    askClarifyingQuestion(input) {
-        const questions = [
-            "Can you tell me more about the nature of your discomfort?",
-            "How would you rate the severity on a scale of 1-10?",
-            "When did these symptoms first begin?",
-            "Have you noticed any patterns or triggers?",
-            "Are there any other symptoms you haven't mentioned?",
-            "What, if anything, seems to make it better or worse?",
-            "Have you taken any medication or tried any treatments?"
-        ];
-        
-        // Select question based on input
-        let selectedQuestion;
-        if (input.includes('pain')) {
-            selectedQuestion = "Can you describe the pain in more detail? (Sharp, dull, burning, throbbing)";
-        } else if (input.includes('fever') || input.includes('temperature')) {
-            selectedQuestion = "What's your temperature reading? Have you measured it?";
-        } else if (input.includes('cough')) {
-            selectedQuestion = "Is it a dry cough or are you bringing up phlegm?";
-        } else {
-            selectedQuestion = questions[Math.min(this.conversationPhase, questions.length - 1)];
-        }
-        
-        return this.getRandomResponse(doctorResponses.transitions) + " " + selectedQuestion;
-    }
-    
-    // Handle emergency situations
-    detectEmergency(input) {
-        const emergencyPatterns = [
-            /chest pain.*(crushing|pressure|tight|squeezing)/i,
-            /(can'?t breathe|shortness of breath.*severe)/i,
-            /(slurred speech|facial droop|arm weakness)/i,
-            /(unconscious|passed out|fainted)/i,
-            /(seizure|convulsing)/i,
-            /(suicidal|want to die)/i,
-            /(severe bleeding|bleeding.*uncontrolled)/i,
-            /(allergic reaction.*throat closing)/i,
-            /(poison|overdose)/i,
-            /(sudden paralysis)/i
-        ];
-        
-        return emergencyPatterns.some(pattern => pattern.test(input));
-    }
-    
-    handleEmergency(input) {
-        patientContext.risk = "CRITICAL";
-        updateSidebar();
+
+    generateEmergencyResponse(analysis) {
+        const emergency = analysis.conditions.find(c => c.data.urgency === "emergency");
         
         return `
-            <div style="color: #dc2626; font-weight: bold;">
-                <i class="fas fa-exclamation-triangle"></i> MEDICAL EMERGENCY DETECTED
+            <div class="emergency-alert">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    <strong style="font-size: 18px;">MEDICAL EMERGENCY DETECTED</strong>
+                </div>
+                <div style="font-size: 16px; line-height: 1.6;">
+                    Your symptoms suggest: <strong>${emergency.condition}</strong>
+                    <br><br>
+                    <strong>IMMEDIATE ACTION REQUIRED:</strong>
+                    <br>
+                    🚨 Call emergency services (911) NOW
+                    <br>
+                    🚑 Do not drive yourself
+                    <br>
+                    ⏰ Time is critical - do not delay
+                    <br>
+                    📞 Stay on the line with dispatcher
+                    <br><br>
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                        If you're alone, try to get to a location where you can be seen or heard by others.
+                    </div>
+                </div>
             </div>
-            <br>
-            Based on your description, this appears to be a medical emergency.
-            <br><br>
-            <strong>IMMEDIATE ACTION REQUIRED:</strong>
-            <br>
-            1. Call emergency services (911/112) immediately
-            <br>
-            2. Do not delay seeking care
-            <br>
-            3. Stay on the line with the dispatcher
-            <br>
-            4. If alone, try to get to where you can be seen
-            <br><br>
-            <small>This requires immediate in-person evaluation. Do not wait.</small>
         `;
     }
-    
-    // Helper methods
-    isGreeting(input) {
-        return /^(hi|hello|hey|good morning|good afternoon|good evening|greetings|what's up)/.test(input);
+
+    getConditionInfo(condition) {
+        const info = {
+            "Myocardial Infarction": "A heart attack occurs when blood flow to the heart muscle is blocked. Immediate medical attention can save heart tissue and save lives.",
+            "Stroke": "A stroke is a brain attack that requires immediate intervention. The faster you receive treatment, the better the outcome. Remember: Face drooping, Arm weakness, Speech difficulty = Time to call 911.",
+            "Appendicitis": "The appendix is inflamed and may rupture if not treated. This typically requires surgical removal within 24-48 hours.",
+            "Pneumonia": "This lung infection causes inflammation and fluid accumulation. Treatment with antibiotics is usually effective when started promptly.",
+            "Migraine": "A neurological condition causing severe headaches. While not life-threatening, proper treatment can significantly improve quality of life.",
+            "GERD": "Stomach acid flows back into the esophagus. Lifestyle changes and medications can effectively manage symptoms.",
+            "COVID-19": "Testing and isolation are important to prevent spread. Most cases can be managed at home with symptom relief.",
+            "Asthma Attack": "Airways narrow making breathing difficult. Use of rescue inhalers and avoiding triggers are key management strategies."
+        };
+        
+        return info[condition.condition] || "This condition requires proper medical evaluation for accurate diagnosis and treatment planning.";
     }
-    
-    isGratitude(input) {
-        return /^(thank|thanks|appreciate)/.test(input);
+
+    getFollowUpQuestion(condition) {
+        const questions = {
+            "Myocardial Infarction": "Is the pain radiating to your jaw, neck, or left arm?",
+            "Stroke": "Do you notice any facial drooping or difficulty speaking?",
+            "Appendicitis": "Did the pain start around your belly button and move to the lower right?",
+            "Pneumonia": "Are you coughing up colored phlegm? What color is it?",
+            "Migraine": "Do you experience sensitivity to light or sound during these headaches?",
+            "GERD": "Is the heartburn worse after eating or when lying down?",
+            "Asthma Attack": "Do you have a rescue inhaler? Has it helped?",
+            "COVID-19": "Have you been tested for COVID-19? Do you have a fever?",
+            "UTI": "Is there pain or burning when you urinate?",
+            "Diabetes Type 2": "Have you had your blood sugar tested recently?"
+        };
+        
+        return questions[condition.condition] || "Can you provide more details about when these symptoms started?";
     }
-    
-    isMedicationQuery(input) {
-        return /(medication|medicine|pill|tablet|prescription|dose)/.test(input);
-    }
-    
-    handleMedicationQuery(input) {
-        const responses = [
-            "I can discuss general medication information, but specific prescriptions should be managed by your treating physician.",
-            "Medication decisions should be made in consultation with your healthcare provider who knows your full medical history.",
-            "It's important to take medications as prescribed and report any side effects to your doctor.",
-            "Never stop or change medications without consulting your healthcare provider first."
+
+    askClarifyingQuestions() {
+        const questions = [
+            "Could you describe your symptoms in more detail?",
+            "When did these symptoms first start?",
+            "On a scale of 1-10, how would you rate the severity?",
+            "Have you experienced anything like this before?",
+            "Are there any other symptoms I should know about?"
         ];
         
-        return this.getRandomResponse(responses);
-    }
-    
-    getRandomResponse(responsesArray) {
-        return responsesArray[Math.floor(Math.random() * responsesArray.length)];
-    }
-    
-    processFollowUp(input) {
-        // Process patient's response to follow-up questions
-        const lowerInput = input.toLowerCase();
-        
-        // Check if patient provided severity rating
-        const severityMatch = lowerInput.match(/(\d+)\s*out of.*10|rate.*(\d+)|severity.*(\d+)/);
-        if (severityMatch) {
-            const rating = severityMatch[1] || severityMatch[2] || severityMatch[3];
-            patientContext.symptomSeverity = `${rating}/10`;
-        }
-        
-        // Check if patient provided duration
-        const durationMatch = lowerInput.match(/(\d+\s*(?:hour|day|week|month|year)s?)/);
-        if (durationMatch && !patientContext.symptomDuration) {
-            patientContext.symptomDuration = durationMatch[0];
-        }
-        
-        // Return next assessment or follow-up
-        return this.analyzeSymptoms(lowerInput);
+        return questions[Math.min(this.conversationPhase, questions.length - 1)] + 
+               "<br><br><small>The more detail you provide, the better I can assist you.</small>";
     }
 }
 
-// Initialize the doctor AI
-const doctorAI = new MedicalDoctorAI();
+// Initialize AI
+const medAI = new AdvancedMedicalAI();
+let sessionStartTime = Date.now();
 
-// Modified existing functions to use the new AI system
+// UI Functions
 function addMessage(text, sender) {
     const container = document.getElementById('chat-container');
     const div = document.createElement('div');
     div.className = `msg ${sender}-msg`;
     div.innerHTML = text;
+    
+    const timestamp = document.createElement('span');
+    timestamp.className = 'msg-timestamp';
+    timestamp.textContent = new Date().toLocaleTimeString();
+    div.appendChild(timestamp);
+    
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
+    
+    // Update message count
+    document.getElementById('message-count').textContent = medAI.messageCount;
 }
 
-function handleInput() {
-    const input = document.getElementById('user-input').value.trim();
-    if (!input) return;
+async function handleInput() {
+    const input = document.getElementById('user-input');
+    const text = input.value.trim();
     
-    // Add user message
-    addMessage(input, 'user');
-    document.getElementById('user-input').value = '';
+    if (!text) return;
     
-    // Show typing indicator
-    const typingIndicator = document.getElementById('typing-indicator');
-    typingIndicator.style.display = 'block';
+    addMessage(text, 'user');
+    input.value = '';
+    input.style.height = 'auto';
     
-    // Simulate doctor thinking time
-    setTimeout(() => {
-        typingIndicator.style.display = 'none';
-        
-        // Get doctor's response
-        const response = doctorAI.respondToPatient(input);
+    showTypingIndicator();
+    
+    setTimeout(async () => {
+        hideTypingIndicator();
+        const response = await medAI.analyzeSymptoms(text);
         addMessage(response, 'bot');
-        
-        // Update sidebar with symptoms
-        updateSidebar();
+        updateSessionInfo();
     }, 1500);
 }
 
-function updateSidebar() {
-    // Update risk display
+function showTypingIndicator() {
+    document.getElementById('typing-indicator').style.display = 'flex';
+}
+
+function hideTypingIndicator() {
+    document.getElementById('typing-indicator').style.display = 'none';
+}
+
+function updateSidebar(analysis) {
+    // Update risk
     const riskDisplay = document.getElementById('risk-display');
-    riskDisplay.innerText = doctorAI.emergencyDetected ? "CRITICAL" : patientContext.risk || "Normal";
-    riskDisplay.style.color = doctorAI.emergencyDetected ? "#dc2626" : 
-                              (patientContext.risk === "HIGH" ? "#f59e0b" : "#48bb78");
+    const riskBadge = document.getElementById('risk-badge');
     
-    // Update symptom list
+    if (analysis.isEmergency) {
+        riskDisplay.textContent = 'CRITICAL';
+        riskBadge.textContent = 'Emergency';
+        riskBadge.className = 'badge badge-danger';
+    } else if (analysis.requiresUrgentCare) {
+        riskDisplay.textContent = 'ELEVATED';
+        riskBadge.textContent = 'Urgent';
+        riskBadge.className = 'badge badge-warning';
+    } else {
+        riskDisplay.textContent = 'NORMAL';
+        riskBadge.textContent = 'Routine';
+        riskBadge.className = 'badge badge-success';
+    }
+    
+    // Update symptoms
     const symptomList = document.getElementById('symptom-list');
-    const recentSymptoms = Array.from(patientContext.symptoms).slice(-5);
-    if (recentSymptoms.length > 0) {
-        symptomList.innerHTML = recentSymptoms.join(', ');
+    const symptomCount = document.getElementById('symptom-count');
+    
+    if (analysis.symptoms.length > 0) {
+        symptomList.innerHTML = analysis.symptoms.slice(0, 5).map(s => 
+            `<div style="margin: 5px 0;"><i class="fas fa-circle" style="font-size: 6px; margin-right: 8px;"></i>${s}</div>`
+        ).join('');
+        symptomCount.textContent = analysis.symptoms.length;
+    }
+    
+    // Update confidence
+    document.getElementById('ai-confidence').textContent = `${medAI.confidence}%`;
+}
+
+function updateSessionInfo() {
+    const duration = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    document.getElementById('session-duration').textContent = 
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function quickPrompt(text) {
+    document.getElementById('user-input').value = text;
+    handleInput();
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleInput();
     }
 }
 
-function exportPDF() {
-    const element = document.body;
-    html2pdf().from(element).save('Clinical_Summary.pdf');
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
 }
 
-// Initialize conversation
-addMessage("Good day. I'm Dr. MedAI, your clinical assistant. I'm here to help you understand your symptoms. Please describe how you're feeling in your own words.", 'bot');
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
 
-// Add keyboard support
-document.getElementById('user-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleInput();
-});
-    </script>
+function toggleVoice() {
+    const icon = document.getElementById('voice-icon');
+    if (icon.classList.contains('fa-microphone')) {
+        icon.classList.remove('fa-microphone');
+        icon.classList.add('fa-stop', 'voice-active');
+        // Voice input would be implemented here
+        alert('Voice input feature - would integrate with Web Speech API');
+    } else {
+        icon.classList.remove('fa-stop', 'voice-active');
+        icon.classList.add('fa-microphone');
+    }
+}
+
+function attachImage() {
+    alert('Image upload feature - would allow users to upload medical images for analysis');
+}
+
+function exportPDF() {
+    const element = document.getElementById('chat-container');
+    const opt = {
+        margin: 1,
+        filename: `MedAI_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+}
+
+function shareReport() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'MedAI Consultation Report',
+            text: 'My medical consultation summary',
+            url: window.location.href
+        });
+    } else {
+        alert('Sharing feature - would generate shareable link or email report');
+    }
+}
+
+function resetSession() {
+    if (confirm('Start a new consultation? This will clear the current session.')) {
+        location.reload();
+    }
+}
+
+// Initialize
+document.getElementById('init-timestamp').textContent = new Date().toLocaleTimeString();
+setInterval(updateSessionInfo, 1000);
+
+// Welcome animation
+setTimeout(() => {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = '100%';
+    setTimeout(() => {
+        progressBar.style.opacity = '0';
+    }, 500);
+}, 100);
+</script>
 
 </body>
 </html>
