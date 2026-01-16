@@ -15,7 +15,6 @@
 
 <body class="dashboard-body">
 
-<!-- ===================== TOP NAV ===================== -->
 <nav class="dash-nav">
     <div class="nav-brand">
         <div class="logo">Med<span>AI</span></div>
@@ -23,50 +22,45 @@
 
     <div class="user-profile">
         <div class="user-info">
-            <span class="user-name" id="display-name">Dr. Practitioner</span>
+            <span class="user-name" id="display-name">Dr. Loading...</span>
             <span class="user-role">Medical Practitioner</span>
         </div>
-        <div class="user-avatar">MD</div>
+        <div class="user-avatar" id="avatar-circle">MD</div>
     </div>
 </nav>
 
-<!-- ===================== LAYOUT ===================== -->
 <main class="dash-container">
 
-    <!-- ========== SIDEBAR ========== -->
     <aside class="dash-sidebar">
         <button class="nav-item active" data-tab="scanner">
-            <i class="icon-camera"></i>
+            <i class="icon-camera">📸</i>
             <span>Scanner</span>
         </button>
 
         <button class="nav-item" data-tab="history">
-            <i class="icon-history"></i>
+            <i class="icon-history">⏳</i>
             <span>History</span>
         </button>
 
         <button class="nav-item" data-tab="analytics">
-            <i class="icon-chart"></i>
+            <i class="icon-chart">📊</i>
             <span>Analytics</span>
         </button>
-         <button class="nav-item" data-tab="log-out" onclick="location.href='login2.html'">
-    <i class="icon-logout"></i>
-    <span>Log-out</span>
-</button>
+        
+        <div class="sidebar-spacer"></div>
 
-</button>
-
+        <button class="nav-item logout-trigger" data-tab="log-out" onclick="location.href='login2.html'">
+            <i class="icon-logout">🚪</i>
+            <span>Log-out</span>
+        </button>
     </aside>
 
-    <!-- ========== MAIN CONTENT ========== -->
     <section class="main-content">
 
-        <!-- ===== SCANNER VIEW ===== -->
         <div id="scanner-section" class="content-view">
-
             <header class="view-header">
                 <h2>Live Diagnostic Scan</h2>
-                <p>Select scan type and align image in the viewfinder</p>
+                <p>Select scan type and align the medical imagery within the viewfinder.</p>
             </header>
 
             <div class="scan-type-selector">
@@ -77,104 +71,110 @@
             </div>
 
             <div class="scanner-card">
-                <div class="camera-container">
-                    <video id="camera-stream" autoplay playsinline></video>
+                <div class="camera-container" id="viewfinder">
+                    <video id="camera-stream" autoplay playsinline muted></video>
 
                     <div class="scanner-overlay">
                         <div class="target-box">
+                            <div class="corners"></div>
                             <div class="scan-line"></div>
                         </div>
                     </div>
 
-                    <div class="ai-status-badge hidden" id="ai-status">
+                    <div class="ai-status-badge" id="ai-status-container">
                         <span class="pulse-dot"></span>
-                        AI: Analyzing…
+                        <span id="ai-status">AI READY</span>
                     </div>
                 </div>
 
                 <div class="camera-controls">
-                    <button id="capture-trigger" class="btn-capture" title="Capture Scan">
+                    <button id="capture-trigger" class="btn-capture" title="Capture & Analyze">
                         <div class="inner-circle"></div>
                     </button>
-                    <button id="toggle-torch" class="btn-tool" title="Toggle Flash">🔦</button>
-                    <button id="upload-local" class="btn-tool" title="Upload File">📂</button>
+                    <div class="tool-group">
+                        <button id="toggle-torch" class="btn-tool" title="Toggle Flash">🔦</button>
+                        <button id="upload-local" class="btn-tool" title="Upload Local File">📂</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- ===== HISTORY VIEW (READY FOR DATA) ===== -->
         <div id="history-section" class="content-view hidden">
             <header class="view-header">
                 <h2>Scan History</h2>
-                <p>Previous diagnostic analyses</p>
+                <div class="history-controls">
+                    <input type="text" placeholder="Search patient ID..." class="search-input">
+                </div>
             </header>
+            <div id="history-list" class="data-grid">
+                <div class="empty-state">No recent scans found.</div>
+            </div>
         </div>
 
-        <!-- ===== ANALYTICS VIEW (READY FOR DATA) ===== -->
         <div id="analytics-section" class="content-view hidden">
             <header class="view-header">
-                <h2>Analytics</h2>
-                <p>AI performance and scan insights</p>
+                <h2>Performance Insights</h2>
+                <p>Global AI confidence and diagnostic distribution.</p>
             </header>
+            <div class="analytics-placeholder">
+                
+            </div>
         </div>
 
     </section>
 </main>
 
-<!-- ===================== RESULTS PANEL ===================== -->
 <div id="results-panel" class="results-container hidden">
-    <div class="panel-header">
-        <h3>AI Diagnostic Analysis</h3>
-        <button id="close-results">✕</button>
-    </div>
+    <div class="panel-blur-overlay"></div>
+    <div class="results-content animate-slide-up">
+        <div class="panel-header">
+            <div class="header-main">
+                <span class="ai-badge">MED-AI ANALYSIS</span>
+                <h3>Diagnostic Report</h3>
+            </div>
+            <button id="close-results" aria-label="Close">✕</button>
+        </div>
 
-    <div class="results-body">
+        <div class="results-body">
+            <div class="analysis-summary">
+                <div class="confidence-box">
+                    <div class="confidence-score">
+                        <svg viewBox="0 0 36 36" class="circular-chart blue">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="circle" id="confidence-path" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="percentage" id="confidence-text">0%</div>
+                    </div>
+                    <span class="label">AI Confidence</span>
+                </div>
 
-        <div class="analysis-summary">
-            <div class="confidence-score">
-                <svg viewBox="0 0 36 36" class="circular-chart">
-                    <path class="circle-bg"
-                          d="M18 2.0845
-                             a 15.9155 15.9155 0 0 1 0 31.831
-                             a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path class="circle"
-                          id="confidence-path"
-                          stroke-dasharray="0, 100"
-                          d="M18 2.0845
-                             a 15.9155 15.9155 0 0 1 0 31.831
-                             a 15.9155 15.9155 0 0 1 0 -31.831" />
-                </svg>
-                <div class="percentage" id="confidence-text">0%</div>
+                <div class="diagnosis-label">
+                    <h4 id="result-title">Reviewing Imagery...</h4>
+                    <p id="result-description">Our neural network is processing the pathological markers in the scan.</p>
+                </div>
             </div>
 
-            <div class="diagnosis-label">
-                <h4 id="result-title">Analyzing…</h4>
-                <p id="result-description">Awaiting scan capture.</p>
+            <div class="clinical-findings">
+                <h5><i class="icon-list">📋</i> Clinical Observations</h5>
+                <ul id="findings-list" class="findings-grid">
+                    <li class="loading-item">Calibrating sensors...</li>
+                </ul>
+            </div>
+
+            <div class="action-footer">
+                <button class="btn-outline">Print Labels</button>
+                <button class="btn-primary" id="save-report">Export Medical Report (PDF)</button>
             </div>
         </div>
-
-        <div class="clinical-findings">
-            <h5>Key Findings</h5>
-            <ul id="findings-list">
-                <li>System ready for scan input.</li>
-            </ul>
-        </div>
-
-        <div class="action-footer">
-            <button class="btn-primary">Generate Report (PDF)</button>
-        </div>
-
     </div>
 </div>
 
-<!-- ===================== MEDBOT FAB ===================== -->
-<a href="MedBot.html" class="medbot-fab" id="MedBot-btn">
+<a href="MedBot.html" class="medbot-fab" id="MedBot-btn" title="Ask MedBot Assistant">
     <span class="bot-icon">🤖</span>
     <div class="fab-ping"></div>
 </a>
 
-<!-- ===================== NOTIFICATION ===================== -->
-<div id="notification" class="notification hidden"></div>
+<div id="notification" class="notification-toast hidden"></div>
 
 </body>
 </html>
