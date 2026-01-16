@@ -1,34 +1,34 @@
 /* ============================================================
-   MEDAI ENTERPRISE DESIGN SYSTEM (KENYAN PRIDE THEME v2.0)
+   MEDAI ENTERPRISE DESIGN SYSTEM (KENYAN PRIDE - PRO)
    ============================================================ */
 
 :root {
-    /* Kenyan Flag Palette */
-    --kenya-black: #000000;
+    /* Pure Kenyan Flag Palette */
+    --kenya-black: #050505;
     --kenya-red: #BB0631;
     --kenya-green: #006600;
     --kenya-white: #FFFFFF;
     
-    /* Functional Colors */
-    --bg-main: #f0f2f5;
+    /* Functional UI Palette */
+    --bg-main: #f8fafb;
     --card-bg: #ffffff;
-    --text-main: #1a1a1a;
+    --text-main: #0f172a;
     --text-muted: #64748b;
-    --accent-glow: rgba(187, 6, 49, 0.15);
+    --border-light: #e2e8f0;
     
-    /* Effects */
-    --glass: rgba(255, 255, 255, 0.8);
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 10px 25px rgba(0,0,0,0.1);
-    --shadow-lg: 0 20px 50px rgba(0,0,0,0.15);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --radius-lg: 24px;
-    --radius-md: 12px;
+    /* Dynamic Feedback */
+    --success-glow: rgba(0, 102, 0, 0.1);
+    --error-glow: rgba(187, 6, 49, 0.1);
+    
+    /* Elevations & Motion */
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-panel: -10px 0 50px rgba(0, 0, 0, 0.1);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
     margin: 0; padding: 0; box-sizing: border-box;
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
 }
 
 body {
@@ -37,56 +37,57 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    letter-spacing: -0.01em;
 }
 
 /* ===================== TOP NAVIGATION ===================== */
 .dash-nav {
     background: var(--kenya-black);
     color: white;
-    padding: 0.7rem 1.5rem;
+    padding: 0.8rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 4px solid var(--kenya-red);
-    box-shadow: var(--shadow-md);
     z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
 .nav-brand .logo {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: -1px;
 }
 
 .nav-brand span { color: var(--kenya-red); }
 
 .user-avatar {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg, var(--kenya-green), #008800);
-    border-radius: 10px; /* Modern squircle */
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--kenya-green), #004400);
+    border-radius: 12px;
     display: grid; place-items: center;
-    font-weight: bold;
-    border: 2px solid rgba(255,255,255,0.2);
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 4px 10px rgba(0, 102, 0, 0.2);
 }
 
 /* ===================== LAYOUT ENGINE ===================== */
 .dash-container { display: flex; flex: 1; overflow: hidden; }
 
 .dash-sidebar {
-    width: 260px;
-    background: var(--card-bg);
+    width: 280px;
+    background: white;
     padding: 1.5rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border-right: 1px solid rgba(0,0,0,0.05);
+    border-right: 1px solid var(--border-light);
 }
 
 .nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 18px;
-    border-radius: var(--radius-md);
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 20px;
+    border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
     color: var(--text-muted);
@@ -94,87 +95,94 @@ body {
 }
 
 .nav-item:hover {
-    background: #f8fafc;
+    background: #f1f5f9;
     color: var(--kenya-black);
-    transform: translateX(4px);
 }
 
 .nav-item.active {
     background: var(--kenya-black);
     color: white;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item.active i { color: var(--kenya-red); }
 
-/* ===================== NOTIFICATION SYSTEM ===================== */
-.notification {
-    position: fixed;
-    top: 25px; left: 50%;
-    transform: translateX(-50%);
-    padding: 16px 32px;
-    border-radius: var(--radius-md);
-    color: white;
-    font-weight: 700;
-    z-index: 9999;
-    display: flex; align-items: center; gap: 12px;
-    box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(8px);
-    transition: var(--transition);
-}
-
-.notification.info { background: rgba(0, 0, 0, 0.9); border-bottom: 3px solid var(--kenya-white); }
-.notification.success { background: rgba(0, 102, 0, 0.95); border-bottom: 3px solid #00ff00; }
-.notification.error { background: rgba(187, 6, 49, 0.95); border-bottom: 3px solid #ff4d4d; }
-
-/* ===================== SCANNER UI ===================== */
+/* ===================== SCANNER UI (CLINICAL FOCUS) ===================== */
 .main-content {
     flex: 1; padding: 2.5rem;
     overflow-y: auto;
-    background: radial-gradient(at 0% 0%, #ffffff 0%, #f1f5f9 100%);
+    background: radial-gradient(circle at 0% 0%, #ffffff 0%, #f8fafb 100%);
 }
 
 .scanner-card {
-    max-width: 900px;
-    background: var(--card-bg);
-    border-radius: var(--radius-lg);
+    max-width: 850px;
+    background: white;
+    border-radius: 32px;
     overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--border-light);
 }
 
 .camera-container {
     position: relative;
     aspect-ratio: 16/9;
     background: #000;
+    overflow: hidden;
 }
 
 .target-box {
-    width: 60%; height: 70%;
-    border: 2px solid var(--kenya-white);
-    border-radius: 30px;
-    box-shadow: 0 0 0 4000px rgba(0,0,0,0.4); /* Dim outside area */
+    width: 65%; height: 75%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 24px;
+    box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); /* Focus effect */
 }
 
 .scan-line {
-    width: 100%; height: 2px;
+    width: 100%; height: 3px;
     background: linear-gradient(90deg, transparent, var(--kenya-red), transparent);
     box-shadow: 0 0 20px var(--kenya-red);
-    animation: scanMove 2.5s infinite alternate ease-in-out;
+    animation: scanMove 3s infinite ease-in-out;
 }
 
-/* ===================== RESULTS REVELATION ===================== */
+.camera-controls {
+    padding: 24px;
+    display: flex; justify-content: center; gap: 40px;
+    background: #ffffff;
+    border-top: 1px solid var(--border-light);
+}
+
+.btn-capture {
+    width: 75px; height: 75px;
+    border-radius: 50%;
+    border: 4px solid #f1f5f9;
+    background: white;
+    padding: 6px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-capture:active { transform: scale(0.9); }
+
+.inner-circle {
+    width: 100%; height: 100%;
+    background: var(--kenya-red);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(187, 6, 49, 0.3);
+}
+
+/* ===================== RESULTS PANEL (THE REVELATION) ===================== */
 .results-container {
     position: fixed; right: 0; top: 0;
     height: 100vh; width: 420px;
-    background: var(--card-bg);
-    box-shadow: var(--shadow-lg);
+    background: white;
+    box-shadow: var(--shadow-panel);
     z-index: 2000;
+    display: flex; flex-direction: column;
     transform: translateX(0);
-    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.results-container.hidden { transform: translateX(110%); }
+.results-container.hidden { transform: translateX(105%); }
 
 .panel-header {
     padding: 24px;
@@ -183,45 +191,55 @@ body {
     border-bottom: 4px solid var(--kenya-green);
 }
 
-.circular-chart {
-    filter: drop-shadow(0 0 8px var(--accent-glow));
+.analysis-summary { padding: 40px 30px; text-align: center; }
+
+.circle {
+    stroke: var(--kenya-green);
+    stroke-width: 4;
+    filter: drop-shadow(0 0 5px rgba(0, 102, 0, 0.2));
 }
 
-.findings-list {
-    list-style: none;
-    margin-top: 15px;
+.clinical-findings {
+    padding: 25px;
+    background: #fffafa;
+    border: 1px solid #fee2e2;
+    margin: 0 24px;
+    border-radius: 16px;
 }
 
-.findings-list li {
-    padding: 12px;
-    margin-bottom: 8px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border-left: 4px solid var(--kenya-red);
-    font-size: 0.9rem;
-    font-weight: 500;
+#findings-list { list-style: none; margin-top: 15px; }
+#findings-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #fecaca;
+    font-size: 0.95rem;
+    color: #450a0a;
 }
 
-/* ===================== ANIMATIONS ===================== */
-@keyframes scanMove {
-    from { transform: translateY(0); }
-    to { transform: translateY(100%); }
+/* ===================== NOTIFICATIONS ===================== */
+.notification {
+    position: fixed; top: 20px; left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 28px;
+    border-radius: 14px;
+    color: white; font-weight: 600;
+    z-index: 9999;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    display: flex; align-items: center; gap: 12px;
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
+.notification.success { background: var(--kenya-green); }
+.notification.error { background: var(--kenya-red); }
+.notification.info { background: var(--kenya-black); }
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 768px) {
     .dash-sidebar {
-        position: fixed; bottom: 0; left: 0;
-        width: 100%; height: 70px;
-        flex-direction: row; padding: 0;
-        justify-content: space-around;
-        z-index: 1001;
+        position: fixed; bottom: 0; width: 100%;
+        height: 75px; flex-direction: row;
+        border-top: 1px solid var(--border-light);
     }
+    .nav-item span { display: none; }
     .results-container { width: 100%; }
-    .main-content { padding: 1rem; padding-bottom: 80px; }
 }
+
+@keyframes scanMove { 0%, 100% { top: 5%; } 50% { top: 90%; } }
