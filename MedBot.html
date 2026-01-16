@@ -2,1571 +2,304 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MedAI Assistant | Doctor Consultation</title>
-    <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAI Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-/* ============================================
-   MEDAI DOCTOR CONSULTATION v5.0
-   Premium Doctor-Patient Experience
-   ============================================ */
-
-/* ================= THEME & VARIABLES ================= */
-:root {
-  /* Medical Professional Colors */
-  --doctor-white: #FFFFFF;
-  --doctor-coat: #F0F8FF;
-  --doctor-scrub-green: #008C51;
-  --doctor-scrub-blue: #2A6BCC;
-  --doctor-stethoscope: #922529;
-  --doctor-chart: #4A5568;
-  --doctor-gold: #D4AF37;
-  
-  /* Consultation Room Theme */
-  --consultation-bg: #F8FAFC;
-  --consultation-card: #FFFFFF;
-  --consultation-accent: #008C51;
-  --consultation-border: #E2E8F0;
-  
-  /* Text Colors */
-  --text-doctor: #1A202C;
-  --text-patient: #2D3748;
-  --text-muted: #718096;
-  --text-emphasis: #922529;
-  
-  /* Typography */
-  --font-medical: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: 'Georgia', 'Times New Roman', serif;
-  --font-mono: 'SF Mono', 'Roboto Mono', monospace;
-  
-  /* Spacing */
-  --space-xs: 0.5rem;
-  --space-sm: 0.875rem;
-  --space-md: 1.25rem;
-  --space-lg: 1.75rem;
-  --space-xl: 2.5rem;
-  --space-xxl: 4rem;
-  
-  /* Border Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
-  
-  /* Shadows */
-  --shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-prominent: 0 12px 32px rgba(0, 0, 0, 0.1);
-  
-  /* Transitions */
-  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  
-  /* Z-index */
-  --z-base: 1;
-  --z-elevated: 10;
-  --z-modal: 100;
-  --z-overlay: 200;
-  --z-max: 999;
-}
-
-/* ================= BASE RESETS ================= */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  font-size: 16px;
-  -webkit-text-size-adjust: 100%;
-  height: 100%;
-}
-
-body {
-  font-family: var(--font-medical);
-  background: var(--consultation-bg);
-  color: var(--text-doctor);
-  line-height: 1.6;
-  min-height: 100vh;
-  overflow-x: hidden;
-  position: relative;
-  background-image: 
-    radial-gradient(circle at 20% 80%, rgba(0, 140, 81, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 80% 20%, rgba(146, 37, 41, 0.03) 0%, transparent 40%);
-}
-
-/* Selection */
-::selection {
-  background-color: rgba(0, 140, 81, 0.2);
-  color: var(--text-doctor);
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--doctor-scrub-green);
-  border-radius: var(--radius-full);
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-/* ================= CONSULTATION ROOM HEADER ================= */
-.consultation-header {
-  background: var(--doctor-white);
-  padding: var(--space-md) var(--space-xl);
-  border-bottom: 3px solid var(--doctor-scrub-green);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: var(--z-modal);
-  box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.doctor-info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-.doctor-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--doctor-scrub-green), var(--doctor-scrub-blue));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-  position: relative;
-  border: 3px solid white;
-  box-shadow: var(--shadow-medium);
-}
-
-.doctor-avatar::after {
-  content: '';
-  position: absolute;
-  top: -3px;
-  left: -3px;
-  right: -3px;
-  bottom: -3px;
-  border-radius: inherit;
-  border: 2px solid var(--doctor-scrub-green);
-  animation: pulse 3s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.02); }
-}
-
-.doctor-details h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-doctor);
-  margin-bottom: var(--space-xs);
-}
-
-.doctor-details .doctor-title {
-  font-size: 0.875rem;
-  color: var(--doctor-scrub-green);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.consultation-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-lg);
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-/* Consultation Tools */
-.consultation-tools {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-.btn-medical {
-  background: var(--doctor-scrub-green);
-  color: white;
-  border: none;
-  padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  transition: all var(--transition-smooth);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-medical::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
-  opacity: 0;
-  transition: opacity var(--transition-smooth);
-}
-
-.btn-medical:hover {
-  background: #007A46;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
-}
-
-.btn-medical:hover::before {
-  opacity: 1;
-}
-
-.btn-medical i {
-  font-size: 1.1rem;
-}
-
-/* ================= CONSULTATION AREA ================= */
-.consultation-area {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: var(--space-xl) var(--space-lg);
-  padding-bottom: 180px;
-}
-
-/* Doctor's Opening Remarks */
-.doctor-opening {
-  background: white;
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl);
-  margin-bottom: var(--space-xl);
-  box-shadow: var(--shadow-medium);
-  border-left: 6px solid var(--doctor-scrub-green);
-  position: relative;
-  overflow: hidden;
-}
-
-.doctor-opening::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--doctor-scrub-green), var(--doctor-scrub-blue));
-}
-
-.doctor-opening h2 {
-  color: var(--doctor-scrub-green);
-  margin-bottom: var(--space-md);
-  font-size: 1.75rem;
-  font-weight: 700;
-}
-
-.doctor-opening p {
-  color: var(--text-patient);
-  font-size: 1.1rem;
-  line-height: 1.8;
-  margin-bottom: var(--space-lg);
-}
-
-.opening-features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--space-md);
-  margin-top: var(--space-lg);
-}
-
-.feature {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  background: var(--doctor-coat);
-  border-radius: var(--radius-lg);
-  transition: transform var(--transition-smooth);
-}
-
-.feature:hover {
-  transform: translateY(-4px);
-}
-
-.feature i {
-  color: var(--doctor-scrub-green);
-  font-size: 1.5rem;
-  margin-top: var(--space-xs);
-}
-
-.feature h4 {
-  color: var(--text-doctor);
-  margin-bottom: var(--space-xs);
-  font-size: 1rem;
-}
-
-/* ================= CONVERSATION THREAD ================= */
-.conversation-thread {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-}
-
-/* Message Wrapper */
-.consultation-message {
-  display: flex;
-  gap: var(--space-md);
-  animation: messageArrive var(--transition-smooth) ease-out;
-  max-width: 85%;
-}
-
-@keyframes messageArrive {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.patient-message {
-  align-self: flex-end;
-  flex-direction: row-reverse;
-}
-
-/* Message Avatar */
-.message-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  flex-shrink: 0;
-  position: relative;
-  box-shadow: var(--shadow-soft);
-}
-
-.doctor-avatar-message {
-  background: linear-gradient(135deg, var(--doctor-scrub-green), var(--doctor-scrub-blue));
-  color: white;
-  border: 2px solid white;
-}
-
-.patient-avatar-message {
-  background: var(--text-doctor);
-  color: white;
-  border: 2px solid var(--consultation-border);
-}
-
-/* Message Bubble */
-.message-bubble {
-  padding: var(--space-lg);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-  position: relative;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  max-width: 650px;
-}
-
-/* Doctor's Message */
-.doctor-message .message-bubble {
-  background: white;
-  border: 1px solid var(--consultation-border);
-  border-top-left-radius: var(--radius-xs);
-  border-bottom-right-radius: var(--radius-lg);
-  border-bottom-left-radius: var(--radius-lg);
-}
-
-.doctor-message .message-bubble::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -8px;
-  width: 0;
-  height: 0;
-  border-right: 8px solid white;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-}
-
-/* Doctor's Professional Signature */
-.doctor-signature {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--consultation-border);
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.doctor-signature i {
-  color: var(--doctor-scrub-green);
-}
-
-/* Patient's Message */
-.patient-message .message-bubble {
-  background: linear-gradient(135deg, #1A202C, #2D3748);
-  color: white;
-  border-top-right-radius: var(--radius-xs);
-  border-bottom-left-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg);
-}
-
-.patient-message .message-bubble::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -8px;
-  width: 0;
-  height: 0;
-  border-left: 8px solid #1A202C;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-}
-
-/* Medical Serious Alert */
-.medical-alert {
-  background: linear-gradient(135deg, #FEE, #FFF5F5);
-  border: 2px solid var(--doctor-stethoscope);
-  border-left: 6px solid var(--doctor-stethoscope);
-  animation: alertPulse 2s ease-in-out infinite;
-}
-
-@keyframes alertPulse {
-  0%, 100% { box-shadow: var(--shadow-soft); }
-  50% { box-shadow: 0 0 0 3px rgba(146, 37, 41, 0.1); }
-}
-
-.medical-alert strong {
-  color: var(--doctor-stethoscope);
-}
-
-/* ================= ENHANCED MEDICAL CONTENT ================= */
-.medical-advice {
-  margin: var(--space-md) 0;
-}
-
-.medical-advice h4 {
-  color: var(--doctor-scrub-green);
-  margin-bottom: var(--space-sm);
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.medical-list {
-  padding-left: var(--space-lg);
-  margin: var(--space-sm) 0;
-}
-
-.medical-list li {
-  margin-bottom: var(--space-xs);
-  position: relative;
-  padding-left: var(--space-sm);
-}
-
-.medical-list li::before {
-  content: '✓';
-  color: var(--doctor-scrub-green);
-  font-weight: bold;
-  position: absolute;
-  left: 0;
-}
-
-/* Follow-up Questions */
-.follow-up {
-  background: var(--doctor-coat);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
-  margin-top: var(--space-lg);
-  border-left: 4px solid var(--doctor-scrub-blue);
-}
-
-.follow-up h5 {
-  color: var(--doctor-scrub-blue);
-  margin-bottom: var(--space-sm);
-  font-size: 1rem;
-}
-
-/* Quick Actions */
-.quick-actions-medical {
-  display: flex;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-  flex-wrap: wrap;
-}
-
-.quick-action-btn {
-  background: rgba(0, 140, 81, 0.1);
-  color: var(--doctor-scrub-green);
-  border: 1px solid rgba(0, 140, 81, 0.2);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all var(--transition-smooth);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 500;
-}
-
-.quick-action-btn:hover {
-  background: rgba(0, 140, 81, 0.2);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-subtle);
-}
-
-/* ================= CONSULTATION INPUT ================= */
-.consultation-input-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  padding: var(--space-lg);
-  border-top: 3px solid var(--consultation-border);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-  z-index: var(--z-modal);
-}
-
-.input-wrapper {
-  max-width: 900px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-/* Microphone Button */
-.voice-consultation {
-  background: transparent;
-  border: 2px solid var(--consultation-border);
-  color: var(--text-muted);
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition-smooth);
-  position: relative;
-}
-
-.voice-consultation:hover {
-  border-color: var(--doctor-scrub-green);
-  color: var(--doctor-scrub-green);
-  transform: scale(1.05);
-}
-
-.voice-consultation.listening {
-  background: var(--doctor-stethoscope);
-  color: white;
-  border-color: var(--doctor-stethoscope);
-  animation: listeningPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes listeningPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(146, 37, 41, 0.4); }
-  50% { box-shadow: 0 0 0 12px rgba(146, 37, 41, 0); }
-}
-
-/* Input Field */
-.patient-input {
-  flex: 1;
-  padding: var(--space-md) var(--space-lg);
-  border: 2px solid var(--consultation-border);
-  border-radius: var(--radius-lg);
-  font-size: 1rem;
-  font-family: var(--font-medical);
-  transition: all var(--transition-smooth);
-  background: var(--doctor-coat);
-}
-
-.patient-input:focus {
-  outline: none;
-  border-color: var(--doctor-scrub-green);
-  box-shadow: 0 0 0 3px rgba(0, 140, 81, 0.1);
-  background: white;
-}
-
-.patient-input::placeholder {
-  color: var(--text-muted);
-}
-
-/* Send Button */
-.send-consultation {
-  background: linear-gradient(135deg, var(--doctor-scrub-green), var(--doctor-scrub-blue));
-  color: white;
-  border: none;
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: all var(--transition-bounce);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-medium);
-  position: relative;
-  overflow: hidden;
-}
-
-.send-consultation::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
-  opacity: 0;
-  transition: opacity var(--transition-smooth);
-}
-
-.send-consultation:hover {
-  transform: scale(1.1) rotate(10deg);
-  box-shadow: var(--shadow-prominent);
-}
-
-.send-consultation:hover::before {
-  opacity: 1;
-}
-
-.send-consultation:active {
-  transform: scale(0.95);
-}
-
-/* ================= TYPING INDICATOR ================= */
-.doctor-typing {
-  display: none;
-  align-items: center;
-  gap: var(--space-md);
-  margin-left: 60px;
-  margin-top: var(--space-sm);
-  padding: var(--space-md);
-  background: white;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-subtle);
-  max-width: 400px;
-  border-left: 4px solid var(--doctor-scrub-green);
-}
-
-.typing-dots {
-  display: flex;
-  gap: 4px;
-}
-
-.typing-dots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--doctor-scrub-green);
-  animation: doctorTyping 1.4s ease-in-out infinite;
-}
-
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes doctorTyping {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
-  30% { transform: translateY(-8px); opacity: 1; }
-}
-
-/* ================= MEDICAL TOOLS ================= */
-.medical-tools-bar {
-  max-width: 900px;
-  margin: 0 auto var(--space-xl);
-  display: flex;
-  gap: var(--space-md);
-  overflow-x: auto;
-  padding: var(--space-sm) 0;
-}
-
-.medical-tool {
-  background: white;
-  border: 1px solid var(--consultation-border);
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all var(--transition-smooth);
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.medical-tool:hover {
-  background: var(--doctor-coat);
-  border-color: var(--doctor-scrub-green);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
-}
-
-.medical-tool i {
-  color: var(--doctor-scrub-green);
-}
-
-/* ================= CONSULTATION SUMMARY ================= */
-.consultation-summary {
-  background: white;
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl);
-  margin-top: var(--space-xxl);
-  box-shadow: var(--shadow-medium);
-  border-top: 6px solid var(--doctor-scrub-green);
-  display: none;
-}
-
-.summary-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-lg);
-}
-
-.summary-header h3 {
-  color: var(--doctor-scrub-green);
-  font-size: 1.5rem;
-}
-
-.summary-content {
-  line-height: 1.8;
-}
-
-/* ================= RESPONSIVE DESIGN ================= */
-@media (max-width: 1024px) {
-  .consultation-header {
-    padding: var(--space-md);
-  }
-  
-  .consultation-area {
-    padding: var(--space-lg);
-  }
-  
-  .consultation-message {
-    max-width: 90%;
-  }
-}
-
-@media (max-width: 768px) {
-  .doctor-details h1 {
-    font-size: 1.25rem;
-  }
-  
-  .consultation-meta {
-    display: none;
-  }
-  
-  .opening-features {
-    grid-template-columns: 1fr;
-  }
-  
-  .input-wrapper {
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-  
-  .voice-consultation,
-  .send-consultation {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .patient-input {
-    width: 100%;
-  }
-  
-  .medical-tools-bar {
-    flex-wrap: wrap;
-  }
-}
-
-@media (max-width: 480px) {
-  .doctor-opening {
-    padding: var(--space-lg);
-  }
-  
-  .consultation-message {
-    max-width: 95%;
-  }
-  
-  .message-bubble {
-    padding: var(--space-md);
-  }
-  
-  .consultation-input-container {
-    padding: var(--space-md);
-  }
-}
-
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --consultation-bg: #0F172A;
-    --consultation-card: #1E293B;
-    --doctor-coat: #1E293B;
-    --consultation-border: #334155;
-    --text-doctor: #F1F5F9;
-    --text-patient: #CBD5E1;
-  }
-  
-  .doctor-opening,
-  .message-bubble:not(.patient-message .message-bubble),
-  .consultation-summary {
-    background: var(--consultation-card);
-  }
-  
-  .patient-input {
-    background: #334155;
-    color: white;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .consultation-header,
-  .consultation-input-container,
-  .medical-tools-bar {
-    display: none !important;
-  }
-  
-  body {
-    background: white;
-    color: black;
-  }
-  
-  .consultation-area {
-    padding-bottom: 0;
-  }
-  
-  .message-bubble {
-    box-shadow: none;
-    border: 1px solid #ddd !important;
-  }
-}
+        :root {
+            --primary: #008C51;
+            --secondary: #2A6BCC;
+            --bg: #f0f4f8;
+            --white: #ffffff;
+            --text: #1a202c;
+            --danger: #e53e3e;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: var(--white);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .nav-back {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .doctor-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* Chat Area */
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 15px;
+            border-radius: 15px;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .bot-msg {
+            background: var(--white);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            border-left: 4px solid var(--primary);
+        }
+
+        .user-msg {
+            background: var(--secondary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--white);
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-send { background: var(--primary); color: white; }
+        .btn-pdf { background: #edf2f7; color: var(--text); }
+        .btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+        .typing { font-size: 12px; color: #718096; margin-left: 5px; display: none; }
+
+        ul { margin: 10px 0; padding-left: 20px; }
+        li { margin-bottom: 5px; }
     </style>
 </head>
-
 <body>
-    <!-- Doctor Consultation Header -->
-    <div class="consultation-header">
-        <div class="doctor-info">
-            <div class="doctor-avatar">
-                <i class="fas fa-user-md"></i>
-            </div>
-            <div class="doctor-details">
-                <h1>Dr. MedAI Assistant</h1>
-                <div class="doctor-title">
-                    <i class="fas fa-badge-check"></i>
-                    AI-Powered Medical Consultation
-                </div>
-            </div>
-        </div>
-        
-        <div class="consultation-meta">
-            <div class="meta-item">
-                <i class="fas fa-clock"></i>
-                <span id="consultation-time">Just now</span>
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-shield-alt"></i>
-                <span>HIPAA Compliant</span>
-            </div>
-        </div>
-        
-        <div class="consultation-tools">
-            <button class="btn-medical" id="save-consultation">
-                <i class="fas fa-file-medical"></i>
-                <span>Save Notes</span>
-            </button>
-            <button class="btn-medical" id="emergency-call">
-                <i class="fas fa-phone-alt"></i>
-                <span>Emergency</span>
-            </button>
+
+<header>
+    <a href="dash.html" class="nav-back">
+        <i class="fas fa-arrow-left"></i> Dashboard
+    </a>
+    <div class="doctor-profile">
+        <div class="avatar"><i class="fas fa-user-md"></i></div>
+        <div>
+            <div style="font-weight: 700;">Dr. MedAI Assistant</div>
+            <div style="font-size: 12px; color: #48bb78;"><i class="fas fa-circle"></i> Active Consultation</div>
         </div>
     </div>
+    <button class="btn btn-pdf" onclick="exportPDF()">
+        <i class="fas fa-file-pdf"></i> Export
+    </button>
+</header>
 
-    <!-- Medical Tools Bar -->
-    <div class="medical-tools-bar">
-        <button class="medical-tool" data-tool="symptoms">
-            <i class="fas fa-stethoscope"></i>
-            <span>Symptom Check</span>
-        </button>
-        <button class="medical-tool" data-tool="medication">
-            <i class="fas fa-pills"></i>
-            <span>Medication Info</span>
-        </button>
-        <button class="medical-tool" data-tool="firstaid">
-            <i class="fas fa-first-aid"></i>
-            <span>First Aid</span>
-        </button>
-        <button class="medical-tool" data-tool="diagnosis">
-            <i class="fas fa-clipboard-check"></i>
-            <span>Differential Dx</span>
-        </button>
-        <button class="medical-tool" data-tool="referral">
-            <i class="fas fa-hospital"></i>
-            <span>Find Hospital</span>
-        </button>
-        <button class="medical-tool" data-tool="history">
-            <i class="fas fa-history"></i>
-            <span>Medical History</span>
-        </button>
+<div id="chat-container">
+    <div class="msg bot-msg">
+        Hello! I am your clinical assistant. I can help analyze your symptoms and provide information on over 60 medical conditions.
+        <br><br><strong>How can I help you today?</strong>
     </div>
+</div>
 
-    <!-- Consultation Area -->
-    <div class="consultation-area">
-        <!-- Doctor's Opening -->
-        <div class="doctor-opening">
-            <h2>Welcome to Your Virtual Medical Consultation</h2>
-            <p>
-                Hello, I'm Dr. MedAI. Thank you for choosing this virtual consultation. 
-                I'm here to listen to your concerns, provide medical guidance, and help you 
-                understand your health better. Please describe what brings you in today.
-            </p>
-            
-            <div class="opening-features">
-                <div class="feature">
-                    <i class="fas fa-comment-medical"></i>
-                    <div>
-                        <h4>Confidential Discussion</h4>
-                        <p>Your health information is protected and confidential</p>
-                    </div>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-brain"></i>
-                    <div>
-                        <h4>AI-Assisted Analysis</h4>
-                        <p>Evidence-based medical knowledge at your service</p>
-                    </div>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-hand-holding-medical"></i>
-                    <div>
-                        <h4>Personalized Guidance</h4>
-                        <p>Tailored advice based on your specific symptoms</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div id="typing-indicator" class="typing" style="padding: 0 25px 10px;">Dr. MedAI is analyzing...</div>
 
-        <!-- Conversation Thread -->
-        <div class="conversation-thread" id="consultation-thread">
-            <!-- Initial doctor greeting will be added here -->
-        </div>
+<div class="controls">
+    <input type="text" id="user-input" placeholder="Type your symptoms (e.g., headache and blurred vision)...">
+    <button class="btn btn-send" onclick="handleInput()">
+        <i class="fas fa-paper-plane"></i>
+    </button>
+</div>
 
-        <!-- Doctor Typing Indicator -->
-        <div class="doctor-typing" id="doctor-typing">
-            <div class="typing-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-            <span>Dr. MedAI is reviewing your symptoms...</span>
-        </div>
+<script>
+    const chatContainer = document.getElementById('chat-container');
+    const userInput = document.getElementById('user-input');
+    const typingIndicator = document.getElementById('typing-indicator');
 
-        <!-- Consultation Summary -->
-        <div class="consultation-summary" id="consultation-summary">
-            <div class="summary-header">
-                <h3><i class="fas fa-file-medical-alt"></i> Consultation Summary</h3>
-                <button class="btn-medical" id="print-summary">
-                    <i class="fas fa-print"></i>
-                    <span>Print</span>
-                </button>
-            </div>
-            <div class="summary-content" id="summary-content">
-                <!-- Summary will be generated here -->
-            </div>
-        </div>
-    </div>
+    // 60+ Condition Database
+    const medicalDatabase = {
+        // Respiratory & Infections
+        "Common Cold": ["cough", "runny nose", "sneezing", "sore throat", "congestion"],
+        "Influenza (Flu)": ["high fever", "body aches", "chills", "severe fatigue"],
+        "COVID-19": ["loss of taste", "loss of smell", "dry cough", "fever", "difficulty breathing"],
+        "Pneumonia": ["sharp chest pain", "productive cough", "shortness of breath", "shaking chills"],
+        "Bronchitis": ["yellow mucus", "wheezing", "tight chest", "fatigue"],
+        "Tuberculosis": ["coughing blood", "night sweats", "weight loss", "persistent cough"],
+        "Sinusitis": ["facial pressure", "stuffy nose", "thick mucus", "headache"],
+        "Streptococcal Pharyngitis": ["swollen tonsils", "white patches in throat", "painful swallowing"],
+        
+        // Cardiovascular
+        "Hypertension": ["pounding in ears", "blurred vision", "nosebleeds", "severe headache"],
+        "Angina/Heart Attack": ["crushing chest pain", "left arm pain", "jaw pain", "nausea", "sweating"],
+        "Anemia": ["pale skin", "brittle nails", "dizziness", "shortness of breath"],
+        "Heart Failure": ["swollen ankles", "fluid retention", "cannot lie flat to breathe"],
+        
+        // Digestive
+        "GERD": ["heartburn", "acid reflux", "sour taste", "chest burning"],
+        "Gastroenteritis": ["vomiting", "watery diarrhea", "stomach cramps"],
+        "Peptic Ulcer": ["stomach burning", "bloating", "hunger pain"],
+        "Appendicitis": ["lower right pain", "rebound tenderness", "nausea", "fever"],
+        "Gallstones": ["intense right side pain", "back pain", "pain after fatty meals"],
+        "Crohn's Disease": ["abdominal pain", "chronic diarrhea", "weight loss", "rectal bleeding"],
+        "Food Poisoning": ["sudden vomiting", "diarrhea", "fever", "weakness"],
 
-    <!-- Consultation Input -->
-    <div class="consultation-input-container">
-        <div class="input-wrapper">
-            <button class="voice-consultation" id="voice-consultation" title="Voice Consultation">
-                <i class="fas fa-microphone"></i>
-            </button>
-            <input type="text" 
-                   class="patient-input" 
-                   id="patient-input" 
-                   placeholder="Describe your symptoms, concerns, or ask a medical question...">
-            <button class="send-consultation" id="send-consultation">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
+        // Neurological & Mental
+        "Migraine": ["throbbing head pain", "light sensitivity", "aura", "nausea"],
+        "Anxiety Disorder": ["palpitations", "panic", "sweating", "overthinking", "trembling"],
+        "Clinical Depression": ["low mood", "loss of interest", "insomnia", "suicidal thoughts"],
+        "Vertigo (BPPV)": ["spinning sensation", "dizziness", "unsteadiness"],
+        "Meningitis": ["stiff neck", "high fever", "confusion", "rash"],
+        "Stroke": ["slurred speech", "facial drooping", "arm weakness", "sudden confusion"],
 
-    <script>
-// ============================================
-// DR. MEDAI CONSULTATION SCRIPT
-// Advanced Doctor-Patient Interaction
-// ============================================
+        // Endocrine & Others
+        "Diabetes Type 2": ["excessive thirst", "frequent urination", "slow healing", "blurry vision"],
+        "Hypothyroidism": ["weight gain", "cold sensitivity", "dry skin", "constipation"],
+        "Hyperthyroidism": ["weight loss", "shaky hands", "rapid heart rate", "bulging eyes"],
+        "UTI": ["burning during urination", "cloudy urine", "pelvic pain"],
+        "Kidney Stones": ["severe flank pain", "blood in urine", "waves of pain"],
+        "Malaria": ["cycling high fever", "shivering", "headache", "sweating"],
+        "Dengue": ["behind eye pain", "bone pain", "rash", "high fever"],
+        "Lyme Disease": ["bullseye rash", "joint swelling", "fatigue"],
+        "Rheumatoid Arthritis": ["morning stiffness", "joint pain", "swollen knuckles"],
+        "Gout": ["painful big toe", "swollen joint", "intense redness"],
+        "Dehydration": ["dark urine", "dry mouth", "extreme thirst", "sunken eyes"],
+        "Insomnia": ["trouble falling asleep", "waking up early", "daytime fatigue"],
+        "Heat Stroke": ["confused", "no sweating", "rapid pulse", "faintness"],
+        "Eczema": ["itchy skin", "red scaly patches", "dryness"],
+        "Asthma": ["wheezing", "chest tightness", "shortness of breath during exercise"]
+    };
 
-// DOM Elements
-const consultationThread = document.getElementById('consultation-thread');
-const doctorTyping = document.getElementById('doctor-typing');
-const patientInput = document.getElementById('patient-input');
-const voiceConsultation = document.getElementById('voice-consultation');
-const sendConsultation = document.getElementById('send-consultation');
-const consultationSummary = document.getElementById('consultation-summary');
-const summaryContent = document.getElementById('summary-content');
-const consultationTime = document.getElementById('consultation-time');
-
-// State Management
-let consultationState = {
-    patientName: '',
-    symptoms: [],
-    medications: [],
-    allergies: [],
-    vitalSigns: {},
-    conversationHistory: [],
-    consultationStartTime: new Date(),
-    currentConcern: ''
-};
-
-// Doctor Persona Settings
-const DOCTOR_PERSONA = {
-    name: "Dr. MedAI",
-    title: "AI-Powered Medical Consultant",
-    specialty: "General Medicine & Symptom Analysis",
-    hospital: "MedAI Virtual Hospital",
-    yearsExperience: "15+",
-    consultationStyle: "empathetic, thorough, professional",
-    typicalPhrases: [
-        "I understand your concern",
-        "Let me help you with that",
-        "That's important information",
-        "Thank you for sharing that detail",
-        "Let's work through this together"
-    ]
-};
-
-// Medical Conditions Database (Enhanced)
-const MEDICAL_KNOWLEDGE = {
-    greetings: [
-        "Hello, I'm Dr. MedAI. Thank you for connecting with me today. How can I assist you with your health concerns?",
-        "Good day. I'm Dr. MedAI, ready to discuss your health concerns. Please tell me what brings you in today.",
-        "Welcome to your virtual consultation. I'm Dr. MedAI, here to listen to your symptoms and provide guidance."
-    ],
-    
-    symptoms: {
-        fever: {
-            medicalName: "Pyrexia",
-            questions: [
-                "How long have you had the fever?",
-                "What's the highest temperature you've recorded?",
-                "Is the fever constant or does it come and go?",
-                "Do you have associated chills or sweats?"
-            ],
-            differential: ["Viral infection", "Bacterial infection", "Inflammatory condition", "Heat exhaustion"],
-            advice: "Monitor temperature regularly, stay hydrated, and rest. Seek medical attention if fever persists beyond 48 hours or exceeds 39.4°C (103°F)."
-        },
-        headache: {
-            medicalName: "Cephalalgia",
-            questions: [
-                "Where is the pain located?",
-                "On a scale of 1-10, how severe is it?",
-                "Is it throbbing or constant?",
-                "Any nausea, vomiting, or sensitivity to light?"
-            ],
-            differential: ["Tension headache", "Migraine", "Sinusitis", "Hypertension"],
-            advice: "Rest in a quiet, dark room. Stay hydrated. Avoid triggers like caffeine or screen time. Seek immediate care if sudden, severe, or with neurological symptoms."
-        },
-        cough: {
-            medicalName: "Tussis",
-            questions: [
-                "Is the cough dry or productive?",
-                "What color is the phlegm if any?",
-                "Does it worsen at night?",
-                "Any associated chest pain or shortness of breath?"
-            ],
-            differential: ["Upper respiratory infection", "Bronchitis", "Asthma", "GERD"],
-            advice: "Stay hydrated with warm fluids. Use honey for throat irritation. Avoid irritants like smoke. Seek care if cough persists beyond 3 weeks or if breathing becomes difficult."
-        }
-    },
-    
-    responses: {
-        empathetic: [
-            "I understand this must be concerning for you.",
-            "Thank you for sharing that important detail.",
-            "I appreciate you bringing this to my attention.",
-            "Let's work together to understand this better."
-        ],
-        reassuring: [
-            "Many people experience similar symptoms and recover well.",
-            "You're taking the right step by seeking information.",
-            "We'll get through this step by step.",
-            "Your awareness of your symptoms is very helpful."
-        ],
-        professional: [
-            "Based on medical guidelines, I recommend...",
-            "The standard approach for these symptoms is...",
-            "Current medical evidence suggests...",
-            "In similar cases, we typically consider..."
-        ]
+    function addMessage(content, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `msg ${sender === 'user' ? 'user-msg' : 'bot-msg'}`;
+        msgDiv.innerHTML = content;
+        chatContainer.appendChild(msgDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-};
 
-// Doctor's Opening Message
-function showDoctorOpening() {
-    setTimeout(() => {
-        const greeting = MEDICAL_KNOWLEDGE.greetings[
-            Math.floor(Math.random() * MEDICAL_KNOWLEDGE.greetings.length)
-        ];
-        
-        addDoctorMessage(`
-            <div class="medical-advice">
-                <h4><i class="fas fa-user-md"></i> ${DOCTOR_PERSONA.name}</h4>
-                <p>${greeting}</p>
-                
-                <div class="follow-up">
-                    <h5><i class="fas fa-question-circle"></i> To help me understand better:</h5>
-                    <ul class="medical-list">
-                        <li>What symptoms are you experiencing?</li>
-                        <li>When did they start?</li>
-                        <li>Have you noticed any patterns?</li>
-                        <li>Any other concerns you'd like to share?</li>
-                    </ul>
-                </div>
-                
-                <div class="doctor-signature">
-                    <i class="fas fa-stethoscope"></i>
-                    <span>${DOCTOR_PERSONA.name} | ${DOCTOR_PERSONA.specialty}</span>
-                </div>
-            </div>
-        `);
-    }, 1000);
-}
+    function handleInput() {
+        const input = userInput.value.trim().toLowerCase();
+        if (!input) return;
 
-// Add Doctor Message
-function addDoctorMessage(content) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'consultation-message doctor-message';
-    messageDiv.innerHTML = `
-        <div class="message-avatar doctor-avatar-message">
-            <i class="fas fa-user-md"></i>
-        </div>
-        <div class="message-bubble">
-            ${content}
-        </div>
-    `;
-    
-    consultationThread.appendChild(messageDiv);
-    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    
-    // Add to history
-    consultationState.conversationHistory.push({
-        role: 'doctor',
-        content: content,
-        timestamp: new Date()
-    });
-}
+        addMessage(userInput.value, 'user');
+        userInput.value = '';
+        
+        typingIndicator.style.display = 'block';
 
-// Add Patient Message
-function addPatientMessage(content) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'consultation-message patient-message';
-    messageDiv.innerHTML = `
-        <div class="message-avatar patient-avatar-message">
-            <i class="fas fa-user"></i>
-        </div>
-        <div class="message-bubble">
-            <p>${content}</p>
-        </div>
-    `;
-    
-    consultationThread.appendChild(messageDiv);
-    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    
-    // Add to history
-    consultationState.conversationHistory.push({
-        role: 'patient',
-        content: content,
-        timestamp: new Date()
-    });
-    
-    // Analyze for symptoms
-    analyzePatientMessage(content);
-}
-
-// Analyze Patient Message
-function analyzePatientMessage(text) {
-    const lowerText = text.toLowerCase();
-    
-    // Check for emergency symptoms
-    const emergencyKeywords = [
-        'chest pain', 'heart attack', 'can\'t breathe', 'suffocating',
-        'severe bleeding', 'unconscious', 'stroke', 'paralysis'
-    ];
-    
-    for (const keyword of emergencyKeywords) {
-        if (lowerText.includes(keyword)) {
-            showEmergencyResponse(keyword);
-            return;
-        }
-    }
-    
-    // Check for common symptoms
-    for (const [symptom, data] of Object.entries(MEDICAL_KNOWLEDGE.symptoms)) {
-        if (lowerText.includes(symptom)) {
-            consultationState.currentConcern = symptom;
-            showSymptomResponse(symptom, data);
-            return;
-        }
-    }
-    
-    // General response
-    showGeneralResponse();
-}
-
-// Show Emergency Response
-function showEmergencyResponse(keyword) {
-    showTypingIndicator();
-    
-    setTimeout(() => {
-        addDoctorMessage(`
-            <div class="medical-advice">
-                <div class="message-bubble medical-alert">
-                    <h4><i class="fas fa-exclamation-triangle"></i> MEDICAL EMERGENCY RECOGNIZED</h4>
-                    <p>I've detected mention of <strong>${keyword}</strong> which requires immediate medical attention.</p>
-                    
-                    <div class="follow-up">
-                        <h5><i class="fas fa-phone-alt"></i> IMMEDIATE ACTION REQUIRED:</h5>
-                        <ul class="medical-list">
-                            <li><strong>Call emergency services immediately: 112 (Kenya) or 999</strong></li>
-                            <li>Do not delay seeking medical care</li>
-                            <li>If with someone, have them call for help</li>
-                            <li>Stay on the line with emergency services</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="quick-actions-medical">
-                        <button class="quick-action-btn" onclick="simulateEmergencyCall()">
-                            <i class="fas fa-phone-alt"></i> Simulate Emergency Call
-                        </button>
-                        <button class="quick-action-btn" onclick="showNearestHospitals()">
-                            <i class="fas fa-hospital"></i> Find Nearest Hospital
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="doctor-signature">
-                    <i class="fas fa-first-aid"></i>
-                    <span>Emergency Protocol Activated</span>
-                </div>
-            </div>
-        `);
-        
-        hideTypingIndicator();
-    }, 2000);
-}
-
-// Show Symptom Response
-function showSymptomResponse(symptom, data) {
-    showTypingIndicator();
-    
-    setTimeout(() => {
-        const empathetic = MEDICAL_KNOWLEDGE.responses.empathetic[
-            Math.floor(Math.random() * MEDICAL_KNOWLEDGE.responses.empathetic.length)
-        ];
-        
-        addDoctorMessage(`
-            <div class="medical-advice">
-                <h4><i class="fas fa-stethoscope"></i> Symptom Analysis: ${data.medicalName}</h4>
-                <p>${empathetic} You mentioned experiencing <strong>${symptom}</strong>.</p>
-                
-                <div class="follow-up">
-                    <h5><i class="fas fa-clipboard-list"></i> To help me understand this better:</h5>
-                    <ul class="medical-list">
-                        ${data.questions.map(q => `<li>${q}</li>`).join('')}
-                    </ul>
-                </div>
-                
-                <div class="follow-up">
-                    <h5><i class="fas fa-brain"></i> Possible Considerations:</h5>
-                    <p>${data.differential.join(', ')}</p>
-                </div>
-                
-                <div class="follow-up">
-                    <h5><i class="fas fa-hand-holding-medical"></i> Initial Guidance:</h5>
-                    <p>${data.advice}</p>
-                </div>
-                
-                <div class="quick-actions-medical">
-                    <button class="quick-action-btn" onclick="askAboutSymptom('${symptom}', 'duration')">
-                        <i class="fas fa-clock"></i> Duration
-                    </button>
-                    <button class="quick-action-btn" onclick="askAboutSymptom('${symptom}', 'severity')">
-                        <i class="fas fa-chart-line"></i> Severity
-                    </button>
-                    <button class="quick-action-btn" onclick="askAboutSymptom('${symptom}', 'triggers')">
-                        <i class="fas fa-bolt"></i> Triggers
-                    </button>
-                </div>
-                
-                <div class="doctor-signature">
-                    <i class="fas fa-file-medical-alt"></i>
-                    <span>Symptom analysis in progress</span>
-                </div>
-            </div>
-        `);
-        
-        hideTypingIndicator();
-    }, 1500);
-}
-
-// Show General Response
-function showGeneralResponse() {
-    showTypingIndicator();
-    
-    setTimeout(() => {
-        const phrases = [
-            "Thank you for sharing that information. To help me provide more specific guidance, could you tell me more about your symptoms?",
-            "I appreciate you reaching out. Health concerns can be worrying. Could you describe what you're experiencing in more detail?",
-            "Thank you for that information. To better assist you, I'd like to understand more about your symptoms and concerns."
-        ];
-        
-        const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-        
-        addDoctorMessage(`
-            <div class="medical-advice">
-                <h4><i class="fas fa-comment-medical"></i> Consultation Note</h4>
-                <p>${randomPhrase}</p>
-                
-                <div class="follow-up">
-                    <h5><i class="fas fa-lightbulb"></i> You might consider:</h5>
-                    <ul class="medical-list">
-                        <li>Describing your main symptom in detail</li>
-                        <li>Mentioning when it started</li>
-                        <li>Noting what makes it better or worse</li>
-                        <li>Sharing any other symptoms you've noticed</li>
-                    </ul>
-                </div>
-                
-                <div class="doctor-signature">
-                    <i class="fas fa-clipboard-check"></i>
-                    <span>Consultation ongoing</span>
-                </div>
-            </div>
-        `);
-        
-        hideTypingIndicator();
-    }, 1200);
-}
-
-// Typing Indicator
-function showTypingIndicator() {
-    doctorTyping.style.display = 'flex';
-    doctorTyping.scrollIntoView({ behavior: 'smooth', block: 'end' });
-}
-
-function hideTypingIndicator() {
-    doctorTyping.style.display = 'none';
-}
-
-// Voice Consultation
-function setupVoiceConsultation() {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
-        
-        voiceConsultation.addEventListener('click', () => {
-            if (!isListening) {
-                recognition.start();
-                voiceConsultation.classList.add('listening');
-                voiceConsultation.innerHTML = '<i class="fas fa-stop"></i>';
-                isListening = true;
-            } else {
-                recognition.stop();
-                voiceConsultation.classList.remove('listening');
-                voiceConsultation.innerHTML = '<i class="fas fa-microphone"></i>';
-                isListening = false;
-            }
-        });
-        
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            patientInput.value = transcript;
-            voiceConsultation.classList.remove('listening');
-            voiceConsultation.innerHTML = '<i class="fas fa-microphone"></i>';
-            isListening = false;
-            
-            // Auto-submit after voice input
-            setTimeout(() => {
-                handlePatientInput();
-            }, 500);
-        };
-        
-        recognition.onerror = () => {
-            voiceConsultation.classList.remove('listening');
-            voiceConsultation.innerHTML = '<i class="fas fa-microphone"></i>';
-            isListening = false;
-        };
-    } else {
-        voiceConsultation.style.display = 'none';
-    }
-}
-
-// Handle Patient Input
-function handlePatientInput() {
-    const text = patientInput.value.trim();
-    if (!text) return;
-    
-    addPatientMessage(text);
-    patientInput.value = '';
-    
-    // Update consultation time
-    updateConsultationTime();
-}
-
-// Update Consultation Time
-function updateConsultationTime() {
-    const now = new Date();
-    const diffMs = now - consultationState.consultationStartTime;
-    const diffMins = Math.floor(diffMs / 60000);
-    
-    if (diffMins < 1) {
-        consultationTime.textContent = 'Just now';
-    } else if (diffMins < 60) {
-        consultationTime.textContent = `${diffMins} min ago`;
-    } else {
-        consultationTime.textContent = `${Math.floor(diffMins / 60)} hr ago`;
-    }
-}
-
-// Medical Tools
-document.querySelectorAll('.medical-tool').forEach(tool => {
-    tool.addEventListener('click', function() {
-        const toolType = this.dataset.tool;
-        
-        showTypingIndicator();
-        
         setTimeout(() => {
-            let response = '';
+            typingIndicator.style.display = 'none';
             
-            switch(toolType) {
-                case 'symptoms':
-                    response = `
-                        <div class="medical-advice">
-                            <h4><i class="fas fa-stethoscope"></i> Symptom Checker</h4>
-                            <p>I can help you understand common symptoms. Some key areas to consider:</p>
-                            <ul class="medical-list">
-                                <li><strong>Duration:</strong> How long have symptoms persisted?</li>
-                                <li><strong>Severity:</strong> On a scale of 1-10, how bothersome?</li>
-                                <li><strong>Pattern:</strong> Constant or intermittent?</li>
-                                <li><strong>Triggers:</strong> What makes it better or worse?</li>
-                            </ul>
-                            <p>Please describe any specific symptoms you're concerned about.</p>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'medication':
-                    response = `
-                        <div class="medical-advice">
-                            <h4><i class="fas fa-pills"></i> Medication Information</h4>
-                            <p>When discussing medications, please share:</p>
-                            <ul class="medical-list">
-                                <li>Names of medications you're taking</li>
-                                <li>Dosage and frequency</li>
-                                <li>How long you've been taking them</li>
-                                <li>Any side effects you've noticed</li>
-                            </ul>
-                            <p><strong>Important:</strong> Never stop prescribed medications without consulting your healthcare provider.</p>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'firstaid':
-                    response = `
-                        <div class="medical-advice">
-                            <h4><i class="fas fa-first-aid"></i> First Aid Guidance</h4>
-                            <p>For common first aid situations:</p>
-                            <ul class="medical-list">
-                                <li><strong>Cuts:</strong> Clean with water, apply pressure, bandage</li>
-                                <li><strong>Burns:</strong> Cool with running water for 20 minutes</li>
-                                <li><strong>Sprains:</strong> Rest, Ice, Compression, Elevation (RICE)</li>
-                                <li><strong>Fever:</strong> Rest, hydration, monitor temperature</li>
-                            </ul>
-                            <p>For serious injuries, seek medical attention immediately.</p>
-                        </div>
-                    `;
-                    break;
+            // Conversation Logic
+            if (input.match(/^(hi|hello|hey|good morning|good afternoon)/)) {
+                addMessage("Hello! I'm ready for your consultation. Please describe your symptoms or how you're feeling.", "bot");
+                return;
             }
-            
-            addDoctorMessage(response);
-            hideTypingIndicator();
-        }, 1500);
-    });
-});
 
-// Initialize Consultation
-function initializeConsultation() {
-    // Start with doctor's opening
-    showDoctorOpening();
-    
-    // Setup voice consultation
-    setupVoiceConsultation();
-    
-    // Setup input handlers
-    sendConsultation.addEventListener('click', handlePatientInput);
-    patientInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handlePatientInput();
-        }
-    });
-    
-    // Update time every minute
-    setInterval(updateConsultationTime, 60000);
-}
+            if (input.includes("thank")) {
+                addMessage("You're very welcome. Is there anything else you'd like to check?", "bot");
+                return;
+            }
 
-// Start consultation when page loads
-document.addEventListener('DOMContentLoaded', initializeConsultation);
-    </script>
+            // Analysis Logic
+            let matches = [];
+            for (const [disease, symptoms] of Object.entries(medicalDatabase)) {
+                let score = 0;
+                symptoms.forEach(s => {
+                    if (input.includes(s)) score++;
+                });
+                if (score > 0) matches.push({ name: disease, score: score });
+            }
+
+            matches.sort((a, b) => b.score - a.score);
+
+            if (matches.length > 0) {
+                let response = `Based on clinical data, your symptoms align with: <br><ul>`;
+                matches.slice(0, 3).forEach(m => {
+                    response += `<li><strong>${m.name}</strong> (Match strength: ${Math.min(m.score * 25, 100)}%)</li>`;
+                });
+                response += `</ul><br>Do you have any other symptoms like fever, pain, or dizziness? <br><br><em>Note: This is for info only. Seek emergency care if symptoms are severe.</em>`;
+                addMessage(response, "bot");
+            } else {
+                addMessage("I couldn't find a direct match. Could you be more specific? For example, mention where the pain is or if you have a fever.", "bot");
+            }
+        }, 800);
+    }
+
+    function exportPDF() {
+        const element = document.getElementById('chat-container');
+        const opt = {
+            margin: 1,
+            filename: 'Medical_Consultation_Report.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleInput();
+    });
+</script>
+
 </body>
 </html>
