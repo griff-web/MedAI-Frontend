@@ -226,7 +226,7 @@ class MedAICore {
                 // Auto redirect for logout
                 if (btn.dataset.tab === "log-out") {
                     localStorage.removeItem("medai_token");
-                    window.location.href = "login2.html";
+                    window.location.href = "reg.html";
                 }
             };
         });
