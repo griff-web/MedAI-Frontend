@@ -169,137 +169,234 @@
         <i class="fas fa-paper-plane"></i>
     </button>
 </div>
+    <script>
+// ============================================
+// DR. MEDAI CLINICAL ENGINE v1.0
+// ============================================
 
-<script>
-    const chatContainer = document.getElementById('chat-container');
-    const userInput = document.getElementById('user-input');
-    const typingIndicator = document.getElementById('typing-indicator');
+const chatContainer = document.getElementById('chat-container');
+const userInput = document.getElementById('user-input');
+const typingIndicator = document.getElementById('typing-indicator');
 
-    // 60+ Condition Database
-    const medicalDatabase = {
-        // Respiratory & Infections
-        "Common Cold": ["cough", "runny nose", "sneezing", "sore throat", "congestion"],
-        "Influenza (Flu)": ["high fever", "body aches", "chills", "severe fatigue"],
-        "COVID-19": ["loss of taste", "loss of smell", "dry cough", "fever", "difficulty breathing"],
-        "Pneumonia": ["sharp chest pain", "productive cough", "shortness of breath", "shaking chills"],
-        "Bronchitis": ["yellow mucus", "wheezing", "tight chest", "fatigue"],
-        "Tuberculosis": ["coughing blood", "night sweats", "weight loss", "persistent cough"],
-        "Sinusitis": ["facial pressure", "stuffy nose", "thick mucus", "headache"],
-        "Streptococcal Pharyngitis": ["swollen tonsils", "white patches in throat", "painful swallowing"],
+// State Management (Mental Model of the Patient)
+let patientContext = {
+    mentionedSymptoms: new Set(),
+    lastMentionedSystem: null,
+    riskLevel: "low",
+    conversationStage: "greeting" // greeting, assessment, analysis
+};
+
+// DATABASE: 100+ Conditions & 70+ Signs/Symptoms
+const medicalLibrary = {
+    // --- RESPIRATORY (1-15) ---
+    "Common Cold": ["cough", "runny nose", "sneezing", "sore throat", "congestion", "mild fatigue"],
+    "Influenza (Flu)": ["high fever", "body aches", "chills", "severe exhaustion", "dry cough", "headache"],
+    "COVID-19": ["loss of taste", "loss of smell", "shortness of breath", "fever", "dry cough", "muscle pain"],
+    "Pneumonia": ["sharp chest pain", "productive cough", "shortness of breath", "yellow mucus", "shaking chills"],
+    "Asthma": ["wheezing", "tight chest", "breathlessness during exercise", "coughing at night"],
+    "Bronchitis": ["persistent mucus", "fatigue", "slight fever", "chest discomfort"],
+    "Tuberculosis": ["coughing blood", "night sweats", "unexplained weight loss", "chest pain"],
+    "COPD": ["chronic cough", "cyanosis", "swelling in ankles", "frequent respiratory infections"],
+    "Pulmonary Embolism": ["sudden breathlessness", "chest pain worse on breathing", "rapid heart rate"],
+    "Sinusitis": ["facial pressure", "stuffy nose", "thick yellow mucus", "bad breath", "tooth pain"],
+    "Pharyngitis": ["swollen glands", "scratchy throat", "difficulty swallowing"],
+    "Laryngitis": ["hoarseness", "loss of voice", "tickling in throat"],
+    "Croup": ["barking cough", "stridor", "hoarse voice"],
+    "Sleep Apnea": ["loud snoring", "daytime sleepiness", "gasping during sleep"],
+    "Cystic Fibrosis": ["salty-tasting skin", "greasy stools", "recurrent lung infections"],
+
+    // --- CARDIOVASCULAR (16-30) ---
+    "Myocardial Infarction (Heart Attack)": ["crushing chest pain", "left arm pain", "jaw pain", "nausea", "cold sweat", "shortness of breath"],
+    "Hypertension": ["pounding in chest", "blurred vision", "nosebleeds", "dizziness", "severe headache"],
+    "Angina": ["chest pressure", "pain triggered by exertion", "indigestion-like pain"],
+    "Atrial Fibrillation": ["heart palpitations", "fluttering in chest", "weakness", "faintness"],
+    "Heart Failure": ["swelling in legs", "orthopnea", "pink frothy sputum", "rapid weight gain"],
+    "Anemia": ["pale skin", "brittle nails", "tachycardia", "cold hands", "extreme fatigue"],
+    "DVT (Deep Vein Thrombosis)": ["swelling in one leg", "warmth in calf", "redness in leg"],
+    "Aortic Stenosis": ["fainting during activity", "heart murmur", "chest tightness"],
+    "Pericarditis": ["sharp chest pain improved by leaning forward", "low grade fever"],
+    "Endocarditis": ["flu-like symptoms", "new heart murmur", "small red spots on skin"],
+    "Peripheral Artery Disease": ["leg pain when walking", "sores on toes that don't heal", "hair loss on legs"],
+    "Bradycardia": ["slow heart rate", "near-fainting", "confusion"],
+    "Tachycardia": ["racing heart", "shortness of breath", "lightheadedness"],
+    "Mitral Valve Prolapse": ["clicking sound in heart", "chest discomfort", "anxiety"],
+    "Raynaud's Disease": ["blue fingers in cold", "numbness in toes", "tingling as skin warms"],
+
+    // --- DIGESTIVE / GI (31-50) ---
+    "GERD (Acid Reflux)": ["heartburn", "acid regurgitation", "sour taste", "chronic cough", "lump in throat"],
+    "Gastroenteritis (Stomach Flu)": ["watery diarrhea", "stomach cramps", "nausea", "projectile vomiting"],
+    "Appendicitis": ["pain starting at navel", "pain moving to lower right", "loss of appetite", "low fever"],
+    "Gallstones": ["pain in upper right abdomen", "back pain between shoulder blades", "pain after fatty meals"],
+    "Peptic Ulcer": ["gnawing stomach pain", "bloating", "feeling full too soon", "dark stools"],
+    "Crohn's Disease": ["chronic diarrhea", "abdominal cramping", "blood in stool", "mouth sores"],
+    "Ulcerative Colitis": ["urgent bowel movements", "rectal pain", "rectal bleeding"],
+    "IBS": ["excessive gas", "alternating diarrhea and constipation", "mucus in stool"],
+    "Celiac Disease": ["bloated stomach", "malnutrition", "fatigue", "itchy rash"],
+    "Hepatitis": ["yellowing eyes (jaundice)", "dark urine", "clay-colored stools", "itchy skin"],
+    "Liver Cirrhosis": ["swollen abdomen (ascites)", "spider-like veins", "easy bruising"],
+    "Pancreatitis": ["pain radiating to back", "oily stools", "tenderness in abdomen"],
+    "Diverticulitis": ["lower left abdominal pain", "fever", "constipation"],
+    "Hernia": ["bulge in groin", "pain when lifting", "heaviness in abdomen"],
+    "Lactose Intolerance": ["bloating after dairy", "gas", "diarrhea"],
+    "Food Poisoning": ["sudden vomiting", "diarrhea within hours of eating", "cramps"],
+    "Gastroparesis": ["vomiting undigested food", "early fullness", "nausea"],
+    "Hemorrhoids": ["rectal itching", "painless bleeding during bowel movements"],
+    "Anal Fissure": ["bright red blood on toilet paper", "pain during bowel movements"],
+    "Oral Thrush": ["white patches on tongue", "cotton feeling in mouth"],
+
+    // --- NEUROLOGICAL & MENTAL (51-70) ---
+    "Migraine": ["pulsating head pain", "aura", "photophobia (light sensitivity)", "phonophobia (sound sensitivity)", "nausea"],
+    "Ischemic Stroke": ["facial drooping", "arm weakness", "slurred speech", "sudden numbness on one side"],
+    "Anxiety Disorder": ["excessive worry", "racing heart", "tightness in throat", "trembling", "sweating"],
+    "Major Depression": ["persistant sadness", "loss of interest", "insomnia", "suicidal thoughts", "fatigue"],
+    "Multiple Sclerosis": ["numbness in limbs", "electric-shock sensations with neck movement", "unsteady gait"],
+    "Parkinson's Disease": ["resting tremor", "slow movement (bradykinesia)", "stiff muscles", "shuffling gait"],
+    "Epilepsy": ["seizures", "temporary confusion", "staring spells"],
+    "Alzheimer's": ["memory loss", "confusion with time", "misplacing items"],
+    "Meningitis": ["stiff neck", "high fever", "sensitivity to light", "sudden confusion"],
+    "Vertigo": ["spinning sensation", "loss of balance", "nystagmus (involuntary eye movement)"],
+    "Sciatica": ["shooting pain down leg", "lower back pain", "numbness in foot"],
+    "Neuropathy": ["tingling in hands", "burning pain in feet", "sensitivity to touch"],
+    "Concussion": ["dazed feeling", "memory gap about injury", "ringing in ears", "headache"],
+    "Bipolar Disorder": ["mood swings", "episodes of high energy", "episodes of deep sadness"],
+    "Panic Attack": ["sense of impending doom", "chest tightness", "hyperventilation"],
+    "OCD": ["repetitive behaviors", "intrusive thoughts", "need for symmetry"],
+    "ADHD": ["difficulty focusing", "impulsivity", "fidgeting"],
+    "Bell's Palsy": ["sudden weakness on half of face", "drooling", "inability to close one eye"],
+    "Restless Leg Syndrome": ["urge to move legs", "crawling sensation in limbs at night"],
+    "Cluster Headache": ["severe pain around one eye", "tearing of the eye", "nasal congestion on one side"],
+
+    // --- ENDOCRINE & OTHERS (71-100) ---
+    "Diabetes Type 1": ["extreme thirst", "frequent urination", "unintended weight loss", "fruity breath odor"],
+    "Diabetes Type 2": ["slow-healing sores", "blurred vision", "recurrent infections", "darkened skin in armpits"],
+    "Hypothyroidism": ["weight gain", "cold intolerance", "dry skin", "thinning hair", "depression"],
+    "Hyperthyroidism": ["sudden weight loss", "bulging eyes", "heat sensitivity", "fine tremors"],
+    "UTI (Cystitis)": ["burning urination", "cloudy urine", "pelvic pressure", "strong smelling urine"],
+    "Kidney Stones": ["severe flank pain", "pink or brown urine", "painful urination", "nausea"],
+    "Rheumatoid Arthritis": ["morning stiffness for hours", "symmetrical joint swelling", "warm joints"],
+    "Osteoarthritis": ["joint pain after use", "grating sensation in joints", "bone spurs"],
+    "Lupus": ["butterfly rash on face", "joint pain", "photosensitivity"],
+    "Psoriasis": ["silvery scales", "red patches with itching", "pitted nails"],
+    "Eczema": ["atopic dermatitis", "weeping sores", "intense itching"],
+    "Lyme Disease": ["bullseye rash", "joint aches", "flu-like symptoms after tick bite"],
+    "Malaria": ["periodic high fever", "profuse sweating", "shivering chills"],
+    "Dengue": ["breakbone pain", "pain behind eyes", "nausea", "rash"],
+    "Gout": ["intense big toe pain", "swelling", "redness", "warmth in joint"],
+    "Anaphylaxis": ["throat swelling", "hives", "fainting", "low blood pressure"],
+    "Hypoglycemia": ["shaking", "sweating", "confusion", "dizziness"],
+    "Osteoporosis": ["loss of height", "stooped posture", "easy fractures"],
+    "Fibromyalgia": ["widespread muscle pain", "tender points", "foggy thinking"],
+    "Chronic Fatigue Syndrome": ["unrefreshing sleep", "post-exertional malaise", "brain fog"],
+    "Mononucleosis": ["swollen lymph nodes", "sore throat", "enlarged spleen"],
+    "Sepsis": ["extremely high or low temperature", "mental confusion", "mottled skin", "high heart rate"],
+    "Glaucoma": ["patchy blind spots", "tunnel vision", "severe eye pain"],
+    "Cataracts": ["cloudy vision", "halos around lights", "fading colors"],
+    "Cushing Syndrome": ["moon face", "buffalo hump on back", "purple stretch marks"],
+    "Addison's Disease": ["extreme fatigue", "darkening of skin (hyperpigmentation)", "salt craving"],
+    "Polycystic Ovary Syndrome (PCOS)": ["irregular periods", "excess facial hair", "acne"],
+    "Iron Deficiency": ["pica (craving ice/dirt)", "spoon-shaped nails", "pale tongue"],
+    "Vitamin D Deficiency": ["bone pain", "muscle weakness", "mood changes"],
+    "Hypercalcemia": ["excessive thirst", "frequent urination", "bone pain", "kidney stones"]
+};
+
+// Conversational Logic
+function handleInput() {
+    const input = userInput.value.trim().toLowerCase();
+    if (!input) return;
+
+    addMessage(userInput.value, 'user');
+    userInput.value = '';
+    
+    typingIndicator.style.display = 'block';
+
+    setTimeout(() => {
+        typingIndicator.style.display = 'none';
+        processMedicalResponse(input);
+    }, 1000);
+}
+
+function processMedicalResponse(input) {
+    // 1. Check for Emergency Keywords
+    const emergencyKeywords = ["chest pain", "difficulty breathing", "stroke", "slurred speech", "unconscious", "bleeding"];
+    const hasEmergency = emergencyKeywords.some(key => input.includes(key));
+
+    // 2. Human-like Greetings
+    if (input.match(/^(hi|hello|hey|good morning|good afternoon|doctor)/)) {
+        const greetings = [
+            "Hello. I'm Dr. MedAI. I'm here to listen to your health concerns. What symptoms are you experiencing?",
+            "Good day. Thank you for reaching out. How can I assist you with your health today?",
+            "Hello! I'm ready to help. Please tell me about what's been bothering you lately."
+        ];
+        addMessage(greetings[Math.floor(Math.random() * greetings.length)], "bot");
+        return;
+    }
+
+    // 3. Match Symptoms
+    let matches = [];
+    for (const [disease, symptoms] of Object.entries(medicalLibrary)) {
+        let score = 0;
+        symptoms.forEach(s => {
+            if (input.includes(s)) {
+                score++;
+                patientContext.mentionedSymptoms.add(s);
+            }
+        });
+        if (score > 0) matches.push({ name: disease, score: score });
+    }
+
+    // Sort by most symptom matches
+    matches.sort((a, b) => b.score - a.score);
+
+    // 4. Formulate the "Doctor" Response
+    if (hasEmergency && input.includes("chest pain")) {
+        addMessage("<strong>URGENT:</strong> I am detecting symptoms that could indicate a cardiovascular event. Please seek emergency medical services immediately or go to the nearest ER.", "bot");
+    } else if (matches.length > 0) {
+        let topMatch = matches[0];
+        let secondaryMatches = matches.slice(1, 3);
         
-        // Cardiovascular
-        "Hypertension": ["pounding in ears", "blurred vision", "nosebleeds", "severe headache"],
-        "Angina/Heart Attack": ["crushing chest pain", "left arm pain", "jaw pain", "nausea", "sweating"],
-        "Anemia": ["pale skin", "brittle nails", "dizziness", "shortness of breath"],
-        "Heart Failure": ["swollen ankles", "fluid retention", "cannot lie flat to breathe"],
+        let response = `I understand. Based on the <strong>${topMatch.score}</strong> symptom(s) you mentioned, `;
         
-        // Digestive
-        "GERD": ["heartburn", "acid reflux", "sour taste", "chest burning"],
-        "Gastroenteritis": ["vomiting", "watery diarrhea", "stomach cramps"],
-        "Peptic Ulcer": ["stomach burning", "bloating", "hunger pain"],
-        "Appendicitis": ["lower right pain", "rebound tenderness", "nausea", "fever"],
-        "Gallstones": ["intense right side pain", "back pain", "pain after fatty meals"],
-        "Crohn's Disease": ["abdominal pain", "chronic diarrhea", "weight loss", "rectal bleeding"],
-        "Food Poisoning": ["sudden vomiting", "diarrhea", "fever", "weakness"],
+        if (topMatch.score >= 3) {
+            response += `your clinical profile strongly suggests <strong>${topMatch.name}</strong>. `;
+        } else {
+            response += `it is possible you are experiencing <strong>${topMatch.name}</strong>. `;
+        }
 
-        // Neurological & Mental
-        "Migraine": ["throbbing head pain", "light sensitivity", "aura", "nausea"],
-        "Anxiety Disorder": ["palpitations", "panic", "sweating", "overthinking", "trembling"],
-        "Clinical Depression": ["low mood", "loss of interest", "insomnia", "suicidal thoughts"],
-        "Vertigo (BPPV)": ["spinning sensation", "dizziness", "unsteadiness"],
-        "Meningitis": ["stiff neck", "high fever", "confusion", "rash"],
-        "Stroke": ["slurred speech", "facial drooping", "arm weakness", "sudden confusion"],
+        if (secondaryMatches.length > 0) {
+            response += `We should also consider <i>${secondaryMatches.map(m => m.name).join(' or ')}</i>. `;
+        }
 
-        // Endocrine & Others
-        "Diabetes Type 2": ["excessive thirst", "frequent urination", "slow healing", "blurry vision"],
-        "Hypothyroidism": ["weight gain", "cold sensitivity", "dry skin", "constipation"],
-        "Hyperthyroidism": ["weight loss", "shaky hands", "rapid heart rate", "bulging eyes"],
-        "UTI": ["burning during urination", "cloudy urine", "pelvic pain"],
-        "Kidney Stones": ["severe flank pain", "blood in urine", "waves of pain"],
-        "Malaria": ["cycling high fever", "shivering", "headache", "sweating"],
-        "Dengue": ["behind eye pain", "bone pain", "rash", "high fever"],
-        "Lyme Disease": ["bullseye rash", "joint swelling", "fatigue"],
-        "Rheumatoid Arthritis": ["morning stiffness", "joint pain", "swollen knuckles"],
-        "Gout": ["painful big toe", "swollen joint", "intense redness"],
-        "Dehydration": ["dark urine", "dry mouth", "extreme thirst", "sunken eyes"],
-        "Insomnia": ["trouble falling asleep", "waking up early", "daytime fatigue"],
-        "Heat Stroke": ["confused", "no sweating", "rapid pulse", "faintness"],
-        "Eczema": ["itchy skin", "red scaly patches", "dryness"],
-        "Asthma": ["wheezing", "chest tightness", "shortness of breath during exercise"]
+        response += `<br><br><strong>Follow-up questions:</strong> Do you also have ${getSuggestedSymptom(topMatch.name)}? How long has this been occurring?`;
+        
+        addMessage(response, "bot");
+    } else {
+        addMessage("I'm listening, but I need a bit more detail to help identify the issue. Could you describe the pain or discomfort more specifically? For example, is it sharp, dull, or accompanied by a fever?", "bot");
+    }
+}
+
+function getSuggestedSymptom(disease) {
+    // Pick a symptom from the database the user hasn't mentioned yet
+    const symptoms = medicalLibrary[disease];
+    const unmentioned = symptoms.filter(s => !patientContext.mentionedSymptoms.has(s));
+    return unmentioned.length > 0 ? unmentioned[0] : "any other unusual changes";
+}
+
+// PDF Export Enhancement
+function exportPDF() {
+    const element = document.getElementById('chat-container');
+    const opt = {
+        margin: [0.5, 0.5],
+        filename: `Consultation_${new Date().toLocaleDateString()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
+    html2pdf().set(opt).from(element).save();
+}
 
-    function addMessage(content, sender) {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `msg ${sender === 'user' ? 'user-msg' : 'bot-msg'}`;
-        msgDiv.innerHTML = content;
-        chatContainer.appendChild(msgDiv);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    function handleInput() {
-        const input = userInput.value.trim().toLowerCase();
-        if (!input) return;
-
-        addMessage(userInput.value, 'user');
-        userInput.value = '';
-        
-        typingIndicator.style.display = 'block';
-
-        setTimeout(() => {
-            typingIndicator.style.display = 'none';
-            
-            // Conversation Logic
-            if (input.match(/^(hi|hello|hey|good morning|good afternoon)/)) {
-                addMessage("Hello! I'm ready for your consultation. Please describe your symptoms or how you're feeling.", "bot");
-                return;
-            }
-
-            if (input.includes("thank")) {
-                addMessage("You're very welcome. Is there anything else you'd like to check?", "bot");
-                return;
-            }
-
-            // Analysis Logic
-            let matches = [];
-            for (const [disease, symptoms] of Object.entries(medicalDatabase)) {
-                let score = 0;
-                symptoms.forEach(s => {
-                    if (input.includes(s)) score++;
-                });
-                if (score > 0) matches.push({ name: disease, score: score });
-            }
-
-            matches.sort((a, b) => b.score - a.score);
-
-            if (matches.length > 0) {
-                let response = `Based on clinical data, your symptoms align with: <br><ul>`;
-                matches.slice(0, 3).forEach(m => {
-                    response += `<li><strong>${m.name}</strong> (Match strength: ${Math.min(m.score * 25, 100)}%)</li>`;
-                });
-                response += `</ul><br>Do you have any other symptoms like fever, pain, or dizziness? <br><br><em>Note: This is for info only. Seek emergency care if symptoms are severe.</em>`;
-                addMessage(response, "bot");
-            } else {
-                addMessage("I couldn't find a direct match. Could you be more specific? For example, mention where the pain is or if you have a fever.", "bot");
-            }
-        }, 800);
-    }
-
-    function exportPDF() {
-        const element = document.getElementById('chat-container');
-        const opt = {
-            margin: 1,
-            filename: 'Medical_Consultation_Report.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
-    }
-
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleInput();
-    });
+userInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleInput();
+});
 </script>
-
 </body>
 </html>
