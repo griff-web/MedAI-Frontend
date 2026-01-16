@@ -1,245 +1,453 @@
-/* ============================================================
-   MEDAI ENTERPRISE DESIGN SYSTEM (KENYAN PRIDE - PRO)
-   ============================================================ */
+ /* ============================================================
+   MEDAI ENTERPRISE DESIGN SYSTEM (KENYAN PRIDE THEME)
+   ============================================================ */
 
 :root {
-    /* Pure Kenyan Flag Palette */
-    --kenya-black: #050505;
-    --kenya-red: #BB0631;
-    --kenya-green: #006600;
-    --kenya-white: #FFFFFF;
-    
-    /* Functional UI Palette */
-    --bg-main: #f8fafb;
-    --card-bg: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border-light: #e2e8f0;
-    
-    /* Dynamic Feedback */
-    --success-glow: rgba(0, 102, 0, 0.1);
-    --error-glow: rgba(187, 6, 49, 0.1);
-    
-    /* Elevations & Motion */
-    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --shadow-panel: -10px 0 50px rgba(0, 0, 0, 0.1);
-    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Kenyan Flag Palette */
+    --kenya-black: #000000;
+    --kenya-red: #BB0631;
+    --kenya-green: #006600;
+    --kenya-white: #FFFFFF;
+    
+    /* Functional Colors */
+    --bg-main: #f4f7f6;
+    --card-bg: #ffffff;
+    --text-main: #1a1a1a;
+    --text-muted: #666666;
+    --glass-effect: rgba(255, 255, 255, 0.9);
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
-    margin: 0; padding: 0; box-sizing: border-box;
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    letter-spacing: -0.01em;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    overflow-x: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ===================== TOP NAVIGATION ===================== */
 .dash-nav {
-    background: var(--kenya-black);
-    color: white;
-    padding: 0.8rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 4px solid var(--kenya-red);
-    z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    background: var(--kenya-black);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--kenya-red);
+    z-index: 1000;
 }
 
 .nav-brand .logo {
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: -1px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
 }
 
-.nav-brand span { color: var(--kenya-red); }
+.nav-brand span {
+    color: var(--kenya-red);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-info {
+    text-align: right;
+}
+
+.user-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-role {
+    font-size: 0.7rem;
+    color: var(--kenya-green);
+    text-transform: uppercase;
+    font-weight: 700;
+}
 
 .user-avatar {
-    width: 42px; height: 42px;
-    background: linear-gradient(135deg, var(--kenya-green), #004400);
-    border-radius: 12px;
-    display: grid; place-items: center;
-    font-weight: 700;
-    border: 1px solid rgba(255,255,255,0.3);
-    box-shadow: 0 4px 10px rgba(0, 102, 0, 0.2);
+    width: 40px;
+    height: 40px;
+    background: var(--kenya-green);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: bold;
+    border: 2px solid var(--kenya-white);
 }
 
 /* ===================== LAYOUT ENGINE ===================== */
-.dash-container { display: flex; flex: 1; overflow: hidden; }
+.dash-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
 
+/* Sidebar - Optimized for Large Screens & Foldables */
 .dash-sidebar {
-    width: 280px;
-    background: white;
-    padding: 1.5rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    border-right: 1px solid var(--border-light);
+    width: 260px;
+    background: white;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-right: 1px solid #ddd;
 }
 
 .nav-item {
-    display: flex; align-items: center; gap: 14px;
-    padding: 14px 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text-muted);
-    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    border: none;
+    background: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: var(--transition);
 }
 
 .nav-item:hover {
-    background: #f1f5f9;
-    color: var(--kenya-black);
+    background: #f0f0f0;
 }
 
 .nav-item.active {
-    background: var(--kenya-black);
-    color: white;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background: var(--kenya-black);
+    color: white;
 }
 
-.nav-item.active i { color: var(--kenya-red); }
+.nav-item.active i {
+    color: var(--kenya-red);
+}
+/* ===================== NOTIFICATION SYSTEM ===================== */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transition: var(--transition);
+    animation: slideDown 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
 
-/* ===================== SCANNER UI (CLINICAL FOCUS) ===================== */
+.notification.info {
+    background: var(--kenya-black);
+    border-left: 4px solid var(--kenya-white);
+}
+
+.notification.warning {
+    background: #f39c12; /* Amber */
+}
+
+.notification.error {
+    background: var(--kenya-red);
+}
+
+.notification.success {
+    background: var(--kenya-green);
+}
+
+@keyframes slideDown {
+    from { transform: translate(-50%, -100px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* Main Content Area */
 .main-content {
-    flex: 1; padding: 2.5rem;
-    overflow-y: auto;
-    background: radial-gradient(circle at 0% 0%, #ffffff 0%, #f8fafb 100%);
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    background: radial-gradient(circle at top right, #fff, #f4f7f6);
+}
+
+/* ===================== SCANNER UI ===================== */
+.view-header {
+    margin-bottom: 2rem;
+}
+
+.view-header h2 {
+    font-size: 2rem;
+    color: var(--kenya-black);
+}
+
+.scan-type-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.type-btn {
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.type-btn.active {
+    background: var(--kenya-green);
+    color: white;
+    border-color: var(--kenya-green);
 }
 
 .scanner-card {
-    max-width: 850px;
-    background: white;
-    border-radius: 32px;
-    overflow: hidden;
-    box-shadow: var(--shadow-soft);
-    border: 1px solid var(--border-light);
+    max-width: 800px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
 }
 
 .camera-container {
-    position: relative;
-    aspect-ratio: 16/9;
-    background: #000;
-    overflow: hidden;
+    position: relative;
+    aspect-ratio: 4/3;
+    background: #000;
+}
+
+#camera-stream {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scanner-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
 }
 
 .target-box {
-    width: 65%; height: 75%;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    border-radius: 24px;
-    box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); /* Focus effect */
+    width: 70%;
+    height: 70%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    position: relative;
 }
 
 .scan-line {
-    width: 100%; height: 3px;
-    background: linear-gradient(90deg, transparent, var(--kenya-red), transparent);
-    box-shadow: 0 0 20px var(--kenya-red);
-    animation: scanMove 3s infinite ease-in-out;
+    width: 100%;
+    height: 4px;
+    background: var(--kenya-red);
+    position: absolute;
+    box-shadow: 0 0 15px var(--kenya-red);
+    animation: scanMove 3s infinite ease-in-out;
+}
+
+@keyframes scanMove {
+    0%, 100% { top: 0% }
+    50% { top: 100% }
 }
 
 .camera-controls {
-    padding: 24px;
-    display: flex; justify-content: center; gap: 40px;
-    background: #ffffff;
-    border-top: 1px solid var(--border-light);
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    background: white;
 }
 
 .btn-capture {
-    width: 75px; height: 75px;
-    border-radius: 50%;
-    border: 4px solid #f1f5f9;
-    background: white;
-    padding: 6px;
-    cursor: pointer;
-    transition: transform 0.2s;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 4px solid var(--kenya-red);
+    background: white;
+    padding: 5px;
+    cursor: pointer;
 }
-
-.btn-capture:active { transform: scale(0.9); }
 
 .inner-circle {
-    width: 100%; height: 100%;
-    background: var(--kenya-red);
-    border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(187, 6, 49, 0.3);
+    width: 100%;
+    height: 100%;
+    background: var(--kenya-red);
+    border-radius: 50%;
 }
 
-/* ===================== RESULTS PANEL (THE REVELATION) ===================== */
+.btn-tool {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* ===================== RESULTS PANEL ===================== */
 .results-container {
-    position: fixed; right: 0; top: 0;
-    height: 100vh; width: 420px;
-    background: white;
-    box-shadow: var(--shadow-panel);
-    z-index: 2000;
-    display: flex; flex-direction: column;
-    transform: translateX(0);
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    width: 400px;
+    background: white;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(0);
+    transition: var(--transition);
 }
 
-.results-container.hidden { transform: translateX(105%); }
+.results-container.hidden {
+    transform: translateX(100%);
+}
 
 .panel-header {
-    padding: 24px;
-    background: var(--kenya-black);
-    color: white;
-    border-bottom: 4px solid var(--kenya-green);
+    padding: 20px;
+    background: var(--kenya-black);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.analysis-summary { padding: 40px 30px; text-align: center; }
+.analysis-summary {
+    padding: 30px;
+    text-align: center;
+}
+
+.circular-chart {
+    width: 120px;
+    margin: 0 auto 15px;
+}
 
 .circle {
-    stroke: var(--kenya-green);
-    stroke-width: 4;
-    filter: drop-shadow(0 0 5px rgba(0, 102, 0, 0.2));
+    fill: none;
+    stroke: var(--kenya-green);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s ease;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 3;
+}
+
+.percentage {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-top: -85px;
+    margin-bottom: 60px;
 }
 
 .clinical-findings {
-    padding: 25px;
-    background: #fffafa;
-    border: 1px solid #fee2e2;
-    margin: 0 24px;
-    border-radius: 16px;
+    padding: 20px;
+    background: #fdf2f4; /* Subtle red tint */
+    margin: 0 20px;
+    border-radius: 12px;
 }
 
-#findings-list { list-style: none; margin-top: 15px; }
-#findings-list li {
-    padding: 10px 0;
-    border-bottom: 1px solid #fecaca;
-    font-size: 0.95rem;
-    color: #450a0a;
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: var(--kenya-green);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
 }
 
-/* ===================== NOTIFICATIONS ===================== */
-.notification {
-    position: fixed; top: 20px; left: 50%;
-    transform: translateX(-50%);
-    padding: 14px 28px;
-    border-radius: 14px;
-    color: white; font-weight: 600;
-    z-index: 9999;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-    display: flex; align-items: center; gap: 12px;
+/* ===================== UTILITIES & RESPONSIVE ===================== */
+
+/* MedBot Floating Button */
+.medbot-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: var(--kenya-red);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(187, 6, 49, 0.3);
+    z-index: 999;
 }
 
-.notification.success { background: var(--kenya-green); }
-.notification.error { background: var(--kenya-red); }
-.notification.info { background: var(--kenya-black); }
+.fab-ping {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: var(--kenya-red);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: ping 2s infinite;
+}
 
-/* ===================== RESPONSIVE ===================== */
+@keyframes ping {
+    75%, 100% { transform: scale(1.6); opacity: 0; }
+}
+
+.hidden { display: none !important; }
+
+/* ===================== RESPONSIVE BREAKPOINTS ===================== */
+
+/* Tablet & Smaller Screens */
+@media (max-width: 1024px) {
+    .dash-sidebar { width: 80px; padding: 1rem; }
+    .nav-item span { display: none; }
+    .results-container { width: 100%; z-index: 3000; }
+}
+
+/* Mobile & Foldable Devices (Portrait) */
 @media (max-width: 768px) {
-    .dash-sidebar {
-        position: fixed; bottom: 0; width: 100%;
-        height: 75px; flex-direction: row;
-        border-top: 1px solid var(--border-light);
-    }
-    .nav-item span { display: none; }
-    .results-container { width: 100%; }
+    .dash-container { flex-direction: column-reverse; }
+    .dash-sidebar {
+        width: 100%;
+        height: 70px;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 0;
+        border-right: none;
+        border-top: 1px solid #ddd;
+    }
+    .main-content { padding: 1rem; }
+    .view-header h2 { font-size: 1.5rem; }
+    .user-info { display: none; }
 }
 
-@keyframes scanMove { 0%, 100% { top: 5%; } 50% { top: 90%; } }
+/* Foldable Support (Dual Screen or Wide Fold) */
+@media (min-width: 600px) and (max-width: 900px) and (orientation: landscape) {
+    .dash-sidebar { width: 200px; }
+    .camera-container { aspect-ratio: 16/9; }
+}
