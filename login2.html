@@ -1,18 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign In | MedAI</title>
-    <meta name="description" content="Secure login for MedAI - AI-powered medical image analysis." />
-    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
-    <link rel="stylesheet" href="auth.css" />
-    
-    <script src="auth.js" defer></script>
-    <script>
-   window.ENV_API_BASE = "https://medai-backend-j9i6.onrender.com";
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign In | MedAI</title>
+<meta name="description" content="Secure login for MedAI - AI-powered medical image analysis." />
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<!-- Apple PWA support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MedAI">
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="auth.css" />
+
+<!-- Scripts -->
+<script src="auth.js" defer></script>
+<script>
+  window.ENV_API_BASE = "https://medai-backend-j9i6.onrender.com";
 </script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 </head>
 
 <body>
@@ -106,5 +121,17 @@
         </footer>
     </section>
 </main>
+
+<!-- PWA Service Worker Registration -->
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("Service Worker registered"))
+      .catch(err => console.error("SW registration failed:", err));
+  });
+}
+</script>
+
 </body>
 </html>
