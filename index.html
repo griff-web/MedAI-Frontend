@@ -1,829 +1,794 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAI | Advanced Medical Diagnostics</title>
-    <meta name="description" content="Enterprise-grade AI-powered medical diagnostics platform">
-    
-    <!-- SEO & OpenGraph -->
-    <meta property="og:title" content="MedAI | Medical AI Diagnostics">
-    <meta property="og:description" content="Advanced AI-powered medical diagnostics platform">
-    <meta property="og:type" content="website">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
-    
-    <!-- PWA Configuration -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    
-    <!-- Apple PWA Support -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MedAI">
-    <link rel="apple-touch-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
-    
-    <!-- Google Fonts with Fallback -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Performance Optimization -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap">
-    
-    <style>
-        /* ========== CSS RESET & BASE ========== */
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        :root {
-            /* Primary Colors */
-            --primary-green: #00FF88;
-            --primary-green-dark: #00CC6C;
-            --kenya-red: #E31837;
-            --kenya-red-dark: #B8142C;
-            --obsidian: #0A0A0F;
-            --obsidian-light: #121218;
-            
-            /* Neutral Colors */
-            --text-primary: #FFFFFF;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-tertiary: rgba(255, 255, 255, 0.5);
-            --border-color: rgba(255, 255, 255, 0.1);
-            
-            /* Effects */
-            --glow-green: rgba(0, 255, 136, 0.3);
-            --progress-glow: rgba(0, 255, 136, 0.6);
-            --scanner-color: rgba(0, 255, 136, 0.15);
-            --card-bg: rgba(255, 255, 255, 0.03);
-            
-            /* Spacing */
-            --space-xs: 0.5rem;
-            --space-sm: 1rem;
-            --space-md: 1.5rem;
-            --space-lg: 2rem;
-            --space-xl: 3rem;
-            
-            /* Typography */
-            --font-heading: 'Space Grotesk', system-ui, sans-serif;
-            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            
-            /* Shadows */
-            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
-            --shadow-glow: 0 0 40px rgba(0, 255, 136, 0.2);
-            
-            /* Border Radius */
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 16px;
-            
-            /* Transitions */
-            --transition-fast: 150ms ease;
-            --transition-normal: 300ms ease;
-            --transition-slow: 500ms ease;
-        }
-        
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
-        }
-        
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: var(--font-body);
-            background-color: var(--obsidian);
-            color: var(--text-primary);
-            overflow: hidden;
-            perspective: 1000px;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* ========== ACCESSIBILITY ========== */
-        .visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-        
-        :focus-visible {
-            outline: 2px solid var(--primary-green);
-            outline-offset: 2px;
-        }
-        
-        /* ========== BACKGROUND EFFECTS ========== */
-        .background-container {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            overflow: hidden;
-        }
-        
-        .grid-bg {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            mask-image: radial-gradient(circle, black 40%, transparent 70%);
-            animation: gridShift 30s linear infinite;
-            will-change: background-position;
-        }
-        
-        @keyframes gridShift {
-            0% { background-position: 0 0, 0 0; }
-            100% { background-position: 600px 600px, 600px 600px; }
-        }
-        
-        .scanline {
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                to bottom,
-                transparent 0px,
-                transparent 2px,
-                var(--scanner-color) 2px,
-                var(--scanner-color) 4px
-            );
-            z-index: 2;
-            pointer-events: none;
-            opacity: 0.6;
-        }
-        
-        .scanner-beam {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 20%;
-            background: linear-gradient(to bottom, 
-                transparent, 
-                var(--scanner-color) 20%, 
-                transparent);
-            border-bottom: 1px solid var(--primary-green);
-            box-shadow: 0 0 30px var(--primary-green);
-            animation: scanMove 3.5s ease-in-out infinite;
-            z-index: 3;
-        }
-        
-        @keyframes scanMove {
-            0% { top: -20%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 120%; opacity: 0; }
-        }
-        
-        /* ========== MAIN LOADER UI ========== */
-        .loader-container {
-            position: relative;
-            width: min(90vw, 500px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-            text-align: center;
-            padding: var(--space-xl) var(--space-lg);
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg), var(--shadow-glow);
-        }
-        
-        /* Logo & Branding */
-        .brand-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: var(--space-lg);
-            width: 100%;
-        }
-        
-        .logo-container {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin-bottom: var(--space-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 50%;
-            border: 2px solid var(--primary-green);
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
-        }
-        
-        .logo-container::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: conic-gradient(
-                from 0deg,
-                transparent,
-                var(--primary-green),
-                transparent 30%
-            );
-            animation: rotateLogo 3s linear infinite;
-        }
-        
-        .logo-image {
-            width: 70px;
-            height: 70px;
-            object-fit: contain;
-            z-index: 2;
-            border-radius: var(--radius-sm);
-        }
-        
-        @keyframes rotateLogo {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .brand-name {
-            font-family: var(--font-heading);
-            font-size: 3.5rem;
-            font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: var(--space-xs);
-            background: linear-gradient(90deg, #FFFFFF, var(--primary-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-            line-height: 1.1;
-        }
-        
-        .brand-tagline {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: var(--space-xs);
-            font-weight: 500;
-        }
-        
-        .brand-subtitle {
-            font-size: 1rem;
-            color: var(--text-tertiary);
-            max-width: 400px;
-            margin-bottom: var(--space-lg);
-        }
-        
-        /* Heartbeat Animation */
-        .heartbeat-container {
-            width: 100%;
-            height: 80px;
-            margin-bottom: var(--space-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .ecg-line {
-            font-family: monospace;
-            font-size: 2.5rem;
-            color: var(--primary-green);
-            letter-spacing: 8px;
-            filter: 
-                drop-shadow(0 0 15px var(--primary-green)) 
-                drop-shadow(0 0 10px var(--primary-green));
-            animation: heartPulse 1.5s infinite;
-            position: relative;
-        }
-        
-        .ecg-line::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                var(--primary-green), 
-                transparent);
-            filter: blur(1px);
-        }
-        
-        @keyframes heartPulse {
-            0%, 20%, 40%, 60%, 80%, 100% { 
-                transform: scale(1); 
-                opacity: 0.6; 
-            }
-            10%, 30%, 50%, 70%, 90% { 
-                transform: scale(1.15); 
-                opacity: 1; 
-            }
-        }
-        
-        /* Status Indicator */
-        .status-container {
-            width: 100%;
-            margin-bottom: var(--space-lg);
-        }
-        
-        .status-label {
-            font-size: 0.9rem;
-            color: var(--text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: var(--space-sm);
-            font-weight: 500;
-            transition: color var(--transition-normal);
-            min-height: 1.5em;
-        }
-        
-        .status-active {
-            color: var(--primary-green);
-            text-shadow: 0 0 10px var(--primary-green);
-        }
-        
-        /* Progress Bar */
-        .progress-container {
-            width: 100%;
-            margin-bottom: var(--space-lg);
-        }
-        
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: var(--space-xs);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-        
-        .progress-rail {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 3px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .progress-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, 
-                var(--primary-green), 
-                var(--kenya-red));
-            border-radius: 3px;
-            box-shadow: 
-                0 0 20px var(--progress-glow),
-                inset 0 0 10px rgba(255, 255, 255, 0.3);
-            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        /* Data Stream */
-        .data-stream {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            margin-top: var(--space-sm);
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-            font-size: 0.75rem;
-            color: var(--primary-green);
-            background: rgba(0, 0, 0, 0.3);
-            padding: var(--space-xs) var(--space-sm);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border-color);
-        }
-        
-        /* Copyright */
-        .copyright {
-            margin-top: var(--space-xl);
-            font-size: 0.8rem;
-            color: var(--text-tertiary);
-            text-align: center;
-            width: 100%;
-            padding-top: var(--space-sm);
-            border-top: 1px solid var(--border-color);
-        }
-        
-        /* Loading Complete Animation */
-        .complete-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--obsidian);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--transition-slow);
-        }
-        
-        .complete-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        
-        .complete-message {
-            text-align: center;
-            transform: scale(0.8);
-            transition: transform var(--transition-slow);
-        }
-        
-        .complete-overlay.active .complete-message {
-            transform: scale(1);
-        }
-        
-        .checkmark {
-            font-size: 5rem;
-            color: var(--primary-green);
-            margin-bottom: var(--space-lg);
-            filter: drop-shadow(0 0 20px var(--primary-green));
-        }
-        
-        /* ========== RESPONSIVE DESIGN ========== */
-        @media (max-width: 768px) {
-            .loader-container {
-                padding: var(--space-lg) var(--space-md);
-                width: 95vw;
-            }
-            
-            .brand-name {
-                font-size: 2.5rem;
-            }
-            
-            .ecg-line {
-                font-size: 2rem;
-                letter-spacing: 6px;
-            }
-            
-            .logo-container {
-                width: 100px;
-                height: 100px;
-            }
-            
-            .logo-image {
-                width: 60px;
-                height: 60px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .brand-name {
-                font-size: 2rem;
-            }
-            
-            .brand-tagline {
-                font-size: 0.8rem;
-                letter-spacing: 2px;
-            }
-            
-            .ecg-line {
-                font-size: 1.5rem;
-                letter-spacing: 4px;
-            }
-            
-            .logo-container {
-                width: 80px;
-                height: 80px;
-            }
-            
-            .logo-image {
-                width: 50px;
-                height: 50px;
-            }
-        }
-        
-        /* ========== PREFERS REDUCED MOTION ========== */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-            
-            .grid-bg {
-                animation: none;
-            }
-            
-            .scanner-beam {
-                animation: none;
-                opacity: 0.3;
-            }
-            
-            .ecg-line {
-                animation: none;
-                opacity: 1;
-            }
-            
-            .logo-container::before {
-                animation: none;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedAI</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVR4nO2WzUrDQBSFv9aqiC8g+AIKLty5c+ErCL6A4MKFGxcu3Ll0Jy5cuHDhwp0/oKKgIIgLF/4gKAqCiD9Y0ZRDJpAhmUlmJkXwwIVkMnPPl3vPzR1QKBQKhUKhUCgUCoXiP1EDFoAd4Ap4BT6BBvAMPACXwC6wCEwCNSfBGrAOXAOvQDsFr8Ae0AdKLoIqsAwcAm8W4Ca8AdvAGFB0FQwCW0DHUdyBNjABFGwEE8A50HMU96ANTALZOMEE0HEQd+AJmAYysYJJ4MlB3IEmMJs0+Bx4cPz1DTgAFoGhJMHngbtE8Q4sACNxghlgMyH4BKwAo3GCeaAdI2gDXWAVGIsT1IF2jGAbKLkKNoF7i/gNWAdKroJtiyDa8R6w4SrYAN4t4vfAOjDgKhiyiN+ATagkCW4d4glwWUkSnDjEhyoJglOLuA2cAnNJgnNL/AZYSRrsWuI3wHKS4Ngi7hnxU5Vx0c+Be4s4etX2VcYRTwN3FnE0mduqCBQKhUKhUCgUCoUiQ74BlRmJH3FtyMsAAAAASUVORK5CYII=">
+
+<!-- Meta Tags -->
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MedAI">
+<meta name="description" content="Advanced Medical AI Diagnostic Platform by MedAI Technologies">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ==================== ROOT VARIABLES ==================== */
+:root {
+  --primary-green: #00FF88;
+  --kenya-red: #E31837;
+  --obsidian: #0A0A0F;
+  --text-dim: rgba(255, 255, 255, 0.5);
+  --glow-green: rgba(0, 255, 136, 0.3);
+  --progress-glow: rgba(0, 255, 136, 0.6);
+  --scanner-color: rgba(0, 255, 136, 0.2);
+  --tech-blue: #00D4FF;
+}
+
+/* ==================== RESET & BASE ==================== */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+  background: radial-gradient(circle at center, #1a1a2e 0%, var(--obsidian) 100%);
+  color: #fff;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+/* ==================== ANIMATED GRID BACKGROUND ==================== */
+.grid-bg {
+  position: absolute; 
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(0, 255, 136, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  animation: gridShift 25s linear infinite;
+  z-index: 1;
+}
+
+@keyframes gridShift {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 500px 500px, 500px 500px; }
+}
+
+/* ==================== SCANLINES ==================== */
+.scanline {
+  position: absolute; 
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 255, 136, 0.04) 2px,
+    rgba(0, 255, 136, 0.04) 4px
+  );
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ==================== SCANNING BEAM ==================== */
+.scanner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 25%;
+  background: linear-gradient(to bottom, 
+    transparent, 
+    var(--scanner-color) 50%, 
+    transparent);
+  border-bottom: 2px solid var(--primary-green);
+  box-shadow: 0 0 30px var(--primary-green);
+  animation: scanMove 3.5s ease-in-out infinite;
+  z-index: 5;
+}
+
+@keyframes scanMove {
+  0% { top: -25%; opacity: 0.3; }
+  50% { top: 50%; opacity: 0.7; }
+  100% { top: 125%; opacity: 0.3; }
+}
+
+/* ==================== FLOATING PARTICLES ==================== */
+.floating-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.float-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--primary-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--primary-green);
+  animation: floatUp 15s linear infinite;
+}
+
+.float-particle:nth-child(2) { left: 20%; animation-delay: 2s; background: var(--tech-blue); box-shadow: 0 0 10px var(--tech-blue); }
+.float-particle:nth-child(3) { left: 40%; animation-delay: 4s; }
+.float-particle:nth-child(4) { left: 60%; animation-delay: 1s; background: var(--kenya-red); box-shadow: 0 0 10px var(--kenya-red); }
+.float-particle:nth-child(5) { left: 80%; animation-delay: 3s; background: var(--tech-blue); box-shadow: 0 0 10px var(--tech-blue); }
+
+@keyframes floatUp {
+  0% { 
+    top: 110%; 
+    opacity: 0;
+    transform: translateX(0);
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { 
+    top: -10%; 
+    opacity: 0;
+    transform: translateX(50px);
+  }
+}
+
+/* ==================== LOADER UI CONTAINER ==================== */
+.loader-ui {
+  position: relative;
+  width: 550px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 20;
+  text-align: center;
+  padding: 40px;
+  background: rgba(10, 10, 15, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 20px;
+  box-shadow: 
+    0 0 60px rgba(0, 255, 136, 0.1),
+    inset 0 0 40px rgba(0, 255, 136, 0.05);
+}
+
+/* ==================== HEARTBEAT ECG ==================== */
+.heartbeat-container {
+  width: 100%;
+  height: 50px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ecg-line {
+  font-size: 1.8rem;
+  font-family: 'Orbitron', monospace;
+  color: var(--primary-green);
+  letter-spacing: 6px;
+  filter: 
+    drop-shadow(0 0 15px var(--primary-green)) 
+    drop-shadow(0 0 8px var(--primary-green));
+  animation: heartPulse 1.4s infinite;
+}
+
+@keyframes heartPulse {
+  0%, 20%, 40%, 60%, 80%, 100% { 
+    transform: scale(1); 
+    opacity: 0.6; 
+  }
+  10%, 30%, 50%, 70%, 90% { 
+    transform: scale(1.35); 
+    opacity: 1; 
+  }
+}
+
+/* ==================== CENTRAL MEDICAL IMAGE ==================== */
+.medical-image-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-bottom: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Rotating Rings */
+.rotating-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-top-color: var(--primary-green);
+  border-right-color: var(--kenya-red);
+  border-radius: 50%;
+  animation: ringRotate 4s linear infinite;
+  filter: drop-shadow(0 0 10px var(--primary-green));
+}
+
+.rotating-ring:nth-child(2) {
+  width: 85%;
+  height: 85%;
+  border-top-color: var(--tech-blue);
+  border-left-color: var(--primary-green);
+  animation: ringRotate 2.5s linear infinite reverse;
+  filter: drop-shadow(0 0 10px var(--tech-blue));
+}
+
+.rotating-ring:nth-child(3) {
+  width: 110%;
+  height: 110%;
+  border: 2px solid transparent;
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+  animation: ringRotate 5s linear infinite;
+}
+
+@keyframes ringRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Medical Icon Center */
+.medical-icon {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.15), transparent 70%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  animation: iconPulse 2.5s ease-in-out infinite;
+}
+
+.medical-icon::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 50%, var(--glow-green) 100%);
+  animation: ripple 2s ease-out infinite;
+}
+
+@keyframes ripple {
+  0% { 
+    transform: scale(0.8); 
+    opacity: 0.8; 
+  }
+  100% { 
+    transform: scale(1.3); 
+    opacity: 0; 
+  }
+}
+
+.medical-icon img {
+  width: 90px;
+  height: 90px;
+  filter: 
+    drop-shadow(0 0 25px var(--primary-green))
+    drop-shadow(0 0 15px rgba(0, 255, 136, 0.8));
+  animation: float 3.5s ease-in-out infinite;
+  z-index: 3;
+}
+
+@keyframes iconPulse {
+  0%, 100% { 
+    box-shadow: 
+      0 0 30px var(--glow-green), 
+      0 0 60px var(--glow-green),
+      inset 0 0 20px var(--glow-green);
+  }
+  50% { 
+    box-shadow: 
+      0 0 50px var(--glow-green), 
+      0 0 100px var(--glow-green),
+      inset 0 0 30px var(--glow-green);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(5deg); }
+}
+
+/* Orbiting Particles */
+.orbit-particle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: var(--primary-green);
+  border-radius: 50%;
+  box-shadow: 0 0 15px var(--primary-green);
+}
+
+.orbit-particle:nth-child(4) {
+  animation: orbit 5s linear infinite;
+}
+
+.orbit-particle:nth-child(5) {
+  animation: orbit 3.5s linear infinite reverse;
+  background: var(--kenya-red);
+  box-shadow: 0 0 15px var(--kenya-red);
+}
+
+.orbit-particle:nth-child(6) {
+  animation: orbit 6s linear infinite;
+  background: var(--tech-blue);
+  box-shadow: 0 0 15px var(--tech-blue);
+}
+
+.orbit-particle:nth-child(7) {
+  animation: orbit 4.5s linear infinite reverse;
+  background: white;
+  box-shadow: 0 0 15px white;
+}
+
+@keyframes orbit {
+  0% { 
+    transform: rotate(0deg) translateX(100px) rotate(0deg); 
+    opacity: 1;
+  }
+  50% { opacity: 0.5; }
+  100% { 
+    transform: rotate(360deg) translateX(100px) rotate(-360deg); 
+    opacity: 1;
+  }
+}
+
+/* ==================== BRANDING ==================== */
+.brand {
+  font-size: 5rem;
+  font-weight: 700;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: -3px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, 
+    #ffffff 0%, 
+    var(--primary-green) 40%, 
+    var(--tech-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: brandGlow 3s ease-in-out infinite;
+  position: relative;
+}
+
+@keyframes brandGlow {
+  0%, 100% { 
+    filter: 
+      drop-shadow(0 0 15px var(--primary-green))
+      drop-shadow(0 0 30px var(--primary-green));
+  }
+  50% { 
+    filter: 
+      drop-shadow(0 0 30px var(--primary-green))
+      drop-shadow(0 0 50px var(--primary-green));
+  }
+}
+
+.brand span {
+  background: linear-gradient(135deg, var(--kenya-red), #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px var(--kenya-red));
+}
+
+/* Company Footer */
+.company-footer {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 30px;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 300;
+}
+
+.company-footer::before,
+.company-footer::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--primary-green), 
+    transparent);
+  box-shadow: 0 0 5px var(--primary-green);
+}
+
+/* ==================== STATUS TEXT ==================== */
+.status-text {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 35px;
+  transition: all 0.3s ease;
+  font-weight: 400;
+}
+
+.status-text.active {
+  color: var(--primary-green);
+  text-shadow: 0 0 10px var(--primary-green);
+}
+
+/* ==================== PROGRESS BAR ==================== */
+.progress-rail {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, 
+    var(--primary-green) 0%, 
+    var(--tech-blue) 50%, 
+    var(--kenya-red) 100%);
+  box-shadow: 
+    0 0 20px var(--progress-glow),
+    0 0 40px var(--progress-glow);
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100px); }
+  100% { transform: translateX(400px); }
+}
+
+/* ==================== DATA STREAM ==================== */
+.data-stream {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: var(--primary-green);
+  text-shadow: 0 0 5px var(--primary-green);
+}
+
+.data-stream span {
+  opacity: 0.9;
+}
+
+/* ==================== SYSTEM INFO ==================== */
+.system-info {
+  width: 100%;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 255, 136, 0.2);
+  display: flex;
+  justify-content: space-around;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-family: monospace;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.info-label {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+.info-value {
+  color: var(--primary-green);
+  font-weight: bold;
+  text-shadow: 0 0 5px var(--primary-green);
+}
+
+/* ==================== FADE OUT ANIMATION ==================== */
+.fade-out { 
+  animation: finalize 1s forwards; 
+}
+
+@keyframes finalize {
+  to { 
+    opacity: 0; 
+    transform: scale(1.15) translateY(-20px); 
+    filter: blur(15px); 
+  }
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 600px) {
+  .loader-ui {
+    width: 90%;
+    padding: 30px 20px;
+  }
+  
+  .brand {
+    font-size: 3.5rem;
+  }
+  
+  .medical-image-container {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .medical-icon img {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .company-footer {
+    font-size: 0.65rem;
+  }
+}
+
+/* ==================== CORNER DECORATIONS ==================== */
+.corner-accent {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--primary-green);
+  opacity: 0.3;
+}
+
+.corner-accent.top-left {
+  top: 15px;
+  left: 15px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-accent.top-right {
+  top: 15px;
+  right: 15px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-accent.bottom-left {
+  bottom: 15px;
+  left: 15px;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-accent.bottom-right {
+  bottom: 15px;
+  right: 15px;
+  border-left: none;
+  border-top: none;
+}
+</style>
 </head>
 
 <body>
-    <!-- Accessibility Skip Link -->
-    <a href="#main-content" class="visually-hidden">Skip to main content</a>
-    
-    <!-- Background Effects -->
-    <div class="background-container">
-        <div class="grid-bg" aria-hidden="true"></div>
-        <div class="scanline" aria-hidden="true"></div>
-        <div class="scanner-beam" aria-hidden="true"></div>
+
+<!-- Background Effects -->
+<div class="grid-bg"></div>
+<div class="scanline"></div>
+<div class="scanner"></div>
+
+<!-- Floating Particles -->
+<div class="floating-particles">
+  <div class="float-particle"></div>
+  <div class="float-particle"></div>
+  <div class="float-particle"></div>
+  <div class="float-particle"></div>
+  <div class="float-particle"></div>
+</div>
+
+<!-- Main Loader UI -->
+<div class="loader-ui" id="loader">
+  <!-- Corner Accents -->
+  <div class="corner-accent top-left"></div>
+  <div class="corner-accent top-right"></div>
+  <div class="corner-accent bottom-left"></div>
+  <div class="corner-accent bottom-right"></div>
+
+  <!-- Heartbeat ECG -->
+  <div class="heartbeat-container">
+    <div class="ecg-line">━╋━╋━━╋━━</div>
+  </div>
+
+  <!-- Central Medical Image with Rotating Rings -->
+  <div class="medical-image-container">
+    <div class="rotating-ring"></div>
+    <div class="rotating-ring"></div>
+    <div class="rotating-ring"></div>
+    <div class="orbit-particle"></div>
+    <div class="orbit-particle"></div>
+    <div class="orbit-particle"></div>
+    <div class="orbit-particle"></div>
+    <div class="medical-icon">
+      <img src="https://cdn-icons-png.flaticon.com/512/2913/2913133.png" alt="Medical AI">
     </div>
-    
-    <!-- Main Loader Container -->
-    <main id="main-content" class="loader-container" role="main">
-        <!-- Brand Section with Logo -->
-        <div class="brand-section">
-            <div class="logo-container">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s" 
-                     alt="MedAI Logo" 
-                     class="logo-image"
-                     loading="eager">
-            </div>
-            
-            <h1 class="brand-name">Med<span style="color: var(--kenya-red); -webkit-text-fill-color: var(--kenya-red);">AI</span></h1>
-            <div class="brand-tagline">Enterprise Medical Intelligence</div>
-            <div class="brand-subtitle">AI-powered diagnostics & predictive healthcare analytics</div>
-        </div>
-        
-        <!-- Heartbeat Animation -->
-        <div class="heartbeat-container" aria-hidden="true">
-            <div class="ecg-line">^v^v^v^--^v^v^--^v^--</div>
-        </div>
-        
-        <!-- Status Indicator -->
-        <div class="status-container">
-            <div class="status-label" id="status-label">Initializing Secure System...</div>
-            
-            <!-- Progress Bar -->
-            <div class="progress-container">
-                <div class="progress-header">
-                    <span>System Integrity Check</span>
-                    <span id="percent">0%</span>
-                </div>
-                <div class="progress-rail">
-                    <div class="progress-fill" id="progress-bar"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Data Stream -->
-        <div class="data-stream">
-            <span id="hex-code">SESSION_ID: INITIALIZING...</span>
-            <span id="timestamp">--:--:-- UTC</span>
-        </div>
-        
-        <!-- Copyright -->
-        <div class="copyright">
-            &copy; 2026 MedAI Technologies. All rights reserved. <br>
-            <small style="color: var(--text-tertiary); font-size: 0.7rem;">
-                Protected under International Intellectual Property Laws
-            </small>
-        </div>
-    </main>
-    
-    <!-- Completion Overlay -->
-    <div class="complete-overlay" id="complete-overlay">
-        <div class="complete-message">
-            <div class="checkmark">✓</div>
-            <h2 style="font-size: 2.5rem; margin-bottom: var(--space-sm); color: var(--primary-green);">SYSTEM READY</h2>
-            <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto;">
-                MedAI diagnostics platform initialized successfully.<br>
-                Redirecting to secure portal...
-            </p>
-        </div>
+  </div>
+
+  <!-- Branding -->
+  <div class="brand">Med<span>AI</span></div>
+  <div class="company-footer">Created by MedAI Technologies</div>
+  
+  <!-- Status -->
+  <div class="status-text" id="status-label">Initializing Core Diagnostics</div>
+
+  <!-- Progress Bar -->
+  <div class="progress-rail">
+    <div class="progress-fill" id="bar"></div>
+  </div>
+
+  <!-- Data Stream -->
+  <div class="data-stream">
+    <span id="hex-code">AUTH_KEY: 0x882...</span>
+    <span id="percent">0%</span>
+  </div>
+
+  <!-- System Information -->
+  <div class="system-info">
+    <div class="info-item">
+      <span class="info-label">System</span>
+      <span class="info-value" id="system-status">ONLINE</span>
     </div>
+    <div class="info-item">
+      <span class="info-label">Region</span>
+      <span class="info-value">KE-EAST</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Security</span>
+      <span class="info-value" id="security-level">L5</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==================== LOADER SCRIPT ==================== */
+let progress = 0;
+const bar = document.getElementById("bar");
+const percent = document.getElementById("percent");
+const statusLabel = document.getElementById("status-label");
+const hexCode = document.getElementById("hex-code");
+const loader = document.getElementById("loader");
+const systemStatus = document.getElementById("system-status");
+const securityLevel = document.getElementById("security-level");
+
+// Enhanced status messages
+const statuses = [
+  "Establishing Secure Connection...",
+  "Authenticating Credentials...",
+  "Loading Medical Knowledge Base...",
+  "Calibrating Neural Networks...",
+  "Syncing Kenya Regional Database...",
+  "Initializing AI Diagnostic Engine...",
+  "Verifying Security Protocols...",
+  "Finalizing System Integration..."
+];
+
+// System status updates
+const systemStatuses = ["ONLINE", "ACTIVE", "SECURE", "READY"];
+const securityLevels = ["L1", "L2", "L3", "L4", "L5"];
+
+// Main loading interval
+const interval = setInterval(() => {
+  // Increment progress
+  progress += Math.random() * 6 + 3;
+  
+  // Generate random hex code
+  hexCode.textContent = "SEC_TOKEN: 0x" + 
+    Math.random().toString(16).substr(2, 8).toUpperCase();
+
+  // Update system info
+  if (progress > 20 && progress < 40) {
+    systemStatus.textContent = systemStatuses[1];
+  } else if (progress > 40 && progress < 60) {
+    systemStatus.textContent = systemStatuses[2];
+    securityLevel.textContent = securityLevels[2];
+  } else if (progress > 60 && progress < 80) {
+    securityLevel.textContent = securityLevels[3];
+  } else if (progress > 80) {
+    systemStatus.textContent = systemStatuses[3];
+    securityLevel.textContent = securityLevels[4];
+  }
+
+  // Check if complete
+  if (progress >= 100) {
+    progress = 100;
+    clearInterval(interval);
     
-    <script>
-        /* ========== ENTERPRISE LOADER SCRIPT ========== */
-        (function() {
-            'use strict';
-            
-            // DOM Elements
-            const progressBar = document.getElementById('progress-bar');
-            const percentDisplay = document.getElementById('percent');
-            const statusLabel = document.getElementById('status-label');
-            const hexCode = document.getElementById('hex-code');
-            const timestamp = document.getElementById('timestamp');
-            const completeOverlay = document.getElementById('complete-overlay');
-            
-            // Configuration
-            const CONFIG = {
-                MIN_LOAD_TIME: 3500, // Minimum 3.5 seconds for perceived stability
-                MAX_PROGRESS_INCREASE: 8,
-                MIN_PROGRESS_INCREASE: 2,
-                UPDATE_INTERVAL: 180,
-                COMPLETION_DELAY: 1500
-            };
-            
-            // Enterprise loading stages with realistic timing
-            const LOADING_STAGES = [
-                { 
-                    label: "Initializing Secure System...", 
-                    weight: 5,
-                    hexPrefix: "SECURE_BOOT"
-                },
-                { 
-                    label: "Loading Medical Knowledge Base...", 
-                    weight: 25,
-                    hexPrefix: "MED_KNOWLEDGE"
-                },
-                { 
-                    label: "Authenticating User Credentials...", 
-                    weight: 15,
-                    hexPrefix: "AUTH_PROTOCOL"
-                },
-                { 
-                    label: "Connecting to Diagnostic API...", 
-                    weight: 20,
-                    hexPrefix: "API_CONNECT"
-                },
-                { 
-                    label: "Syncing Regional Health Data...", 
-                    weight: 25,
-                    hexPrefix: "DATA_SYNC"
-                },
-                { 
-                    label: "Finalizing AI Diagnostics Engine...", 
-                    weight: 10,
-                    hexPrefix: "AI_ENGINE"
-                }
-            ];
-            
-            // State
-            let progress = 0;
-            let startTime = Date.now();
-            let currentStage = 0;
-            let intervalId = null;
-            
-            // Initialize
-            function init() {
-                updateTimestamp();
-                startProgressSimulation();
-                setInterval(updateTimestamp, 1000);
-            }
-            
-            // Start progress simulation
-            function startProgressSimulation() {
-                intervalId = setInterval(updateProgress, CONFIG.UPDATE_INTERVAL);
-            }
-            
-            // Update progress
-            function updateProgress() {
-                // Calculate elapsed time
-                const elapsed = Date.now() - startTime;
-                const timeBasedProgress = Math.min(95, (elapsed / CONFIG.MIN_LOAD_TIME) * 100);
-                
-                // Add random increment (bounded)
-                const randomIncrement = Math.random() * 
-                    (CONFIG.MAX_PROGRESS_INCREASE - CONFIG.MIN_PROGRESS_INCREASE) + 
-                    CONFIG.MIN_PROGRESS_INCREASE;
-                
-                // Use the higher of time-based or incremental progress
-                progress = Math.max(progress + randomIncrement, timeBasedProgress);
-                
-                // Ensure we don't exceed 100% until complete
-                if (progress >= 100) {
-                    progress = 100;
-                    completeLoading();
-                    return;
-                }
-                
-                // Update UI
-                updateUI();
-            }
-            
-            // Update UI elements
-            function updateUI() {
-                // Update progress bar
-                progressBar.style.width = `${progress}%`;
-                percentDisplay.textContent = `${Math.floor(progress)}%`;
-                
-                // Update status based on progress
-                updateStatus();
-                
-                // Update hex code
-                updateHexCode();
-            }
-            
-            // Update status label based on progress
-            function updateStatus() {
-                const stageProgress = progress / 100;
-                const stageIndex = Math.floor(stageProgress * LOADING_STAGES.length);
-                
-                if (stageIndex < LOADING_STAGES.length && stageIndex !== currentStage) {
-                    currentStage = stageIndex;
-                    statusLabel.textContent = LOADING_STAGES[stageIndex].label;
-                    
-                    // Add active class for animation
-                    statusLabel.classList.add('status-active');
-                    setTimeout(() => statusLabel.classList.remove('status-active'), 500);
-                }
-            }
-            
-            // Update hex code with realistic data
-            function updateHexCode() {
-                const stage = LOADING_STAGES[currentStage];
-                const randomHex = Math.random().toString(16).substr(2, 12).toUpperCase();
-                hexCode.textContent = `${stage.hexPrefix}: 0x${randomHex.substr(0, 4)}...${randomHex.substr(-4)}`;
-            }
-            
-            // Update timestamp
-            function updateTimestamp() {
-                const now = new Date();
-                const timeStr = now.toUTCString().split(' ')[4];
-                timestamp.textContent = timeStr;
-            }
-            
-            // Complete loading sequence
-            function completeLoading() {
-                clearInterval(intervalId);
-                
-                // Update final UI state
-                progressBar.style.width = '100%';
-                percentDisplay.textContent = '100%';
-                statusLabel.textContent = 'System Ready - Access Granted';
-                statusLabel.classList.add('status-active');
-                
-                // Generate final hex code
-                hexCode.textContent = `SESSION_READY: 0x${Math.random().toString(16).substr(2, 16).toUpperCase()}`;
-                
-                // Show completion overlay
-                setTimeout(() => {
-                    completeOverlay.classList.add('active');
-                    
-                    // Redirect after delay
-                    setTimeout(() => {
-                        // In production, this would redirect to the main application
-                        // window.location.href = 'dashboard.html';
-                        
-                        // For demo purposes, we'll reload to show the animation again
-                        console.log('Redirecting to application...');
-                        // Uncomment for actual redirect:
-                        // window.location.href = 'login.html';
-                    }, CONFIG.COMPLETION_DELAY);
-                }, 800);
-            }
-            
-            // Service Worker Registration
-            function registerServiceWorker() {
-                if ('serviceWorker' in navigator) {
-                    window.addEventListener('load', () => {
-                        navigator.serviceWorker.register('service-worker.js')
-                            .then(registration => {
-                                console.log('ServiceWorker registered: ', registration.scope);
-                            })
-                            .catch(error => {
-                                console.log('ServiceWorker registration failed: ', error);
-                            });
-                    });
-                }
-            }
-            
-            // Error Handling
-            function handleErrors() {
-                window.addEventListener('error', (event) => {
-                    console.error('Loader Error:', event.error);
-                    // In production, you might want to send this to an error tracking service
-                });
-            }
-            
-            // Initialize everything when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-            
-            // Register service worker
-            registerServiceWorker();
-            
-            // Set up error handling
-            handleErrors();
-            
-        })();
-    </script>
+    statusLabel.textContent = "✓ ACCESS GRANTED";
+    statusLabel.classList.add('active');
+    statusLabel.style.color = "var(--primary-green)";
+    statusLabel.style.fontSize = "1rem";
+    statusLabel.style.fontWeight = "700";
+
+    // Fade out and redirect
+    setTimeout(() => {
+      loader.classList.add("fade-out");
+      setTimeout(() => { 
+        // Redirect to login page (create this file separately)
+        window.location.href = "login.html"; 
+      }, 1000);
+    }, 1500);
+  }
+
+  // Update status based on progress
+  let statusIndex = Math.floor((progress / 100) * statuses.length);
+  if (statusIndex >= statuses.length) statusIndex = statuses.length - 1;
+  statusLabel.textContent = statuses[statusIndex];
+
+  // Update progress bar
+  bar.style.width = progress + "%";
+  percent.textContent = Math.floor(progress) + "%";
+}, 200);
+
+/* ==================== SERVICE WORKER (Optional PWA Support) ==================== */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("✓ Service Worker registered"))
+      .catch(err => console.log("Service Worker registration skipped:", err));
+  });
+}
+
+/* ==================== DYNAMIC PARTICLE CREATION ==================== */
+function createFloatingParticle() {
+  const particle = document.createElement('div');
+  particle.className = 'float-particle';
+  particle.style.left = Math.random() * 100 + '%';
+  particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+  particle.style.animationDelay = Math.random() * 5 + 's';
+  
+  const colors = ['var(--primary-green)', 'var(--tech-blue)', 'var(--kenya-red)'];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  particle.style.background = color;
+  particle.style.boxShadow = `0 0 10px ${color}`;
+  
+  document.querySelector('.floating-particles').appendChild(particle);
+  
+  setTimeout(() => particle.remove(), 15000);
+}
+
+// Create particles periodically
+setInterval(createFloatingParticle, 3000);
+</script>
+
 </body>
 </html>
