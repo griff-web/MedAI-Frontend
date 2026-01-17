@@ -1,277 +1,829 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>MedAI</title>
-
-<!-- Favicon (browser tab) -->
-<link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
-
-<!-- PWA manifest -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-
-<!-- Apple PWA support -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MedAI">
-
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
-
-<style>
-/* ---------- ROOT VARIABLES ---------- */
-:root {
-  --primary-green: #00FF88;
-  --kenya-red: #E31837;
-  --obsidian: #0A0A0F;
-  --text-dim: rgba(255, 255, 255, 0.5);
-  --glow-green: rgba(0, 255, 136, 0.3);
-  --progress-glow: rgba(0, 255, 136, 0.6);
-  --scanner-color: rgba(0, 255, 136, 0.2);
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Space Grotesk', sans-serif;
-  background-color: var(--obsidian);
-  color: #fff;
-  overflow: hidden;
-  perspective: 1000px;
-}
-
-/* ---------- GRID BACKGROUND ---------- */
-.grid-bg {
-  position: absolute; inset: 0;
-  background-image: 
-    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(circle, black, transparent 80%);
-  animation: gridShift 20s linear infinite;
-}
-
-@keyframes gridShift {
-  0% { background-position: 0 0, 0 0; }
-  100% { background-position: 600px 600px, 600px 600px; }
-}
-
-/* ---------- SCANLINES ---------- */
-.scanline {
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0,255,136,0.03) 2px,
-    rgba(0,255,136,0.03) 4px
-  );
-  z-index: 10;
-  pointer-events: none;
-}
-
-.scanner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 20%;
-  background: linear-gradient(to bottom, transparent, var(--scanner-color));
-  border-bottom: 1px solid var(--primary-green);
-  animation: scanMove 2.8s ease-in-out infinite;
-  z-index: 5;
-}
-
-@keyframes scanMove {
-  0% { top: -20%; }
-  50% { top: 50%; }
-  100% { top: 120%; }
-}
-
-/* ---------- LOADER UI ---------- */
-.loader-ui {
-  position: relative;
-  width: 420px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 20;
-  text-align: center;
-}
-
-/* Heartbeat Animation */
-.heartbeat-container {
-  width: 100%;
-  height: 60px;
-  margin-bottom: 25px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ecg-line {
-  font-size: 2rem;
-  color: var(--primary-green);
-  letter-spacing: 5px;
-  filter: drop-shadow(0 0 12px var(--primary-green)) drop-shadow(0 0 8px var(--primary-green));
-  animation: heartPulse 1.2s infinite;
-}
-
-@keyframes heartPulse {
-  0%,20%,40%,60%,80%,100% { transform: scale(1); opacity: 0.5; }
-  10%,30%,50%,70%,90% { transform: scale(1.3); opacity: 1; }
-}
-
-/* Brand */
-.brand {
-  font-size: 4rem;
-  font-weight: 700;
-  letter-spacing: -2px;
-  margin-bottom: 10px;
-  background: linear-gradient(90deg, #fff, var(--primary-green));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 10px var(--primary-green);
-}
-
-.brand span {
-  color: var(--kenya-red);
-  -webkit-text-fill-color: var(--kenya-red);
-  text-shadow: 0 0 10px var(--kenya-red);
-}
-
-/* Status */
-.status-text {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  margin-bottom: 40px;
-  transition: color 0.3s ease;
-}
-
-/* Progress Bar */
-.progress-rail {
-  width: 100%;
-  height: 3px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
-  overflow: hidden;
-  position: relative;
-}
-
-.progress-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--primary-green), var(--kenya-red));
-  box-shadow: 0 0 20px var(--progress-glow);
-  border-radius: 2px;
-  transition: width 0.35s cubic-bezier(0.1, 0.7, 1.0, 0.1);
-}
-
-/* Data Stream */
-.data-stream {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
-  font-family: monospace;
-  font-size: 10px;
-  color: var(--primary-green);
-}
-
-/* Fade out on completion */
-.fade-out { animation: finalize 0.8s forwards; }
-@keyframes finalize {
-  to { opacity: 0; transform: scale(1.1); filter: blur(10px); }
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAI | Advanced Medical Diagnostics</title>
+    <meta name="description" content="Enterprise-grade AI-powered medical diagnostics platform">
+    
+    <!-- SEO & OpenGraph -->
+    <meta property="og:title" content="MedAI | Medical AI Diagnostics">
+    <meta property="og:description" content="Advanced AI-powered medical diagnostics platform">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- Apple PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MedAI">
+    <link rel="apple-touch-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    
+    <!-- Google Fonts with Fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Performance Optimization -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+    
+    <style>
+        /* ========== CSS RESET & BASE ========== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        :root {
+            /* Primary Colors */
+            --primary-green: #00FF88;
+            --primary-green-dark: #00CC6C;
+            --kenya-red: #E31837;
+            --kenya-red-dark: #B8142C;
+            --obsidian: #0A0A0F;
+            --obsidian-light: #121218;
+            
+            /* Neutral Colors */
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-tertiary: rgba(255, 255, 255, 0.5);
+            --border-color: rgba(255, 255, 255, 0.1);
+            
+            /* Effects */
+            --glow-green: rgba(0, 255, 136, 0.3);
+            --progress-glow: rgba(0, 255, 136, 0.6);
+            --scanner-color: rgba(0, 255, 136, 0.15);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            
+            /* Typography */
+            --font-heading: 'Space Grotesk', system-ui, sans-serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            
+            /* Shadows */
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 40px rgba(0, 255, 136, 0.2);
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-normal: 300ms ease;
+            --transition-slow: 500ms ease;
+        }
+        
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-body);
+            background-color: var(--obsidian);
+            color: var(--text-primary);
+            overflow: hidden;
+            perspective: 1000px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* ========== ACCESSIBILITY ========== */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        :focus-visible {
+            outline: 2px solid var(--primary-green);
+            outline-offset: 2px;
+        }
+        
+        /* ========== BACKGROUND EFFECTS ========== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(circle, black 40%, transparent 70%);
+            animation: gridShift 30s linear infinite;
+            will-change: background-position;
+        }
+        
+        @keyframes gridShift {
+            0% { background-position: 0 0, 0 0; }
+            100% { background-position: 600px 600px, 600px 600px; }
+        }
+        
+        .scanline {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 2px,
+                var(--scanner-color) 2px,
+                var(--scanner-color) 4px
+            );
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        .scanner-beam {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 20%;
+            background: linear-gradient(to bottom, 
+                transparent, 
+                var(--scanner-color) 20%, 
+                transparent);
+            border-bottom: 1px solid var(--primary-green);
+            box-shadow: 0 0 30px var(--primary-green);
+            animation: scanMove 3.5s ease-in-out infinite;
+            z-index: 3;
+        }
+        
+        @keyframes scanMove {
+            0% { top: -20%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 120%; opacity: 0; }
+        }
+        
+        /* ========== MAIN LOADER UI ========== */
+        .loader-container {
+            position: relative;
+            width: min(90vw, 500px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            padding: var(--space-xl) var(--space-lg);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+        
+        /* Logo & Branding */
+        .brand-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            width: 100%;
+        }
+        
+        .logo-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            border: 2px solid var(--primary-green);
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+        }
+        
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: conic-gradient(
+                from 0deg,
+                transparent,
+                var(--primary-green),
+                transparent 30%
+            );
+            animation: rotateLogo 3s linear infinite;
+        }
+        
+        .logo-image {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            z-index: 2;
+            border-radius: var(--radius-sm);
+        }
+        
+        @keyframes rotateLogo {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .brand-name {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: var(--space-xs);
+            background: linear-gradient(90deg, #FFFFFF, var(--primary-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            line-height: 1.1;
+        }
+        
+        .brand-tagline {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: var(--space-xs);
+            font-weight: 500;
+        }
+        
+        .brand-subtitle {
+            font-size: 1rem;
+            color: var(--text-tertiary);
+            max-width: 400px;
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* Heartbeat Animation */
+        .heartbeat-container {
+            width: 100%;
+            height: 80px;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .ecg-line {
+            font-family: monospace;
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            letter-spacing: 8px;
+            filter: 
+                drop-shadow(0 0 15px var(--primary-green)) 
+                drop-shadow(0 0 10px var(--primary-green));
+            animation: heartPulse 1.5s infinite;
+            position: relative;
+        }
+        
+        .ecg-line::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--primary-green), 
+                transparent);
+            filter: blur(1px);
+        }
+        
+        @keyframes heartPulse {
+            0%, 20%, 40%, 60%, 80%, 100% { 
+                transform: scale(1); 
+                opacity: 0.6; 
+            }
+            10%, 30%, 50%, 70%, 90% { 
+                transform: scale(1.15); 
+                opacity: 1; 
+            }
+        }
+        
+        /* Status Indicator */
+        .status-container {
+            width: 100%;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .status-label {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: var(--space-sm);
+            font-weight: 500;
+            transition: color var(--transition-normal);
+            min-height: 1.5em;
+        }
+        
+        .status-active {
+            color: var(--primary-green);
+            text-shadow: 0 0 10px var(--primary-green);
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-xs);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .progress-rail {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, 
+                var(--primary-green), 
+                var(--kenya-red));
+            border-radius: 3px;
+            box-shadow: 
+                0 0 20px var(--progress-glow),
+                inset 0 0 10px rgba(255, 255, 255, 0.3);
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        /* Data Stream */
+        .data-stream {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: var(--space-sm);
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.75rem;
+            color: var(--primary-green);
+            background: rgba(0, 0, 0, 0.3);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Copyright */
+        .copyright {
+            margin-top: var(--space-xl);
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            text-align: center;
+            width: 100%;
+            padding-top: var(--space-sm);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Loading Complete Animation */
+        .complete-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--obsidian);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-slow);
+        }
+        
+        .complete-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .complete-message {
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform var(--transition-slow);
+        }
+        
+        .complete-overlay.active .complete-message {
+            transform: scale(1);
+        }
+        
+        .checkmark {
+            font-size: 5rem;
+            color: var(--primary-green);
+            margin-bottom: var(--space-lg);
+            filter: drop-shadow(0 0 20px var(--primary-green));
+        }
+        
+        /* ========== RESPONSIVE DESIGN ========== */
+        @media (max-width: 768px) {
+            .loader-container {
+                padding: var(--space-lg) var(--space-md);
+                width: 95vw;
+            }
+            
+            .brand-name {
+                font-size: 2.5rem;
+            }
+            
+            .ecg-line {
+                font-size: 2rem;
+                letter-spacing: 6px;
+            }
+            
+            .logo-container {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .logo-image {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .brand-name {
+                font-size: 2rem;
+            }
+            
+            .brand-tagline {
+                font-size: 0.8rem;
+                letter-spacing: 2px;
+            }
+            
+            .ecg-line {
+                font-size: 1.5rem;
+                letter-spacing: 4px;
+            }
+            
+            .logo-container {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .logo-image {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        /* ========== PREFERS REDUCED MOTION ========== */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            
+            .grid-bg {
+                animation: none;
+            }
+            
+            .scanner-beam {
+                animation: none;
+                opacity: 0.3;
+            }
+            
+            .ecg-line {
+                animation: none;
+                opacity: 1;
+            }
+            
+            .logo-container::before {
+                animation: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
-<div class="grid-bg"></div>
-<div class="scanline"></div>
-<div class="scanner"></div>
-
-<div class="loader-ui" id="loader">
-  <div class="heartbeat-container">
-    <div class="ecg-line">^v^v^--^v^--</div>
-  </div>
-
-  <div class="brand">Med<span>AI</span></div>
-  <div class="status-text" id="status-label">Initializing Core Diagnostics</div>
-
-  <div class="progress-rail">
-    <div class="progress-fill" id="bar"></div>
-  </div>
-
-  <div class="data-stream">
-    <span id="hex-code">AUTH_KEY: 0x882...</span>
-    <span id="percent">0%</span>
-  </div>
-</div>
-
-<script>
-/* ---------- LOADER SCRIPT ---------- */
-let progress = 0;
-const bar = document.getElementById("bar");
-const percent = document.getElementById("percent");
-const statusLabel = document.getElementById("status-label");
-const hexCode = document.getElementById("hex-code");
-const loader = document.getElementById("loader");
-
-const statuses = [
-  "Establishing Secure Link...",
-  "Loading Medical Knowledge Base...",
-  "Calibrating Neural Pathways...",
-  "Syncing Kenya Regional Data...",
-  "Finalizing AI Protocols..."
-];
-
-const interval = setInterval(() => {
-  progress += Math.random() * 7 + 2;
-  hexCode.textContent = "SEC_TOKEN: " + Math.random().toString(16).substr(2,8).toUpperCase();
-
-  if(progress >= 100){
-    progress = 100;
-    clearInterval(interval);
-    statusLabel.textContent = "ACCESS GRANTED";
-    statusLabel.style.color = "var(--primary-green)";
-
-    setTimeout(() => {
-      loader.classList.add("fade-out");
-      setTimeout(() => { window.location.href = "login.html"; }, 800);
-    }, 1200);
-  }
-
-  let statusIndex = Math.floor((progress/100)*statuses.length);
-  if(statusIndex < statuses.length) statusLabel.textContent = statuses[statusIndex];
-
-  bar.style.width = progress + "%";
-  percent.textContent = Math.floor(progress) + "%";
-}, 180);
-
-/* ---------- SERVICE WORKER REGISTRATION ---------- */
-if("serviceWorker" in navigator){
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => console.log("Service Worker registered"))
-      .catch(err => console.error("SW registration failed:", err));
-  });
-}
-</script>
-
+    <!-- Accessibility Skip Link -->
+    <a href="#main-content" class="visually-hidden">Skip to main content</a>
+    
+    <!-- Background Effects -->
+    <div class="background-container">
+        <div class="grid-bg" aria-hidden="true"></div>
+        <div class="scanline" aria-hidden="true"></div>
+        <div class="scanner-beam" aria-hidden="true"></div>
+    </div>
+    
+    <!-- Main Loader Container -->
+    <main id="main-content" class="loader-container" role="main">
+        <!-- Brand Section with Logo -->
+        <div class="brand-section">
+            <div class="logo-container">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s" 
+                     alt="MedAI Logo" 
+                     class="logo-image"
+                     loading="eager">
+            </div>
+            
+            <h1 class="brand-name">Med<span style="color: var(--kenya-red); -webkit-text-fill-color: var(--kenya-red);">AI</span></h1>
+            <div class="brand-tagline">Enterprise Medical Intelligence</div>
+            <div class="brand-subtitle">AI-powered diagnostics & predictive healthcare analytics</div>
+        </div>
+        
+        <!-- Heartbeat Animation -->
+        <div class="heartbeat-container" aria-hidden="true">
+            <div class="ecg-line">^v^v^v^--^v^v^--^v^--</div>
+        </div>
+        
+        <!-- Status Indicator -->
+        <div class="status-container">
+            <div class="status-label" id="status-label">Initializing Secure System...</div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span>System Integrity Check</span>
+                    <span id="percent">0%</span>
+                </div>
+                <div class="progress-rail">
+                    <div class="progress-fill" id="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Data Stream -->
+        <div class="data-stream">
+            <span id="hex-code">SESSION_ID: INITIALIZING...</span>
+            <span id="timestamp">--:--:-- UTC</span>
+        </div>
+        
+        <!-- Copyright -->
+        <div class="copyright">
+            &copy; 2026 MedAI Technologies. All rights reserved. <br>
+            <small style="color: var(--text-tertiary); font-size: 0.7rem;">
+                Protected under International Intellectual Property Laws
+            </small>
+        </div>
+    </main>
+    
+    <!-- Completion Overlay -->
+    <div class="complete-overlay" id="complete-overlay">
+        <div class="complete-message">
+            <div class="checkmark">✓</div>
+            <h2 style="font-size: 2.5rem; margin-bottom: var(--space-sm); color: var(--primary-green);">SYSTEM READY</h2>
+            <p style="color: var(--text-secondary); max-width: 400px; margin: 0 auto;">
+                MedAI diagnostics platform initialized successfully.<br>
+                Redirecting to secure portal...
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        /* ========== ENTERPRISE LOADER SCRIPT ========== */
+        (function() {
+            'use strict';
+            
+            // DOM Elements
+            const progressBar = document.getElementById('progress-bar');
+            const percentDisplay = document.getElementById('percent');
+            const statusLabel = document.getElementById('status-label');
+            const hexCode = document.getElementById('hex-code');
+            const timestamp = document.getElementById('timestamp');
+            const completeOverlay = document.getElementById('complete-overlay');
+            
+            // Configuration
+            const CONFIG = {
+                MIN_LOAD_TIME: 3500, // Minimum 3.5 seconds for perceived stability
+                MAX_PROGRESS_INCREASE: 8,
+                MIN_PROGRESS_INCREASE: 2,
+                UPDATE_INTERVAL: 180,
+                COMPLETION_DELAY: 1500
+            };
+            
+            // Enterprise loading stages with realistic timing
+            const LOADING_STAGES = [
+                { 
+                    label: "Initializing Secure System...", 
+                    weight: 5,
+                    hexPrefix: "SECURE_BOOT"
+                },
+                { 
+                    label: "Loading Medical Knowledge Base...", 
+                    weight: 25,
+                    hexPrefix: "MED_KNOWLEDGE"
+                },
+                { 
+                    label: "Authenticating User Credentials...", 
+                    weight: 15,
+                    hexPrefix: "AUTH_PROTOCOL"
+                },
+                { 
+                    label: "Connecting to Diagnostic API...", 
+                    weight: 20,
+                    hexPrefix: "API_CONNECT"
+                },
+                { 
+                    label: "Syncing Regional Health Data...", 
+                    weight: 25,
+                    hexPrefix: "DATA_SYNC"
+                },
+                { 
+                    label: "Finalizing AI Diagnostics Engine...", 
+                    weight: 10,
+                    hexPrefix: "AI_ENGINE"
+                }
+            ];
+            
+            // State
+            let progress = 0;
+            let startTime = Date.now();
+            let currentStage = 0;
+            let intervalId = null;
+            
+            // Initialize
+            function init() {
+                updateTimestamp();
+                startProgressSimulation();
+                setInterval(updateTimestamp, 1000);
+            }
+            
+            // Start progress simulation
+            function startProgressSimulation() {
+                intervalId = setInterval(updateProgress, CONFIG.UPDATE_INTERVAL);
+            }
+            
+            // Update progress
+            function updateProgress() {
+                // Calculate elapsed time
+                const elapsed = Date.now() - startTime;
+                const timeBasedProgress = Math.min(95, (elapsed / CONFIG.MIN_LOAD_TIME) * 100);
+                
+                // Add random increment (bounded)
+                const randomIncrement = Math.random() * 
+                    (CONFIG.MAX_PROGRESS_INCREASE - CONFIG.MIN_PROGRESS_INCREASE) + 
+                    CONFIG.MIN_PROGRESS_INCREASE;
+                
+                // Use the higher of time-based or incremental progress
+                progress = Math.max(progress + randomIncrement, timeBasedProgress);
+                
+                // Ensure we don't exceed 100% until complete
+                if (progress >= 100) {
+                    progress = 100;
+                    completeLoading();
+                    return;
+                }
+                
+                // Update UI
+                updateUI();
+            }
+            
+            // Update UI elements
+            function updateUI() {
+                // Update progress bar
+                progressBar.style.width = `${progress}%`;
+                percentDisplay.textContent = `${Math.floor(progress)}%`;
+                
+                // Update status based on progress
+                updateStatus();
+                
+                // Update hex code
+                updateHexCode();
+            }
+            
+            // Update status label based on progress
+            function updateStatus() {
+                const stageProgress = progress / 100;
+                const stageIndex = Math.floor(stageProgress * LOADING_STAGES.length);
+                
+                if (stageIndex < LOADING_STAGES.length && stageIndex !== currentStage) {
+                    currentStage = stageIndex;
+                    statusLabel.textContent = LOADING_STAGES[stageIndex].label;
+                    
+                    // Add active class for animation
+                    statusLabel.classList.add('status-active');
+                    setTimeout(() => statusLabel.classList.remove('status-active'), 500);
+                }
+            }
+            
+            // Update hex code with realistic data
+            function updateHexCode() {
+                const stage = LOADING_STAGES[currentStage];
+                const randomHex = Math.random().toString(16).substr(2, 12).toUpperCase();
+                hexCode.textContent = `${stage.hexPrefix}: 0x${randomHex.substr(0, 4)}...${randomHex.substr(-4)}`;
+            }
+            
+            // Update timestamp
+            function updateTimestamp() {
+                const now = new Date();
+                const timeStr = now.toUTCString().split(' ')[4];
+                timestamp.textContent = timeStr;
+            }
+            
+            // Complete loading sequence
+            function completeLoading() {
+                clearInterval(intervalId);
+                
+                // Update final UI state
+                progressBar.style.width = '100%';
+                percentDisplay.textContent = '100%';
+                statusLabel.textContent = 'System Ready - Access Granted';
+                statusLabel.classList.add('status-active');
+                
+                // Generate final hex code
+                hexCode.textContent = `SESSION_READY: 0x${Math.random().toString(16).substr(2, 16).toUpperCase()}`;
+                
+                // Show completion overlay
+                setTimeout(() => {
+                    completeOverlay.classList.add('active');
+                    
+                    // Redirect after delay
+                    setTimeout(() => {
+                        // In production, this would redirect to the main application
+                        // window.location.href = 'dashboard.html';
+                        
+                        // For demo purposes, we'll reload to show the animation again
+                        console.log('Redirecting to application...');
+                        // Uncomment for actual redirect:
+                        // window.location.href = 'login.html';
+                    }, CONFIG.COMPLETION_DELAY);
+                }, 800);
+            }
+            
+            // Service Worker Registration
+            function registerServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('service-worker.js')
+                            .then(registration => {
+                                console.log('ServiceWorker registered: ', registration.scope);
+                            })
+                            .catch(error => {
+                                console.log('ServiceWorker registration failed: ', error);
+                            });
+                    });
+                }
+            }
+            
+            // Error Handling
+            function handleErrors() {
+                window.addEventListener('error', (event) => {
+                    console.error('Loader Error:', event.error);
+                    // In production, you might want to send this to an error tracking service
+                });
+            }
+            
+            // Initialize everything when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+            
+            // Register service worker
+            registerServiceWorker();
+            
+            // Set up error handling
+            handleErrors();
+            
+        })();
+    </script>
 </body>
 </html>
