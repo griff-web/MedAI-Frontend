@@ -1,15 +1,28 @@
-l<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>MedAI</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
-   <link rel="manifest" href="manifest.json">
+
+<!-- Favicon (browser tab) -->
+<link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f172a">
 
+<!-- Apple PWA support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MedAI">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+
 <style>
+/* ---------- ROOT VARIABLES ---------- */
 :root {
   --primary-green: #00FF88;
   --kenya-red: #E31837;
@@ -24,15 +37,17 @@ l<!DOCTYPE html>
 
 body {
   height: 100vh;
-  background-color: var(--obsidian);
-  display: flex; justify-content: center; align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-family: 'Space Grotesk', sans-serif;
-  overflow: hidden; 
+  background-color: var(--obsidian);
   color: #fff;
+  overflow: hidden;
   perspective: 1000px;
 }
 
-/* Animated Grid Background */
+/* ---------- GRID BACKGROUND ---------- */
 .grid-bg {
   position: absolute; inset: 0;
   background-image: 
@@ -48,7 +63,7 @@ body {
   100% { background-position: 600px 600px, 600px 600px; }
 }
 
-/* Scanline overlay */
+/* ---------- SCANLINES ---------- */
 .scanline {
   position: absolute; inset: 0;
   background: repeating-linear-gradient(
@@ -58,12 +73,16 @@ body {
     rgba(0,255,136,0.03) 2px,
     rgba(0,255,136,0.03) 4px
   );
-  z-index: 10; pointer-events: none;
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* Moving Scanner Beam */
 .scanner {
-  position: absolute; top: 0; left: 0; width: 100%; height: 20%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20%;
   background: linear-gradient(to bottom, transparent, var(--scanner-color));
   border-bottom: 1px solid var(--primary-green);
   animation: scanMove 2.8s ease-in-out infinite;
@@ -76,20 +95,25 @@ body {
   100% { top: 120%; }
 }
 
-/* Loader Container */
+/* ---------- LOADER UI ---------- */
 .loader-ui {
   position: relative;
   width: 420px;
-  display: flex; flex-direction: column; align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   z-index: 20;
   text-align: center;
 }
 
-/* ECG / Heartbeat Animation */
+/* Heartbeat Animation */
 .heartbeat-container {
-  width: 100%; height: 60px;
+  width: 100%;
+  height: 60px;
   margin-bottom: 25px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ecg-line {
@@ -101,54 +125,68 @@ body {
 }
 
 @keyframes heartPulse {
-  0%, 20%, 40%, 60%, 80%, 100% { transform: scale(1); opacity: 0.5; }
-  10%, 30%, 50%, 70%, 90% { transform: scale(1.3); opacity: 1; }
+  0%,20%,40%,60%,80%,100% { transform: scale(1); opacity: 0.5; }
+  10%,30%,50%,70%,90% { transform: scale(1.3); opacity: 1; }
 }
 
-/* Brand Logo */
+/* Brand */
 .brand {
-  font-size: 4rem; font-weight: 700;
-  letter-spacing: -2px; margin-bottom: 10px;
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: -2px;
+  margin-bottom: 10px;
   background: linear-gradient(90deg, #fff, var(--primary-green));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   text-shadow: 0 0 10px var(--primary-green);
 }
 
 .brand span {
-  color: var(--kenya-red); -webkit-text-fill-color: var(--kenya-red);
+  color: var(--kenya-red);
+  -webkit-text-fill-color: var(--kenya-red);
   text-shadow: 0 0 10px var(--kenya-red);
 }
 
-/* Status Text */
+/* Status */
 .status-text {
-  font-size: 0.8rem; color: var(--text-dim);
-  text-transform: uppercase; letter-spacing: 4px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 4px;
   margin-bottom: 40px;
   transition: color 0.3s ease;
 }
 
-/* Progress Rail */
+/* Progress Bar */
 .progress-rail {
-  width: 100%; height: 3px;
-  background: rgba(255, 255, 255, 0.1);
-  position: relative;
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
   border-radius: 2px;
   overflow: hidden;
+  position: relative;
 }
 
 .progress-fill {
-  position: absolute; top: 0; left: 0;
-  height: 100%; width: 0%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
   background: linear-gradient(90deg, var(--primary-green), var(--kenya-red));
   box-shadow: 0 0 20px var(--progress-glow);
   border-radius: 2px;
   transition: width 0.35s cubic-bezier(0.1, 0.7, 1.0, 0.1);
 }
 
-/* Data Stream / Hex Codes */
+/* Data Stream */
 .data-stream {
-  width: 100%; display: flex; justify-content: space-between;
-  margin-top: 12px; font-family: monospace; font-size: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-family: monospace;
+  font-size: 10px;
   color: var(--primary-green);
 }
 
@@ -157,6 +195,7 @@ body {
 @keyframes finalize {
   to { opacity: 0; transform: scale(1.1); filter: blur(10px); }
 }
+
 </style>
 </head>
 
@@ -185,6 +224,7 @@ body {
 </div>
 
 <script>
+/* ---------- LOADER SCRIPT ---------- */
 let progress = 0;
 const bar = document.getElementById("bar");
 const percent = document.getElementById("percent");
@@ -201,12 +241,10 @@ const statuses = [
 ];
 
 const interval = setInterval(() => {
-  progress += Math.random() * 7 + 2; // smoother progression
-  
-  // Realistic random token
-  hexCode.textContent = "SEC_TOKEN: " + Math.random().toString(16).substr(2, 8).toUpperCase();
+  progress += Math.random() * 7 + 2;
+  hexCode.textContent = "SEC_TOKEN: " + Math.random().toString(16).substr(2,8).toUpperCase();
 
-  if (progress >= 100) {
+  if(progress >= 100){
     progress = 100;
     clearInterval(interval);
     statusLabel.textContent = "ACCESS GRANTED";
@@ -218,13 +256,21 @@ const interval = setInterval(() => {
     }, 1200);
   }
 
-  // Update Status Text smoothly
-  let statusIndex = Math.floor((progress / 100) * statuses.length);
+  let statusIndex = Math.floor((progress/100)*statuses.length);
   if(statusIndex < statuses.length) statusLabel.textContent = statuses[statusIndex];
 
   bar.style.width = progress + "%";
   percent.textContent = Math.floor(progress) + "%";
 }, 180);
+
+/* ---------- SERVICE WORKER REGISTRATION ---------- */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("Service Worker registered"))
+      .catch(err => console.error("SW registration failed:", err));
+  });
+}
 </script>
 
 </body>
