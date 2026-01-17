@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Diagnostic Dashboard | MedAI</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+<meta charset="UTF-8">
+<title>Diagnostic Dashboard | MedAI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <link rel="stylesheet" href="auth.css">
-    <link rel="stylesheet" href="dash.css">
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
 
-    <script src="auth.js" defer></script>
-    <script src="dash.js" defer></script>
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<!-- Apple PWA Support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MedAI">
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="dash.css">
+
+<!-- Scripts -->
+<script src="auth.js" defer></script>
+<script src="dash.js" defer></script>
+
 </head>
 
 <body class="dashboard-body">
@@ -117,7 +131,7 @@
                 <p>Global AI confidence and diagnostic distribution.</p>
             </header>
             <div class="analytics-placeholder">
-                
+                <!-- Charts or graphs go here -->
             </div>
         </div>
 
@@ -175,6 +189,17 @@
 </a>
 
 <div id="notification" class="notification-toast hidden"></div>
+
+<!-- PWA Service Worker Registration -->
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("Service Worker registered"))
+      .catch(err => console.error("SW registration failed:", err));
+  });
+}
+</script>
 
 </body>
 </html>
