@@ -1,6 +1,6 @@
 /**
- * MEDAI ENTERPRISE ENGINE v2.5.0
- * Status: Production Ready | Integrated Module
+ * MEDAI ENTERPRISE ENGINE v1.0
+ * Features: Backend Sync, Keyboard Nav, PDF Export
  */
 
 class MedAICore {
@@ -8,7 +8,7 @@ class MedAICore {
         this.config = {
             API_BASE: window.ENV_API_BASE || "https://ai-p17b.onrender.com",
             ENDPOINTS: { ANALYZE: "/diagnostics/process" },
-            TIMEOUT: 60000, // 60s for cold-start tolerance
+            TIMEOUT: 60000,
             RETRY_ATTEMPTS: 3
         };
 
@@ -18,7 +18,7 @@ class MedAICore {
             activeMode: "xray",
             isProcessing: false,
             torchOn: false,
-            controller: null,
+            lastResult: null, // Stores data for PDF generation
             user: JSON.parse(localStorage.getItem("medai_user")) || { name: "Practitioner" }
         };
 
@@ -29,9 +29,9 @@ class MedAICore {
         this.cacheSelectors();
         this.bindEvents();
         this.setupNavigation();
+        this.setupKeyboardListeners();
         this.renderUser();
         
-        // Connect to hardware
         await this.setupCamera();
         console.log("🚀 MedAI Core: Ready & Connected");
     }
@@ -42,13 +42,13 @@ class MedAICore {
             captureBtn: document.getElementById("capture-trigger"),
             toggleTorch: document.getElementById("toggle-torch"),
             uploadLocal: document.getElementById("upload-local"),
-            typeBtns: document.querySelectorAll(".type-btn"),
-            navItems: document.querySelectorAll(".nav-item"),
+            typeBtns: Array.from(document.querySelectorAll(".type-btn")),
+            navItems: Array.from(document.querySelectorAll(".nav-item")),
             views: document.querySelectorAll(".content-view"),
             resultsPanel: document.getElementById("results-panel"),
             closeResults: document.getElementById("close-results"),
+            downloadPdf: document.getElementById("download-pdf"), // New Selector
             aiStatus: document.getElementById("ai-status"),
-            // Results mapping
             confidencePath: document.getElementById("confidence-path"),
             confidenceText: document.getElementById("confidence-text"),
             resultTitle: document.getElementById("result-title"),
@@ -60,188 +60,167 @@ class MedAICore {
     }
 
     /* =====================================================
-       CAMERA SYSTEM (Refined)
+       PDF GENERATION SYSTEM
     ===================================================== */
-    async setupCamera() {
-        try {
-            const constraints = {
-                video: {
-                    facingMode: "environment",
-                    width: { ideal: 3840 }, // Target 4K if available
-                    height: { ideal: 2160 }
-                }
-            };
-
-            this.state.stream = await navigator.mediaDevices.getUserMedia(constraints);
-            this.dom.video.srcObject = this.state.stream;
-
-            const track = this.state.stream.getVideoTracks()[0];
-            if ("ImageCapture" in window) {
-                this.state.imageCapture = new ImageCapture(track);
-            }
-        } catch (e) {
-            this.notify("Imaging system offline. Use local upload.", "warning");
+    async generateReport() {
+        if (!this.state.lastResult) return;
+        const data = this.state.lastResult;
+        
+        // Ensure jspdf is loaded (loads from CDN if not present)
+        if (typeof jspdf === "undefined") {
+            this.notify("Loading PDF Engine...", "info");
+            await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
         }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const timestamp = new Date().toLocaleString();
+
+        // Styles & Content
+        doc.setFontSize(22);
+        doc.text("MedAI Diagnostic Report", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Generated: ${timestamp}`, 20, 30);
+        doc.text(`Practitioner: Dr. ${this.state.user.name}`, 20, 37);
+        doc.line(20, 45, 190, 45);
+
+        doc.setFontSize(16);
+        doc.text(`Diagnosis: ${data.diagnosis}`, 20, 55);
+        doc.setFontSize(12);
+        doc.text(`Confidence: ${data.confidence}%`, 20, 63);
+        
+        doc.text("Description:", 20, 75);
+        doc.setFont("helvetica", "italic");
+        doc.text(doc.splitTextToSize(data.description, 160), 20, 82);
+
+        doc.setFont("helvetica", "normal");
+        doc.text("Key Findings:", 20, 110);
+        data.findings.forEach((f, i) => {
+            doc.text(`- ${f}`, 25, 118 + (i * 7));
+        });
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Disclaimer: This is an AI-generated analysis. Verify with clinical correlation.", 20, 280);
+
+        doc.save(`MedAI_Report_${Date.now()}.pdf`);
+        this.notify("Report Downloaded", "success");
     }
 
-    async captureFallback() {
-        const canvas = document.createElement("canvas");
-        canvas.width = this.dom.video.videoWidth;
-        canvas.height = this.dom.video.videoHeight;
-        const ctx = canvas.getContext("2d");
-        // Slight medical-grade sharpening
-        ctx.filter = "contrast(1.1) brightness(1.05)";
-        ctx.drawImage(this.dom.video, 0, 0);
-        return new Promise(res => canvas.toBlob(res, "image/jpeg", 0.95));
+    loadScript(src) {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = src;
+            script.onload = resolve;
+            document.head.appendChild(script);
+        });
     }
 
     /* =====================================================
-       AI PIPELINE (With Exponential Backoff)
+       UI & KEYBOARD NAVIGATION
+    ===================================================== */
+    setupKeyboardListeners() {
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && !this.dom.resultsPanel.classList.contains("hidden")) {
+                this.dom.closeResults.click();
+            }
+            if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && !this.state.isProcessing) {
+                const activeIndex = this.dom.navItems.findIndex(item => item.classList.contains("active"));
+                let nextIndex = e.key === "ArrowRight" ? activeIndex + 1 : activeIndex - 1;
+                if (nextIndex >= 0 && nextIndex < this.dom.navItems.length) {
+                    this.dom.navItems[nextIndex].click();
+                }
+            }
+        });
+    }
+
+    displayDiagnosis(data) {
+        this.state.lastResult = data; // Cache for PDF
+        this.dom.resultsPanel.classList.remove("hidden");
+        this.dom.resultsPanel.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const score = Math.min(100, Math.max(0, data.confidence || 0));
+        if (this.dom.confidencePath) {
+            this.dom.confidencePath.style.strokeDasharray = `${score}, 100`;
+            this.dom.confidenceText.textContent = `${score}%`;
+        }
+
+        this.dom.resultTitle.textContent = data.diagnosis || "Analysis Complete";
+        this.dom.resultDescription.textContent = data.description || "No description provided.";
+
+        this.dom.findingsList.innerHTML = "";
+        (data.findings || []).forEach((finding, index) => {
+            const li = document.createElement("li");
+            li.className = "animate-slide-in";
+            li.style.animationDelay = `${index * 0.1}s`;
+            li.innerHTML = `<span class="bullet">•</span> ${finding}`;
+            this.dom.findingsList.appendChild(li);
+        });
+
+        this.notify("Results Synchronized", "success");
+    }
+
+    /* =====================================================
+       CORE PIPELINE
     ===================================================== */
     async handleCapture() {
         if (this.state.isProcessing) return;
-
-        const token = localStorage.getItem("medai_token");
-        if (!token) {
-            this.notify("Session expired. Please log in.", "error");
-            setTimeout(() => window.location.href = 'index.html', 1500);
-            return;
-        }
-
+        this.toggleLoading(true, "Analyzing...");
         try {
-            this.toggleLoading(true, "Capturing Scan...");
-            
-            const raw = this.state.imageCapture
-                ? await this.state.imageCapture.takePhoto()
+            const blob = this.state.imageCapture 
+                ? await this.state.imageCapture.takePhoto() 
                 : await this.captureFallback();
-
-            // Perform upload with retry logic to handle Render "Cold Starts"
-            const result = await this.uploadWithRetry(raw);
-            this.displayDiagnosis(result);
             
+            const result = await this.uploadWithRetry(blob);
+            this.displayDiagnosis(result);
         } catch (e) {
-            this.notify(e.message || "Analysis failed.", "error");
+            this.notify(e.message, "error");
         } finally {
             this.toggleLoading(false);
         }
     }
 
     async uploadWithRetry(blob, attempt = 0) {
-        this.updateAIStatus(`AI Analyzing (Attempt ${attempt + 1})...`);
-        
-        this.state.controller?.abort();
-        this.state.controller = new AbortController();
-        const timeoutId = setTimeout(() => this.state.controller.abort(), this.config.TIMEOUT);
-
         const fd = new FormData();
-        fd.append("file", blob, `scan_${Date.now()}.jpg`);
+        fd.append("file", blob, `scan.jpg`);
         fd.append("type", this.state.activeMode);
 
-        try {
-            const res = await fetch(`${this.config.API_BASE}${this.config.ENDPOINTS.ANALYZE}`, {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${localStorage.getItem("medai_token")}` },
-                body: fd,
-                signal: this.state.controller.signal
-            });
-
-            clearTimeout(timeoutId);
-
-            if (res.status === 401) throw new Error("Unauthorized. Please log in again.");
-            if (!res.ok) throw new Error(`Server error: ${res.status}`);
-
-            return await res.json();
-
-        } catch (err) {
-            if (attempt < this.config.RETRY_ATTEMPTS && err.name !== 'AbortError') {
-                const delay = 1000 * Math.pow(2, attempt); // Exponential Backoff
-                await new Promise(r => setTimeout(r, delay));
-                return this.uploadWithRetry(blob, attempt + 1);
-            }
-            throw new Error("AI Engine unresponsive. Check connection.");
-        }
-    }
-
-    /* =====================================================
-       UI & TRUE RESULTS REVEAL
-    ===================================================== */
-    displayDiagnosis(data) {
-        // Ensure UI is visible
-        this.dom.resultsPanel.classList.remove("hidden");
-        this.dom.resultsPanel.scrollTo(0,0);
-
-        // 1. Confidence Gauge Update
-        const score = Math.min(100, Math.max(0, data.confidence || 0));
-        if (this.dom.confidencePath) {
-            // formula for SVG circle: dash-offset = 100 - score
-            this.dom.confidencePath.style.strokeDasharray = `${score}, 100`;
-            this.dom.confidenceText.textContent = `${score}%`;
-        }
-
-        // 2. Reveal True Results from Backend
-        this.dom.resultTitle.textContent = data.diagnosis || "Undetermined Scan";
-        this.dom.resultDescription.textContent = data.description || "The AI could not provide a specific description for this scan.";
-
-        // 3. Dynamic Findings List
-        this.dom.findingsList.innerHTML = "";
-        const findings = data.findings || ["Inconclusive reading - verify image quality"];
-        findings.forEach((finding, index) => {
-            const li = document.createElement("li");
-            li.style.animationDelay = `${index * 0.1}s`;
-            li.className = "animate-slide-in";
-            li.innerHTML = `<span class="bullet">•</span> ${finding}`;
-            this.dom.findingsList.appendChild(li);
+        const res = await fetch(`${this.config.API_BASE}${this.config.ENDPOINTS.ANALYZE}`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${localStorage.getItem("medai_token")}` },
+            body: fd
         });
 
-        this.notify("Diagnosis Loaded Successfully", "success");
+        if (!res.ok) {
+            if (attempt < this.config.RETRY_ATTEMPTS) {
+                return this.uploadWithRetry(blob, attempt + 1);
+            }
+            throw new Error("Cloud Engine Unreachable");
+        }
+        return await res.json();
     }
 
     bindEvents() {
         this.dom.captureBtn.onclick = () => this.handleCapture();
-
+        this.dom.closeResults.onclick = () => this.dom.resultsPanel.classList.add("hidden");
+        this.dom.downloadPdf.onclick = () => this.generateReport(); // Link PDF button
+        this.dom.uploadLocal.onclick = () => this.handleLocalUpload();
+        
         this.dom.typeBtns.forEach(btn => {
             btn.onclick = () => {
                 this.dom.typeBtns.forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
                 this.state.activeMode = btn.dataset.type;
-                this.notify(`Switched to ${this.state.activeMode.toUpperCase()} mode`, "info");
             };
         });
-
-        this.dom.closeResults.onclick = () => this.dom.resultsPanel.classList.add("hidden");
 
         this.dom.toggleTorch.onclick = async () => {
             const track = this.state.stream?.getVideoTracks()[0];
             if (!track) return;
-            try {
-                this.state.torchOn = !this.state.torchOn;
-                await track.applyConstraints({ advanced: [{ torch: this.state.torchOn }] });
-                this.dom.toggleTorch.classList.toggle("active", this.state.torchOn);
-            } catch {
-                this.notify("Torch hardware not detected.", "info");
-            }
+            this.state.torchOn = !this.state.torchOn;
+            await track.applyConstraints({ advanced: [{ torch: this.state.torchOn }] });
+            this.dom.toggleTorch.classList.toggle("active", this.state.torchOn);
         };
-
-        this.dom.uploadLocal.onclick = () => this.handleLocalUpload();
-    }
-
-    async handleLocalUpload() {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = async () => {
-            if (!input.files[0]) return;
-            this.toggleLoading(true, "Uploading File...");
-            try {
-                const result = await this.uploadWithRetry(input.files[0]);
-                this.displayDiagnosis(result);
-            } catch (e) {
-                this.notify(e.message, "error");
-            } finally {
-                this.toggleLoading(false);
-            }
-        };
-        input.click();
     }
 
     setupNavigation() {
@@ -250,42 +229,36 @@ class MedAICore {
                 this.dom.navItems.forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
                 this.dom.views.forEach(v => v.classList.add("hidden"));
-                const targetView = document.getElementById(`${btn.dataset.tab}-section`);
-                if (targetView) targetView.classList.remove("hidden");
+                document.getElementById(`${btn.dataset.tab}-section`)?.classList.remove("hidden");
             };
         });
     }
 
-    toggleLoading(active, text = "AI Analyzing...") {
+    // Helper functions
+    toggleLoading(active, text) {
         this.state.isProcessing = active;
         this.dom.captureBtn.disabled = active;
-        this.dom.captureBtn.classList.toggle("loading-pulse", active);
-        this.updateAIStatus(active ? text : "AI Ready");
+        if (this.dom.aiStatus) this.dom.aiStatus.textContent = active ? text : "AI Ready";
     }
 
-    updateAIStatus(text) {
-        if (this.dom.aiStatus) this.dom.aiStatus.textContent = text;
-    }
-
-    notify(message, type = "info") {
+    notify(msg, type) {
         if (!this.dom.notif) return;
-        this.dom.notif.textContent = message;
+        this.dom.notif.textContent = msg;
         this.dom.notif.className = `notification ${type} visible`;
-        
-        clearTimeout(this.notifTimer);
-        this.notifTimer = setTimeout(() => {
-            this.dom.notif.classList.remove("visible");
-        }, 4000);
+        setTimeout(() => this.dom.notif.classList.remove("visible"), 4000);
+    }
+
+    async setupCamera() {
+        try {
+            this.state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            this.dom.video.srcObject = this.state.stream;
+            if ("ImageCapture" in window) this.state.imageCapture = new ImageCapture(this.state.stream.getVideoTracks()[0]);
+        } catch (e) { this.notify("Camera offline", "warning"); }
     }
 
     renderUser() {
-        if (this.dom.displayName) {
-            this.dom.displayName.textContent = `Dr. ${this.state.user.name}`;
-        }
+        if (this.dom.displayName) this.dom.displayName.textContent = `Dr. ${this.state.user.name}`;
     }
 }
 
-// Global Instantation
-window.addEventListener("DOMContentLoaded", () => {
-    window.App = new MedAICore();
-});
+window.addEventListener("DOMContentLoaded", () => { window.App = new MedAICore(); });
