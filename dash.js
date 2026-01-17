@@ -1,6 +1,6 @@
 /**
  * MEDAI ENTERPRISE ENGINE v1.0
- * Features: Backend Sync, Keyboard Nav, PDF Export
+ * Features: Backend Sync, Multi-Axis Keyboard Nav, PDF Export
  */
 
 class MedAICore {
@@ -18,7 +18,7 @@ class MedAICore {
             activeMode: "xray",
             isProcessing: false,
             torchOn: false,
-            lastResult: null, // Stores data for PDF generation
+            lastResult: null,
             user: JSON.parse(localStorage.getItem("medai_user")) || { name: "Practitioner" }
         };
 
@@ -47,7 +47,7 @@ class MedAICore {
             views: document.querySelectorAll(".content-view"),
             resultsPanel: document.getElementById("results-panel"),
             closeResults: document.getElementById("close-results"),
-            downloadPdf: document.getElementById("download-pdf"), // New Selector
+            downloadPdf: document.getElementById("download-pdf"),
             aiStatus: document.getElementById("ai-status"),
             confidencePath: document.getElementById("confidence-path"),
             confidenceText: document.getElementById("confidence-text"),
@@ -60,70 +60,18 @@ class MedAICore {
     }
 
     /* =====================================================
-       PDF GENERATION SYSTEM
-    ===================================================== */
-    async generateReport() {
-        if (!this.state.lastResult) return;
-        const data = this.state.lastResult;
-        
-        // Ensure jspdf is loaded (loads from CDN if not present)
-        if (typeof jspdf === "undefined") {
-            this.notify("Loading PDF Engine...", "info");
-            await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
-        }
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const timestamp = new Date().toLocaleString();
-
-        // Styles & Content
-        doc.setFontSize(22);
-        doc.text("MedAI Diagnostic Report", 20, 20);
-        doc.setFontSize(12);
-        doc.text(`Generated: ${timestamp}`, 20, 30);
-        doc.text(`Practitioner: Dr. ${this.state.user.name}`, 20, 37);
-        doc.line(20, 45, 190, 45);
-
-        doc.setFontSize(16);
-        doc.text(`Diagnosis: ${data.diagnosis}`, 20, 55);
-        doc.setFontSize(12);
-        doc.text(`Confidence: ${data.confidence}%`, 20, 63);
-        
-        doc.text("Description:", 20, 75);
-        doc.setFont("helvetica", "italic");
-        doc.text(doc.splitTextToSize(data.description, 160), 20, 82);
-
-        doc.setFont("helvetica", "normal");
-        doc.text("Key Findings:", 20, 110);
-        data.findings.forEach((f, i) => {
-            doc.text(`- ${f}`, 25, 118 + (i * 7));
-        });
-
-        doc.setFontSize(10);
-        doc.setTextColor(100);
-        doc.text("Disclaimer: This is an AI-generated analysis. Verify with clinical correlation.", 20, 280);
-
-        doc.save(`MedAI_Report_${Date.now()}.pdf`);
-        this.notify("Report Downloaded", "success");
-    }
-
-    loadScript(src) {
-        return new Promise((resolve) => {
-            const script = document.createElement("script");
-            script.src = src;
-            script.onload = resolve;
-            document.head.appendChild(script);
-        });
-    }
-
-    /* =====================================================
-       UI & KEYBOARD NAVIGATION
+       UI & KEYBOARD NAVIGATION (Updated with Up/Down)
     ===================================================== */
     setupKeyboardListeners() {
         window.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && !this.dom.resultsPanel.classList.contains("hidden")) {
+            const isResultsOpen = !this.dom.resultsPanel.classList.contains("hidden");
+
+            // 1. ESC: Close results panel
+            if (e.key === "Escape" && isResultsOpen) {
                 this.dom.closeResults.click();
             }
+
+            // 2. Left/Right: Navigate Main Tabs
             if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && !this.state.isProcessing) {
                 const activeIndex = this.dom.navItems.findIndex(item => item.classList.contains("active"));
                 let nextIndex = e.key === "ArrowRight" ? activeIndex + 1 : activeIndex - 1;
@@ -131,11 +79,29 @@ class MedAICore {
                     this.dom.navItems[nextIndex].click();
                 }
             }
+
+            // 3. Up/Down: Scroll Results OR Change Diagnostic Mode
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                if (isResultsOpen) {
+                    // Scroll the panel if it's open
+                    const scrollAmt = e.key === "ArrowDown" ? 100 : -100;
+                    this.dom.resultsPanel.scrollBy({ top: scrollAmt, behavior: 'smooth' });
+                } else {
+                    // Change Diagnostic Mode (Xray, MRI, etc) if panel is closed
+                    const activeModeIdx = this.dom.typeBtns.findIndex(btn => btn.classList.contains("active"));
+                    let nextModeIdx = e.key === "ArrowDown" ? activeModeIdx + 1 : activeModeIdx - 1;
+                    
+                    if (nextModeIdx >= 0 && nextModeIdx < this.dom.typeBtns.length) {
+                        e.preventDefault(); // Prevent page scroll while switching modes
+                        this.dom.typeBtns[nextModeIdx].click();
+                    }
+                }
+            }
         });
     }
 
     displayDiagnosis(data) {
-        this.state.lastResult = data; // Cache for PDF
+        this.state.lastResult = data;
         this.dom.resultsPanel.classList.remove("hidden");
         this.dom.resultsPanel.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -161,7 +127,50 @@ class MedAICore {
     }
 
     /* =====================================================
-       CORE PIPELINE
+       PDF GENERATION SYSTEM
+    ===================================================== */
+    async generateReport() {
+        if (!this.state.lastResult) return;
+        const data = this.state.lastResult;
+        
+        if (typeof jspdf === "undefined") {
+            this.notify("Loading PDF Engine...", "info");
+            await this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(22);
+        doc.text("MedAI Diagnostic Report", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Practitioner: Dr. ${this.state.user.name}`, 20, 37);
+        doc.line(20, 45, 190, 45);
+
+        doc.setFontSize(16);
+        doc.text(`Diagnosis: ${data.diagnosis}`, 20, 55);
+        doc.text(`Confidence: ${data.confidence}%`, 20, 65);
+        
+        doc.text("Description:", 20, 80);
+        doc.setFontSize(11);
+        const splitDesc = doc.splitTextToSize(data.description, 165);
+        doc.text(splitDesc, 20, 87);
+
+        doc.save(`MedAI_Report_${Date.now()}.pdf`);
+        this.notify("Report Downloaded", "success");
+    }
+
+    loadScript(src) {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = src;
+            script.onload = resolve;
+            document.head.appendChild(script);
+        });
+    }
+
+    /* =====================================================
+       CORE PIPELINE & EVENTS
     ===================================================== */
     async handleCapture() {
         if (this.state.isProcessing) return;
@@ -192,9 +201,7 @@ class MedAICore {
         });
 
         if (!res.ok) {
-            if (attempt < this.config.RETRY_ATTEMPTS) {
-                return this.uploadWithRetry(blob, attempt + 1);
-            }
+            if (attempt < this.config.RETRY_ATTEMPTS) return this.uploadWithRetry(blob, attempt + 1);
             throw new Error("Cloud Engine Unreachable");
         }
         return await res.json();
@@ -203,7 +210,7 @@ class MedAICore {
     bindEvents() {
         this.dom.captureBtn.onclick = () => this.handleCapture();
         this.dom.closeResults.onclick = () => this.dom.resultsPanel.classList.add("hidden");
-        this.dom.downloadPdf.onclick = () => this.generateReport(); // Link PDF button
+        this.dom.downloadPdf.onclick = () => this.generateReport();
         this.dom.uploadLocal.onclick = () => this.handleLocalUpload();
         
         this.dom.typeBtns.forEach(btn => {
@@ -234,7 +241,6 @@ class MedAICore {
         });
     }
 
-    // Helper functions
     toggleLoading(active, text) {
         this.state.isProcessing = active;
         this.dom.captureBtn.disabled = active;
@@ -254,6 +260,29 @@ class MedAICore {
             this.dom.video.srcObject = this.state.stream;
             if ("ImageCapture" in window) this.state.imageCapture = new ImageCapture(this.state.stream.getVideoTracks()[0]);
         } catch (e) { this.notify("Camera offline", "warning"); }
+    }
+
+    async captureFallback() {
+        const canvas = document.createElement("canvas");
+        canvas.width = this.dom.video.videoWidth;
+        canvas.height = this.dom.video.videoHeight;
+        canvas.getContext("2d").drawImage(this.dom.video, 0, 0);
+        return new Promise(res => canvas.toBlob(res, "image/jpeg", 0.95));
+    }
+
+    async handleLocalUpload() {
+        const input = document.createElement("input");
+        input.type = "file"; input.accept = "image/*";
+        input.onchange = async () => {
+            if (!input.files[0]) return;
+            this.toggleLoading(true, "Analyzing...");
+            try {
+                const res = await this.uploadWithRetry(input.files[0]);
+                this.displayDiagnosis(res);
+            } catch (e) { this.notify("Upload failed", "error"); }
+            finally { this.toggleLoading(false); }
+        };
+        input.click();
     }
 
     renderUser() {
