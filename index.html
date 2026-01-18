@@ -5,790 +5,302 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedAI</title>
 
-<!-- Favicon -->
 <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
 
-<!-- Meta Tags -->
 <meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MedAI">
 <meta name="description" content="Advanced Medical AI Diagnostic Platform by MedAI Technologies">
 
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-/* ==================== ROOT VARIABLES ==================== */
-:root {
-  --primary-green: #00FF88;
-  --kenya-red: #E31837;
-  --obsidian: #0A0A0F;
-  --text-dim: rgba(255, 255, 255, 0.5);
-  --glow-green: rgba(0, 255, 136, 0.3);
-  --progress-glow: rgba(0, 255, 136, 0.6);
-  --scanner-color: rgba(0, 255, 136, 0.2);
-  --tech-blue: #00D4FF;
+/* ================= ROOT ================= */
+:root{
+--primary-green:#00FF88;
+--tech-blue:#00D4FF;
+--kenya-red:#E31837;
+--obsidian:#0A0A0F;
+--text-dim:rgba(255,255,255,.55);
+--glow:rgba(0,255,136,.35);
 }
 
-/* ==================== RESET & BASE ==================== */
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* BODY */
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family:'Space Grotesk',sans-serif;
+background:radial-gradient(circle,#1a1a2e 0%,var(--obsidian) 100%);
+color:#fff;
+overflow:hidden;
 }
 
-body {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Space Grotesk', sans-serif;
-  background: radial-gradient(circle at center, #1a1a2e 0%, var(--obsidian) 100%);
-  color: #fff;
-  overflow: hidden;
-  perspective: 1000px;
+/* GRID */
+.grid-bg{
+position:absolute;inset:0;
+background:
+linear-gradient(rgba(0,255,136,.08) 1px,transparent 1px),
+linear-gradient(90deg,rgba(0,255,136,.08) 1px,transparent 1px);
+background-size:50px 50px;
+mask-image:radial-gradient(circle,black 35%,transparent 75%);
+animation:gridMove 25s linear infinite;
+z-index:1;
+}
+@keyframes gridMove{to{background-position:500px 500px}}
+
+/* SCAN */
+.scanline{
+position:absolute;inset:0;
+background:repeating-linear-gradient(to bottom,
+transparent 0 2px,rgba(0,255,136,.05) 2px 4px);
+pointer-events:none;z-index:5;
 }
 
-/* ==================== ANIMATED GRID BACKGROUND ==================== */
-.grid-bg {
-  position: absolute; 
-  inset: 0;
-  background-image: 
-    linear-gradient(rgba(0, 255, 136, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 136, 0.08) 1px, transparent 1px);
-  background-size: 50px 50px;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-  animation: gridShift 25s linear infinite;
-  z-index: 1;
+/* LOADER */
+.loader-ui{
+position:relative;
+width:550px;
+padding:40px;
+border-radius:20px;
+background:rgba(10,10,15,.65);
+backdrop-filter:blur(20px);
+border:1px solid rgba(0,255,136,.25);
+box-shadow:0 0 60px rgba(0,255,136,.12);
+z-index:10;
+text-align:center;
 }
 
-@keyframes gridShift {
-  0% { background-position: 0 0, 0 0; }
-  100% { background-position: 500px 500px, 500px 500px; }
+/* ECG */
+.ecg-line{
+font-family:'Orbitron',monospace;
+font-size:1.8rem;
+color:var(--primary-green);
+letter-spacing:6px;
+animation:pulse 1.4s infinite;
+}
+@keyframes pulse{
+50%{transform:scale(1.3);opacity:1}
 }
 
-/* ==================== SCANLINES ==================== */
-.scanline {
-  position: absolute; 
-  inset: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 255, 136, 0.04) 2px,
-    rgba(0, 255, 136, 0.04) 4px
-  );
-  z-index: 10;
-  pointer-events: none;
+/* ICON */
+.medical-image-container{
+position:relative;
+width:200px;height:200px;
+margin:30px auto;
+}
+.rotating-ring{
+position:absolute;
+inset:0;
+border-radius:50%;
+border:3px solid transparent;
+border-top-color:var(--primary-green);
+animation:spin 4s linear infinite;
+}
+.rotating-ring:nth-child(2){
+inset:15%;
+border-top-color:var(--tech-blue);
+animation-direction:reverse;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.medical-icon{
+width:130px;height:130px;
+margin:auto;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+background:radial-gradient(circle,rgba(0,255,136,.2),transparent 70%);
+box-shadow:0 0 40px var(--glow);
+animation:iconPulse 2.5s infinite;
+}
+@keyframes iconPulse{
+50%{box-shadow:0 0 80px var(--glow)}
+}
+.medical-icon img{
+width:90px;
+filter:drop-shadow(0 0 25px var(--primary-green));
 }
 
-/* ==================== SCANNING BEAM ==================== */
-.scanner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 25%;
-  background: linear-gradient(to bottom, 
-    transparent, 
-    var(--scanner-color) 50%, 
-    transparent);
-  border-bottom: 2px solid var(--primary-green);
-  box-shadow: 0 0 30px var(--primary-green);
-  animation: scanMove 3.5s ease-in-out infinite;
-  z-index: 5;
+/* BRAND */
+.brand{
+font-family:'Orbitron';
+font-size:4.5rem;
+background:linear-gradient(135deg,#fff,var(--primary-green),var(--tech-blue));
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+.brand span{
+background:linear-gradient(135deg,var(--kenya-red),#ff6b6b);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
 }
 
-@keyframes scanMove {
-  0% { top: -25%; opacity: 0.3; }
-  50% { top: 50%; opacity: 0.7; }
-  100% { top: 125%; opacity: 0.3; }
+/* STATUS */
+.status-text{
+margin:25px 0;
+font-size:.85rem;
+letter-spacing:3px;
+color:var(--text-dim);
+text-transform:uppercase;
 }
 
-/* ==================== FLOATING PARTICLES ==================== */
-.floating-particles {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 2;
+/* PROGRESS */
+.progress-rail{
+height:4px;
+background:rgba(255,255,255,.1);
+border-radius:3px;
+overflow:hidden;
+}
+.progress-fill{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,var(--primary-green),var(--tech-blue),var(--kenya-red));
+transition:width .4s linear;
 }
 
-.float-particle {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  background: var(--primary-green);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--primary-green);
-  animation: floatUp 15s linear infinite;
+/* DATA */
+.data-stream{
+display:flex;
+justify-content:space-between;
+margin-top:15px;
+font-family:monospace;
+font-size:.75rem;
+color:var(--primary-green);
 }
 
-.float-particle:nth-child(2) { left: 20%; animation-delay: 2s; background: var(--tech-blue); box-shadow: 0 0 10px var(--tech-blue); }
-.float-particle:nth-child(3) { left: 40%; animation-delay: 4s; }
-.float-particle:nth-child(4) { left: 60%; animation-delay: 1s; background: var(--kenya-red); box-shadow: 0 0 10px var(--kenya-red); }
-.float-particle:nth-child(5) { left: 80%; animation-delay: 3s; background: var(--tech-blue); box-shadow: 0 0 10px var(--tech-blue); }
-
-@keyframes floatUp {
-  0% { 
-    top: 110%; 
-    opacity: 0;
-    transform: translateX(0);
-  }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { 
-    top: -10%; 
-    opacity: 0;
-    transform: translateX(50px);
-  }
+/* INFO */
+.system-info{
+display:flex;
+justify-content:space-around;
+margin-top:25px;
+padding-top:15px;
+border-top:1px solid rgba(0,255,136,.2);
+font-family:monospace;
+font-size:.7rem;
+}
+.info-value{
+color:var(--primary-green);
+text-shadow:0 0 8px var(--primary-green);
+transition:.4s;
 }
 
-/* ==================== LOADER UI CONTAINER ==================== */
-.loader-ui {
-  position: relative;
-  width: 550px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 20;
-  text-align: center;
-  padding: 40px;
-  background: rgba(10, 10, 15, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 255, 136, 0.2);
-  border-radius: 20px;
-  box-shadow: 
-    0 0 60px rgba(0, 255, 136, 0.1),
-    inset 0 0 40px rgba(0, 255, 136, 0.05);
-}
-
-/* ==================== HEARTBEAT ECG ==================== */
-.heartbeat-container {
-  width: 100%;
-  height: 50px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ecg-line {
-  font-size: 1.8rem;
-  font-family: 'Orbitron', monospace;
-  color: var(--primary-green);
-  letter-spacing: 6px;
-  filter: 
-    drop-shadow(0 0 15px var(--primary-green)) 
-    drop-shadow(0 0 8px var(--primary-green));
-  animation: heartPulse 1.4s infinite;
-}
-
-@keyframes heartPulse {
-  0%, 20%, 40%, 60%, 80%, 100% { 
-    transform: scale(1); 
-    opacity: 0.6; 
-  }
-  10%, 30%, 50%, 70%, 90% { 
-    transform: scale(1.35); 
-    opacity: 1; 
-  }
-}
-
-/* ==================== CENTRAL MEDICAL IMAGE ==================== */
-.medical-image-container {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  margin-bottom: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Rotating Rings */
-.rotating-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 3px solid transparent;
-  border-top-color: var(--primary-green);
-  border-right-color: var(--kenya-red);
-  border-radius: 50%;
-  animation: ringRotate 4s linear infinite;
-  filter: drop-shadow(0 0 10px var(--primary-green));
-}
-
-.rotating-ring:nth-child(2) {
-  width: 85%;
-  height: 85%;
-  border-top-color: var(--tech-blue);
-  border-left-color: var(--primary-green);
-  animation: ringRotate 2.5s linear infinite reverse;
-  filter: drop-shadow(0 0 10px var(--tech-blue));
-}
-
-.rotating-ring:nth-child(3) {
-  width: 110%;
-  height: 110%;
-  border: 2px solid transparent;
-  border-bottom-color: rgba(255, 255, 255, 0.3);
-  animation: ringRotate 5s linear infinite;
-}
-
-@keyframes ringRotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Medical Icon Center */
-.medical-icon {
-  position: relative;
-  width: 130px;
-  height: 130px;
-  background: radial-gradient(circle, rgba(0, 255, 136, 0.15), transparent 70%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  animation: iconPulse 2.5s ease-in-out infinite;
-}
-
-.medical-icon::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: radial-gradient(circle, transparent 50%, var(--glow-green) 100%);
-  animation: ripple 2s ease-out infinite;
-}
-
-@keyframes ripple {
-  0% { 
-    transform: scale(0.8); 
-    opacity: 0.8; 
-  }
-  100% { 
-    transform: scale(1.3); 
-    opacity: 0; 
-  }
-}
-
-.medical-icon img {
-  width: 90px;
-  height: 90px;
-  filter: 
-    drop-shadow(0 0 25px var(--primary-green))
-    drop-shadow(0 0 15px rgba(0, 255, 136, 0.8));
-  animation: float 3.5s ease-in-out infinite;
-  z-index: 3;
-}
-
-@keyframes iconPulse {
-  0%, 100% { 
-    box-shadow: 
-      0 0 30px var(--glow-green), 
-      0 0 60px var(--glow-green),
-      inset 0 0 20px var(--glow-green);
-  }
-  50% { 
-    box-shadow: 
-      0 0 50px var(--glow-green), 
-      0 0 100px var(--glow-green),
-      inset 0 0 30px var(--glow-green);
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(5deg); }
-}
-
-/* Orbiting Particles */
-.orbit-particle {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  background: var(--primary-green);
-  border-radius: 50%;
-  box-shadow: 0 0 15px var(--primary-green);
-}
-
-.orbit-particle:nth-child(4) {
-  animation: orbit 5s linear infinite;
-}
-
-.orbit-particle:nth-child(5) {
-  animation: orbit 3.5s linear infinite reverse;
-  background: var(--kenya-red);
-  box-shadow: 0 0 15px var(--kenya-red);
-}
-
-.orbit-particle:nth-child(6) {
-  animation: orbit 6s linear infinite;
-  background: var(--tech-blue);
-  box-shadow: 0 0 15px var(--tech-blue);
-}
-
-.orbit-particle:nth-child(7) {
-  animation: orbit 4.5s linear infinite reverse;
-  background: white;
-  box-shadow: 0 0 15px white;
-}
-
-@keyframes orbit {
-  0% { 
-    transform: rotate(0deg) translateX(100px) rotate(0deg); 
-    opacity: 1;
-  }
-  50% { opacity: 0.5; }
-  100% { 
-    transform: rotate(360deg) translateX(100px) rotate(-360deg); 
-    opacity: 1;
-  }
-}
-
-/* ==================== BRANDING ==================== */
-.brand {
-  font-size: 5rem;
-  font-weight: 700;
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: -3px;
-  margin-bottom: 10px;
-  background: linear-gradient(135deg, 
-    #ffffff 0%, 
-    var(--primary-green) 40%, 
-    var(--tech-blue) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: brandGlow 3s ease-in-out infinite;
-  position: relative;
-}
-
-@keyframes brandGlow {
-  0%, 100% { 
-    filter: 
-      drop-shadow(0 0 15px var(--primary-green))
-      drop-shadow(0 0 30px var(--primary-green));
-  }
-  50% { 
-    filter: 
-      drop-shadow(0 0 30px var(--primary-green))
-      drop-shadow(0 0 50px var(--primary-green));
-  }
-}
-
-.brand span {
-  background: linear-gradient(135deg, var(--kenya-red), #ff6b6b);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 20px var(--kenya-red));
-}
-
-/* Company Footer */
-.company-footer {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  margin-bottom: 30px;
-  opacity: 0.8;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 300;
-}
-
-.company-footer::before,
-.company-footer::after {
-  content: '';
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent, 
-    var(--primary-green), 
-    transparent);
-  box-shadow: 0 0 5px var(--primary-green);
-}
-
-/* ==================== STATUS TEXT ==================== */
-.status-text {
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  margin-bottom: 35px;
-  transition: all 0.3s ease;
-  font-weight: 400;
-}
-
-.status-text.active {
-  color: var(--primary-green);
-  text-shadow: 0 0 10px var(--primary-green);
-}
-
-/* ==================== PROGRESS BAR ==================== */
-.progress-rail {
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-.progress-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, 
-    var(--primary-green) 0%, 
-    var(--tech-blue) 50%, 
-    var(--kenya-red) 100%);
-  box-shadow: 
-    0 0 20px var(--progress-glow),
-    0 0 40px var(--progress-glow);
-  border-radius: 3px;
-  transition: width 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1);
-}
-
-.progress-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 100px;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100px); }
-  100% { transform: translateX(400px); }
-}
-
-/* ==================== DATA STREAM ==================== */
-.data-stream {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.75rem;
-  color: var(--primary-green);
-  text-shadow: 0 0 5px var(--primary-green);
-}
-
-.data-stream span {
-  opacity: 0.9;
-}
-
-/* ==================== SYSTEM INFO ==================== */
-.system-info {
-  width: 100%;
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(0, 255, 136, 0.2);
-  display: flex;
-  justify-content: space-around;
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  font-family: monospace;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-
-.info-label {
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.6;
-}
-
-.info-value {
-  color: var(--primary-green);
-  font-weight: bold;
-  text-shadow: 0 0 5px var(--primary-green);
-}
-
-/* ==================== FADE OUT ANIMATION ==================== */
-.fade-out { 
-  animation: finalize 1s forwards; 
-}
-
-@keyframes finalize {
-  to { 
-    opacity: 0; 
-    transform: scale(1.15) translateY(-20px); 
-    filter: blur(15px); 
-  }
-}
-
-/* ==================== RESPONSIVE DESIGN ==================== */
-@media (max-width: 600px) {
-  .loader-ui {
-    width: 90%;
-    padding: 30px 20px;
-  }
-  
-  .brand {
-    font-size: 3.5rem;
-  }
-  
-  .medical-image-container {
-    width: 160px;
-    height: 160px;
-  }
-  
-  .medical-icon img {
-    width: 70px;
-    height: 70px;
-  }
-  
-  .company-footer {
-    font-size: 0.65rem;
-  }
-}
-
-/* ==================== CORNER DECORATIONS ==================== */
-.corner-accent {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--primary-green);
-  opacity: 0.3;
-}
-
-.corner-accent.top-left {
-  top: 15px;
-  left: 15px;
-  border-right: none;
-  border-bottom: none;
-}
-
-.corner-accent.top-right {
-  top: 15px;
-  right: 15px;
-  border-left: none;
-  border-bottom: none;
-}
-
-.corner-accent.bottom-left {
-  bottom: 15px;
-  left: 15px;
-  border-right: none;
-  border-top: none;
-}
-
-.corner-accent.bottom-right {
-  bottom: 15px;
-  right: 15px;
-  border-left: none;
-  border-top: none;
+/* FADE */
+.fade-out{animation:fade 1s forwards}
+@keyframes fade{
+to{opacity:0;transform:scale(1.15);filter:blur(15px)}
 }
 </style>
 </head>
 
 <body>
-
-<!-- Background Effects -->
 <div class="grid-bg"></div>
 <div class="scanline"></div>
-<div class="scanner"></div>
 
-<!-- Floating Particles -->
-<div class="floating-particles">
-  <div class="float-particle"></div>
-  <div class="float-particle"></div>
-  <div class="float-particle"></div>
-  <div class="float-particle"></div>
-  <div class="float-particle"></div>
-</div>
-
-<!-- Main Loader UI -->
 <div class="loader-ui" id="loader">
-  <!-- Corner Accents -->
-  <div class="corner-accent top-left"></div>
-  <div class="corner-accent top-right"></div>
-  <div class="corner-accent bottom-left"></div>
-  <div class="corner-accent bottom-right"></div>
+  <div class="ecg-line">━╋━╋━━╋━━</div>
 
-  <!-- Heartbeat ECG -->
-  <div class="heartbeat-container">
-    <div class="ecg-line">━╋━╋━━╋━━</div>
-  </div>
-
-  <!-- Central Medical Image with Rotating Rings -->
   <div class="medical-image-container">
     <div class="rotating-ring"></div>
     <div class="rotating-ring"></div>
-    <div class="rotating-ring"></div>
-    <div class="orbit-particle"></div>
-    <div class="orbit-particle"></div>
-    <div class="orbit-particle"></div>
-    <div class="orbit-particle"></div>
     <div class="medical-icon">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s" alt="Medical AI">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
     </div>
   </div>
 
-  <!-- Branding -->
   <div class="brand">Med<span>AI</span></div>
-  <div class="company-footer">Created by MedAI Technologies</div>
-  
-  <!-- Status -->
-  <div class="status-text" id="status-label">Initializing Core Diagnostics</div>
+  <div class="status-text" id="status">Initializing Core Diagnostics</div>
 
-  <!-- Progress Bar -->
-  <div class="progress-rail">
-    <div class="progress-fill" id="bar"></div>
-  </div>
+  <div class="progress-rail"><div class="progress-fill" id="bar"></div></div>
 
-  <!-- Data Stream -->
   <div class="data-stream">
-    <span id="hex-code">AUTH_KEY: 0x882...</span>
-    <span id="percent">0%</span>
+    <span id="hex">SEC_TOKEN: 0x0000</span>
+    <span id="pct">0%</span>
   </div>
 
-  <!-- System Information -->
   <div class="system-info">
-    <div class="info-item">
-      <span class="info-label">System</span>
-      <span class="info-value" id="system-status">ONLINE</span>
-    </div>
-    <div class="info-item">
-      <span class="info-label">Region</span>
-      <span class="info-value">Africa</span>
-    </div>
-    <div class="info-item">
-      <span class="info-label">Security</span>
-      <span class="info-value" id="security-level">L5</span>
-    </div>
+    <div><div>System</div><div class="info-value" id="sys">ONLINE</div></div>
+    <div><div>Region</div><div class="info-value" id="region">Detecting…</div></div>
+    <div><div>Security</div><div class="info-value" id="sec">L1</div></div>
   </div>
 </div>
 
 <script>
-/* ==================== LOADER SCRIPT ==================== */
-let progress = 0;
-const bar = document.getElementById("bar");
-const percent = document.getElementById("percent");
-const statusLabel = document.getElementById("status-label");
-const hexCode = document.getElementById("hex-code");
-const loader = document.getElementById("loader");
-const systemStatus = document.getElementById("system-status");
-const securityLevel = document.getElementById("security-level");
+/* ============ CONFIG ============ */
+const DURATION = 45000;
+const STEP = 200;
+const INC = 100 / (DURATION / STEP);
 
-// Enhanced status messages
-const statuses = [
-  "Establishing Secure Connection...",
-  "Authenticating Credentials...",
-  "Loading Medical Knowledge Base...",
-  "Calibrating Neural Networks...",
-  "Syncing Kenya Regional Database...",
-  "Initializing AI Diagnostic Engine...",
-  "Verifying Security Protocols...",
-  "Finalizing System Integration..."
+/* ELEMENTS */
+const bar = document.getElementById("bar");
+const pct = document.getElementById("pct");
+const hex = document.getElementById("hex");
+const status = document.getElementById("status");
+const loader = document.getElementById("loader");
+const region = document.getElementById("region");
+const sys = document.getElementById("sys");
+const sec = document.getElementById("sec");
+
+/* STATUS FLOW */
+const messages=[
+"Establishing Secure Connection…",
+"Authenticating Credentials…",
+"Loading Medical Knowledge Base…",
+"Calibrating Neural Networks…",
+"Syncing Regional Data…",
+"Initializing Diagnostic Engine…",
+"Verifying Security Protocols…",
+"Finalizing Integration…"
 ];
 
-// System status updates
-const systemStatuses = ["ONLINE", "ACTIVE", "SECURE", "READY"];
-const securityLevels = ["L1", "L2", "L3", "L4", "L5"];
+let progress=0;
 
-// Main loading interval
-const interval = setInterval(() => {
-  // Increment progress
-  progress += Math.random() * 6 + 3;
-  
-  // Generate random hex code
-  hexCode.textContent = "SEC_TOKEN: 0x" + 
-    Math.random().toString(16).substr(2, 8).toUpperCase();
+/* REGION — IP FIRST */
+fetch("https://ipapi.co/json/")
+.then(r=>r.json())
+.then(d=>{
+region.textContent=d.country_name||"Global";
+region.style.textShadow="0 0 15px var(--primary-green)";
+});
 
-  // Update system info
-  if (progress > 20 && progress < 40) {
-    systemStatus.textContent = systemStatuses[1];
-  } else if (progress > 40 && progress < 60) {
-    systemStatus.textContent = systemStatuses[2];
-    securityLevel.textContent = securityLevels[2];
-  } else if (progress > 60 && progress < 80) {
-    securityLevel.textContent = securityLevels[3];
-  } else if (progress > 80) {
-    systemStatus.textContent = systemStatuses[3];
-    securityLevel.textContent = securityLevels[4];
-  }
+/* OPTIONAL GPS */
+setTimeout(()=>{
+navigator.geolocation?.getCurrentPosition(pos=>{
+fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
+.then(r=>r.json())
+.then(d=>{
+region.textContent=d.address.state||d.address.country;
+});
+});
+},18000);
 
-  // Check if complete
-  if (progress >= 100) {
-    progress = 100;
-    clearInterval(interval);
-    
-    statusLabel.textContent = "✓ ACCESS GRANTED";
-    statusLabel.classList.add('active');
-    statusLabel.style.color = "var(--primary-green)";
-    statusLabel.style.fontSize = "1rem";
-    statusLabel.style.fontWeight = "700";
+/* LOADER LOOP */
+const loop=setInterval(()=>{
+progress+=INC;
+hex.textContent="SEC_TOKEN: 0x"+Math.random().toString(16).slice(2,10).toUpperCase();
+bar.style.width=progress+"%";
+pct.textContent=Math.floor(progress)+"%";
+status.textContent=messages[Math.min(messages.length-1,Math.floor(progress/12))];
 
-    // Fade out and redirect
-    setTimeout(() => {
-      loader.classList.add("fade-out");
-      setTimeout(() => { 
-        // Redirect to login page (create this file separately)
-        window.location.href = "login.html"; 
-      }, 1000);
-    }, 1500);
-  }
+if(progress>30)sec.textContent="L3";
+if(progress>60)sec.textContent="L4";
+if(progress>85){sys.textContent="READY";sec.textContent="L5"}
 
-  // Update status based on progress
-  let statusIndex = Math.floor((progress / 100) * statuses.length);
-  if (statusIndex >= statuses.length) statusIndex = statuses.length - 1;
-  statusLabel.textContent = statuses[statusIndex];
-
-  // Update progress bar
-  bar.style.width = progress + "%";
-  percent.textContent = Math.floor(progress) + "%";
-}, 200);
-
-/* ==================== SERVICE WORKER (Optional PWA Support) ==================== */
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => console.log("✓ Service Worker registered"))
-      .catch(err => console.log("Service Worker registration skipped:", err));
-  });
+if(progress>=100){
+clearInterval(loop);
+status.textContent="✓ ACCESS GRANTED";
+setTimeout(()=>{
+loader.classList.add("fade-out");
+setTimeout(()=>location.href="login.html",1000);
+},1500);
 }
-
-/* ==================== DYNAMIC PARTICLE CREATION ==================== */
-function createFloatingParticle() {
-  const particle = document.createElement('div');
-  particle.className = 'float-particle';
-  particle.style.left = Math.random() * 100 + '%';
-  particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-  particle.style.animationDelay = Math.random() * 5 + 's';
-  
-  const colors = ['var(--primary-green)', 'var(--tech-blue)', 'var(--kenya-red)'];
-  const color = colors[Math.floor(Math.random() * colors.length)];
-  particle.style.background = color;
-  particle.style.boxShadow = `0 0 10px ${color}`;
-  
-  document.querySelector('.floating-particles').appendChild(particle);
-  
-  setTimeout(() => particle.remove(), 15000);
-}
-
-// Create particles periodically
-setInterval(createFloatingParticle, 3000);
+},STEP);
 </script>
-
 </body>
 </html>
