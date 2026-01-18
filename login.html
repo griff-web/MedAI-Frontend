@@ -22,11 +22,13 @@
 <link rel="stylesheet" href="auth.css" />
 
 <!-- Scripts -->
-<script src="auth.js" defer></script>
 <script>
+  // Backend & Google Client Config
   window.ENV_API_BASE = "https://medai-backend-j9i6.onrender.com";
+  window.ENV_GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"; 
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="auth.js" defer></script>
 
 </head>
 
@@ -47,30 +49,17 @@
             <p>Sign in to access your clinical dashboard</p>
         </header>
 
+        <!-- GOOGLE SIGN-IN -->
         <div class="social-auth">
-            <div id="g_id_onload"
-                 data-client_id="YOUR_GOOGLE_CLIENT_ID"
-                 data-context="signin"
-                 data-ux_mode="popup"
-                 data-login_uri="/auth/google"
-                 data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin" 
-                 data-type="standard" 
-                 data-shape="rectangular" 
-                 data-theme="outline" 
-                 data-text="signin_with" 
-                 data-size="large" 
-                 data-logo_alignment="left"
-                 data-width="100%">
-            </div>
+            <div id="google-signin-btn"></div>
         </div>
 
         <div class="divider">
             <span>or sign in with email</span>
         </div>
 
-        <form id="form-login" method="POST" action="/auth/login" novalidate>
+        <!-- LOCAL LOGIN FORM -->
+        <form id="form-login" method="POST" novalidate>
             
             <div class="form-group">
                 <label for="email">Email Address</label>
