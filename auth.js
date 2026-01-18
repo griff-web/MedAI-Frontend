@@ -15,7 +15,7 @@
         REDIRECT_PATH: "dash.html",
         NOTIF_DURATION: 5000,
         REQUEST_TIMEOUT: 25000,
-        GOOGLE_CLIENT_ID: window.ENV_GOOGLE_CLIENT_ID || "<YOUR_GOOGLE_CLIENT_ID>"
+        GOOGLE_CLIENT_ID: window.ENV_GOOGLE_CLIENT_ID || "1083572515625-2f35o2d9fl3g0sqbhemkus0tkqh13pgk.apps.googleusercontent.com"
     };
 
     class NotificationManager {
