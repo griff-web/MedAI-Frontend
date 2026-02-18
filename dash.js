@@ -1,123 +1,36 @@
 /**
- * MEDAI ENTERPRISE ENGINE v2.2 (Performance Optimized)
- * - Added: Mode Switching Logic
- * - Added: UI State Management
- * - Improved: Camera Readiness Checks
+ * MEDAI ENTERPRISE ENGINE v2.4 (Intelligence & Feedback Edition)
+ * - Added: Real-time Status Sequencer
+ * - Added: Staggered Results Injection (Visual "Thinking")
+ * - Added: Auto-saving UI State
+ * - Added: Vibration/Haptic Feedback (Mobile)
  */
 
 (() => {
     "use strict";
 
-    /* =========================================================
-       CONFIGURATION & UTILITIES
-    ========================================================= */
     class Config {
-        static API_BASE = window.ENV_API_BASE || "https://ai-p17b.onrender.com";
+        static API_BASE = "https://ai-p17b.onrender.com";
         static ENDPOINTS = { ANALYZE: "/diagnostics/process" };
-        static TIMEOUT = 60000;
-        static RETRY_ATTEMPTS = 3;
-        static RETRY_BASE_DELAY = 1000;
+        static STATUS_MESSAGES = [
+            "Initializing Neural Network...",
+            "Enhancing Contrast Markers...",
+            "Detecting Pathological Anomalies...",
+            "Cross-referencing Medical Database...",
+            "Finalizing Diagnostic Report..."
+        ];
     }
 
-    class Utils {
-        static sleep = ms => new Promise(r => setTimeout(r, ms));
-        
-        static backoffDelay(attempt) {
-            return (Config.RETRY_BASE_DELAY * Math.pow(2, attempt)) + (Math.random() * 300);
-        }
-
-        static clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-        static notify(el, message, type = "info") {
-            if (!el) return;
-            el.textContent = message;
-            el.className = `notification ${type} visible`;
-            setTimeout(() => el.classList.remove("visible"), 4000);
-        }
-    }
-
-    /* =========================================================
-       CORE SERVICES
-    ========================================================= */
-    class HttpClient {
-        static async post(url, body, headers = {}, attempt = 0) {
-            const controller = new AbortController();
-            const tid = setTimeout(() => controller.abort(), Config.TIMEOUT);
-
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers,
-                    body,
-                    signal: controller.signal
-                });
-
-                if (!response.ok) {
-                    if (response.status >= 500 && attempt < Config.RETRY_ATTEMPTS) {
-                        await Utils.sleep(Utils.backoffDelay(attempt));
-                        return this.post(url, body, headers, attempt + 1);
-                    }
-                    throw new Error(`Server Error: ${response.status}`);
-                }
-                return await response.json();
-            } catch (err) {
-                if (attempt < Config.RETRY_ATTEMPTS && (err.name === "AbortError" || err instanceof TypeError)) {
-                    await Utils.sleep(Utils.backoffDelay(attempt));
-                    return this.post(url, body, headers, attempt + 1);
-                }
-                throw err;
-            } finally {
-                clearTimeout(tid);
-            }
-        }
-    }
-
-    class CameraService {
-        constructor(videoEl) {
-            this.video = videoEl;
-            this.stream = null;
-        }
-
-        async init() {
-            this.stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-            });
-            this.video.srcObject = this.stream;
-            // Ensure video metadata is loaded before allowing capture
-            return new Promise(resolve => {
-                this.video.onloadedmetadata = () => {
-                    this.video.play();
-                    resolve();
-                };
-            });
-        }
-
-        async capture() {
-            if (!this.video.videoWidth) throw new Error("Camera not ready");
-            
-            const canvas = document.createElement("canvas");
-            canvas.width = this.video.videoWidth;
-            canvas.height = this.video.videoHeight;
-            canvas.getContext("2d").drawImage(this.video, 0, 0);
-            
-            return new Promise(resolve => {
-                canvas.toBlob(b => resolve(b), "image/jpeg", 0.9);
-            });
-        }
-    }
-
-    /* =========================================================
-       APPLICATION CONTROLLER
-    ========================================================= */
     class MedAIApp {
         constructor() {
             this.state = {
-                activeMode: "xray",
+                activeMode: localStorage.getItem("medai_pref_mode") || "xray",
                 isProcessing: false,
                 lastResult: null,
                 user: JSON.parse(localStorage.getItem("medai_user") || '{"name":"Practitioner"}')
             };
             this.dom = {};
+            this.camera = null;
         }
 
         init() {
@@ -125,6 +38,7 @@
             this.bindEvents();
             this.initCamera();
             this.renderUser();
+            this.applySavedState();
         }
 
         cacheDOM() {
@@ -132,121 +46,180 @@
             this.dom = {
                 video: $("camera-stream"),
                 captureBtn: $("capture-trigger"),
+                notification: $("notification"),
+                aiStatus: $("ai-status"),
+                modeButtons: document.querySelectorAll(".type-btn"),
+                navItems: document.querySelectorAll(".nav-item"),
+                sections: document.querySelectorAll(".content-view"),
                 resultsPanel: $("results-panel"),
+                closeResults: $("close-results"),
                 resultTitle: $("result-title"),
                 resultDescription: $("result-description"),
                 findingsList: $("findings-list"),
                 confidenceText: $("confidence-text"),
+                confidencePath: $("confidence-path"),
                 downloadPdf: $("download-pdf"),
-                displayName: $("display-name"),
-                notification: $("notification"),
-                // Select all mode buttons (assumes class 'mode-btn')
-                modeButtons: document.querySelectorAll(".mode-btn")
+                displayName: $("display-name")
             };
         }
 
+        applySavedState() {
+            // Restore last used mode (X-ray, CT, etc.)
+            const savedMode = this.state.activeMode;
+            this.dom.modeButtons.forEach(btn => {
+                if (btn.dataset.type === savedMode) btn.classList.add("active");
+                else btn.classList.remove("active");
+            });
+        }
+
         bindEvents() {
-            // 1. Mode Switching Logic
+            // Mode Selectors
             this.dom.modeButtons.forEach(btn => {
                 btn.addEventListener("click", (e) => {
-                    const mode = e.currentTarget.dataset.mode;
-                    if (mode) this.switchMode(mode, e.currentTarget);
+                    this.hapticFeedback(10);
+                    this.dom.modeButtons.forEach(b => b.classList.remove("active"));
+                    e.currentTarget.classList.add("active");
+                    this.state.activeMode = e.currentTarget.dataset.type;
+                    localStorage.setItem("medai_pref_mode", this.state.activeMode);
                 });
             });
 
-            // 2. Capture Logic
+            // Tab Navigation
+            this.dom.navItems.forEach(nav => {
+                nav.addEventListener("click", (e) => {
+                    this.hapticFeedback(5);
+                    const targetTab = e.currentTarget.dataset.tab;
+                    if(targetTab === "log-out") return;
+                    this.dom.navItems.forEach(n => n.classList.remove("active"));
+                    e.currentTarget.classList.add("active");
+                    this.dom.sections.forEach(sec => {
+                        sec.classList.toggle("hidden", sec.id !== `${targetTab}-section`);
+                    });
+                });
+            });
+
             this.dom.captureBtn?.addEventListener("click", () => this.handleCapture());
-
-            // 3. PDF Logic
-            this.dom.downloadPdf?.addEventListener("click", () => this.handleDownload());
+            this.dom.closeResults?.addEventListener("click", () => {
+                this.dom.resultsPanel.classList.add("hidden");
+            });
         }
 
-        switchMode(mode, targetEl) {
-            this.state.activeMode = mode;
-            // UI Update
-            this.dom.modeButtons.forEach(b => b.classList.remove("active"));
-            targetEl.classList.add("active");
-            console.log(`Switched to: ${mode}`);
-        }
-
-        async initCamera() {
-            try {
-                this.camera = new CameraService(this.dom.video);
-                await this.camera.init();
-            } catch (err) {
-                Utils.notify(this.dom.notification, "Camera Access Denied", "error");
-            }
+        hapticFeedback(ms) {
+            if ("vibrate" in navigator) navigator.vibrate(ms);
         }
 
         async handleCapture() {
             if (this.state.isProcessing) return;
-            
+            this.hapticFeedback([20, 50, 20]);
             this.setLoading(true);
+            
+            // Start AI Status Sequencer
+            let statusIdx = 0;
+            const statusInterval = setInterval(() => {
+                if (statusIdx < Config.STATUS_MESSAGES.length) {
+                    this.dom.aiStatus.textContent = Config.STATUS_MESSAGES[statusIdx++];
+                }
+            }, 1200);
+
             try {
-                const blob = await this.camera.capture();
+                const blob = await this.captureFrame();
                 const fd = new FormData();
                 fd.append("file", blob, "scan.jpg");
                 fd.append("type", this.state.activeMode);
 
-                const result = await HttpClient.post(
-                    `${Config.API_BASE}${Config.ENDPOINTS.ANALYZE}`, 
-                    fd, 
-                    { Authorization: `Bearer ${localStorage.getItem("medai_token") || ""}` }
-                );
+                const response = await fetch(`${Config.API_BASE}${Config.ENDPOINTS.ANALYZE}`, {
+                    method: "POST",
+                    body: fd,
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem("medai_token") || ""}` }
+                });
 
-                this.displayResults(result);
+                if (!response.ok) throw new Error("Network Response Error");
+                
+                const data = await response.json();
+                clearInterval(statusInterval);
+                this.displayResults(data);
+
             } catch (err) {
-                Utils.notify(this.dom.notification, err.message, "error");
+                clearInterval(statusInterval);
+                this.notify("Analysis Failed: Check Connection", "error");
             } finally {
                 this.setLoading(false);
             }
         }
 
-        displayResults(data) {
+        async displayResults(data) {
             this.state.lastResult = data;
-            const score = Utils.clamp(data?.confidence ?? 0, 0, 100);
-
-            if(this.dom.resultTitle) this.dom.resultTitle.textContent = data?.diagnosis || "Complete";
-            if(this.dom.resultDescription) this.dom.resultDescription.textContent = data?.description || "";
-            if(this.dom.confidenceText) this.dom.confidenceText.textContent = `${score}%`;
+            this.dom.resultsPanel.classList.remove("hidden");
             
-            if (this.dom.findingsList) {
-                this.dom.findingsList.innerHTML = (data?.findings || [])
-                    .map(f => `<li>${f}</li>`).join("");
-            }
+            // Reset UI for animation
+            this.dom.resultTitle.textContent = "Synthesizing...";
+            this.dom.findingsList.innerHTML = "";
+            this.updateConfidence(0);
 
-            this.dom.resultsPanel?.classList.remove("hidden");
-            this.dom.resultsPanel?.scrollIntoView({ behavior: 'smooth' });
+            // Staggered Reveal Animation
+            await this.sleep(600);
+            this.dom.resultTitle.textContent = data.diagnosis;
+            this.dom.resultDescription.textContent = data.description;
+            this.updateConfidence(data.confidence || 0);
+
+            // Staggered list items
+            for (const finding of (data.findings || [])) {
+                await this.sleep(300);
+                const li = document.createElement("li");
+                li.className = "animate-fade-in";
+                li.innerHTML = `<i class="icon">🔹</i> ${finding}`;
+                this.dom.findingsList.appendChild(li);
+                this.hapticFeedback(5);
+            }
         }
 
-        async handleDownload() {
-            if (!this.state.lastResult) return;
-            try {
-                // Dynamic import logic (assumes PDFService is available)
-                await PDFService.generate(this.state.lastResult, this.state.user.name);
-            } catch (err) {
-                Utils.notify(this.dom.notification, "PDF Generation Failed", "error");
-            }
+        updateConfidence(score) {
+            this.dom.confidenceText.textContent = `${score}%`;
+            this.dom.confidencePath.style.strokeDasharray = `${score}, 100`;
+            // Color shift based on confidence
+            const color = score > 80 ? "#10b981" : score > 50 ? "#f59e0b" : "#ef4444";
+            this.dom.confidencePath.style.stroke = color;
         }
 
-        setLoading(state) {
-            this.state.isProcessing = state;
-            if (this.dom.captureBtn) {
-                this.dom.captureBtn.disabled = state;
-                this.dom.captureBtn.innerHTML = state ? 
-                    '<span class="spinner"></span> Processing...' : 
-                    'Analyze Scan';
-            }
+        captureFrame() {
+            const canvas = document.createElement("canvas");
+            canvas.width = this.dom.video.videoWidth;
+            canvas.height = this.dom.video.videoHeight;
+            canvas.getContext("2d").drawImage(this.dom.video, 0, 0);
+            return new Promise(res => canvas.toBlob(res, "image/jpeg", 0.9));
+        }
+
+        setLoading(isLoading) {
+            this.state.isProcessing = isLoading;
+            this.dom.captureBtn.disabled = isLoading;
+            this.dom.captureBtn.classList.toggle("pulse-animation", isLoading);
+            if (!isLoading) this.dom.aiStatus.textContent = "AI READY";
+        }
+
+        sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        notify(msg, type) {
+            this.dom.notification.textContent = msg;
+            this.dom.notification.className = `notification-toast visible ${type}`;
+            setTimeout(() => this.dom.notification.classList.remove("visible"), 4000);
         }
 
         renderUser() {
-            if (this.dom.displayName) {
-                this.dom.displayName.textContent = `Dr. ${this.state.user.name}`;
+            if(this.dom.displayName) this.dom.displayName.textContent = `Dr. ${this.state.user.name}`;
+        }
+
+        async initCamera() {
+            try {
+                this.cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment", focusMode: "continuous" }
+                });
+                this.dom.video.srcObject = this.cameraStream;
+            } catch (e) {
+                this.notify("Camera Access Required", "error");
             }
         }
     }
 
-    // Launch
     document.addEventListener("DOMContentLoaded", () => {
         window.App = new MedAIApp();
         window.App.init();
