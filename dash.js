@@ -2,19 +2,19 @@
 "use strict";
 
 /*
- * MEDAI ENTERPRISE ENGINE v3.0 (Security Hardened Edition)
- * - Eliminated XSS vectors
- * - Removed localStorage token usage
- * - Added strict schema validation
- * - Added file signature validation
- * - Implemented safe retry logic
- * - Removed medical certainty language
- * - Added mandatory disclaimer
+ * MEDAI ENTERPRISE ENGINE v3.1 (Hardened - LocalStorage Token Retained)
+ * Security Improvements:
+ * - Removed all innerHTML usage
+ * - Strict API schema validation
+ * - File signature validation
+ * - Safe retry logic
+ * - Rate limiting
+ * - Reduced medical liability language
  */
 
 class Config {
     static API_BASE = "https://ai-p17b.onrender.com";
-    static ENDPOINTS = { ANALYZE: "/diagnostics/process" };
+    static ENDPOINT = "/diagnostics/process";
     static REQUEST_TIMEOUT = 30000;
     static MAX_RETRIES = 2;
     static MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -26,7 +26,6 @@ class MedAIApp {
 
     constructor() {
         this.state = {
-            activeMode: "xray",
             isProcessing: false,
             lastRequestTime: 0,
             isOnline: navigator.onLine
@@ -54,15 +53,14 @@ class MedAIApp {
         this.dom = {
             video: $("camera-stream"),
             captureBtn: $("capture-trigger"),
+            uploadLocal: $("upload-local"),
             notification: $("notification"),
-            aiStatus: $("ai-status"),
             resultsPanel: $("results-panel"),
             resultTitle: $("result-title"),
             resultDescription: $("result-description"),
             findingsList: $("findings-list"),
             confidenceText: $("confidence-text"),
-            confidencePath: $("confidence-path"),
-            uploadLocal: $("upload-local")
+            confidencePath: $("confidence-path")
         };
     }
 
@@ -79,9 +77,12 @@ class MedAIApp {
         });
     }
 
-    /* ---------------- SECURITY UTILITIES ---------------- */
+    /* ---------------- SECURITY CORE ---------------- */
 
     async fetchSecure(url, options = {}, retries = Config.MAX_RETRIES) {
+
+        const token = localStorage.getItem("medai_token") || "";
+
         for (let i = 0; i <= retries; i++) {
             try {
                 this.abortController = new AbortController();
@@ -89,7 +90,10 @@ class MedAIApp {
 
                 const response = await fetch(url, {
                     ...options,
-                    credentials: "include", // secure cookies
+                    headers: {
+                        ...options.headers,
+                        Authorization: `Bearer ${token}`
+                    },
                     signal: this.abortController.signal
                 });
 
@@ -100,7 +104,7 @@ class MedAIApp {
                         await this.sleep(1000 * (i + 1));
                         continue;
                     }
-                    throw new Error(`Server Error (${response.status})`);
+                    throw new Error(`Server error ${response.status}`);
                 }
 
                 return response;
@@ -113,35 +117,28 @@ class MedAIApp {
     }
 
     validateResponseSchema(data) {
-        if (typeof data !== "object" || data === null) return false;
-        if (typeof data.diagnosis !== "string") return false;
-        if (!Array.isArray(data.findings)) return false;
-        if (typeof data.confidence !== "number") return false;
-        return true;
+        return (
+            data &&
+            typeof data === "object" &&
+            typeof data.diagnosis === "string" &&
+            Array.isArray(data.findings) &&
+            typeof data.confidence === "number"
+        );
     }
 
     async validateFileSignature(file) {
-        const buffer = await file.slice(0, 12).arrayBuffer();
-        const bytes = new Uint8Array(buffer);
+        const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
 
-        // JPEG
-        if (bytes[0] === 0xFF && bytes[1] === 0xD8) return true;
+        if (header[0] === 0xFF && header[1] === 0xD8) return true; // JPEG
+        if (header[0] === 0x89 && header[1] === 0x50) return true; // PNG
+        if (header[0] === 0x52 && header[1] === 0x49) return true; // WEBP
+        if ((header[0] === 0x49 && header[1] === 0x49) ||
+            (header[0] === 0x4D && header[1] === 0x4D)) return true; // TIFF
 
-        // PNG
-        if (bytes[0] === 0x89 && bytes[1] === 0x50) return true;
-
-        // WEBP (RIFF)
-        if (bytes[0] === 0x52 && bytes[1] === 0x49) return true;
-
-        // TIFF
-        if ((bytes[0] === 0x49 && bytes[1] === 0x49) ||
-            (bytes[0] === 0x4D && bytes[1] === 0x4D)) return true;
-
-        // DICOM (DICM at byte 128)
-        const dicomHeader = new TextDecoder().decode(
+        const dicomCheck = new TextDecoder().decode(
             new Uint8Array(await file.slice(128, 132).arrayBuffer())
         );
-        if (dicomHeader === "DICM") return true;
+        if (dicomCheck === "DICM") return true;
 
         return false;
     }
@@ -156,7 +153,7 @@ class MedAIApp {
         return true;
     }
 
-    /* ---------------- CORE LOGIC ---------------- */
+    /* ---------------- ANALYSIS ---------------- */
 
     async safeCapture() {
         if (this.state.isProcessing || !this.state.isOnline) return;
@@ -171,6 +168,7 @@ class MedAIApp {
     }
 
     async sendForAnalysis(file, filename) {
+
         this.setLoading(true);
 
         try {
@@ -178,19 +176,18 @@ class MedAIApp {
             fd.append("file", file, filename);
 
             const response = await this.fetchSecure(
-                `${Config.API_BASE}${Config.ENDPOINTS.ANALYZE}`,
+                `${Config.API_BASE}${Config.ENDPOINT}`,
                 { method: "POST", body: fd }
             );
 
             const data = await response.json();
 
-            if (!this.validateResponseSchema(data)) {
-                throw new Error("Invalid response structure");
-            }
+            if (!this.validateResponseSchema(data))
+                throw new Error("Invalid server response");
 
             this.displayResults(data);
 
-        } catch (err) {
+        } catch {
             this.notify("Analysis failed.", "error");
         } finally {
             this.setLoading(false);
@@ -204,16 +201,17 @@ class MedAIApp {
         }
 
         if (!(await this.validateFileSignature(file))) {
-            this.notify("Invalid or unsafe file.", "error");
+            this.notify("Unsafe or invalid file.", "error");
             return;
         }
 
         await this.sendForAnalysis(file, file.name);
     }
 
-    /* ---------------- SAFE RENDERING ---------------- */
+    /* ---------------- SAFE DOM RENDERING ---------------- */
 
     displayResults(data) {
+
         this.dom.resultsPanel?.classList.remove("hidden");
 
         this.dom.resultTitle.textContent = data.diagnosis;
@@ -224,9 +222,9 @@ class MedAIApp {
 
         this.dom.findingsList.textContent = "";
 
-        data.findings.forEach(finding => {
+        data.findings.forEach(item => {
             const li = document.createElement("li");
-            li.textContent = `• ${finding}`;
+            li.textContent = `• ${item}`;
             this.dom.findingsList.appendChild(li);
         });
     }
@@ -312,8 +310,7 @@ class MedAIApp {
 /* ---------------- START ---------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
-    const app = new MedAIApp();
-    app.init();
+    new MedAIApp().init();
 });
 
 })();
