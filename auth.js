@@ -1,301 +1,709 @@
-(() => {
-"use strict";
-
-/*
- * MEDAI ENTERPRISE ENGINE v4.0 (Auth Integrated)
- * Fully compatible with MedAI Enterprise Authentication Engine v2.0.0
+/**
+ * MedAI Authentication Module
+ * Handles login, registration, password reset, and token management
  */
 
-class Config {
-    static API_BASE = window.ENV_API_BASE || "https://m-backend-n2pd.onrender.com";
-    static ENDPOINT = "/diagnostics/process";
-    static REQUEST_TIMEOUT = 30000;
-    static MAX_RETRIES = 2;
-    static MAX_FILE_SIZE = 50 * 1024 * 1024;
-    static COOLDOWN_MS = 3000;
-    static RETRYABLE_STATUS = [502, 503, 504];
-    static REDIRECT_LOGIN = "login.html";
-}
-
-class MedAIApp {
-
-    constructor() {
-        this.state = {
-            isProcessing: false,
-            lastRequestTime: 0,
-            isOnline: navigator.onLine
-        };
-
-        this.dom = {};
-        this.cameraStream = null;
-        this.fileInput = null;
+// ==================== CONFIGURATION ====================
+const CONFIG = {
+    API_BASE: window.ENV_API_BASE || "https://m-backend-n2pd.onrender.com",
+    GOOGLE_CLIENT_ID: window.ENV_GOOGLE_CLIENT_ID,
+    TOKEN_KEY: "medai_token",
+    USER_KEY: "medai_user",
+    REMEMBER_KEY: "medai_remember",
+    AUTH_EVENT: "medai-auth-changed",
+    ROUTES: {
+        DASHBOARD: "/dash.html",
+        LOGIN: "/login.html",
+        REGISTER: "/reg.html",
+        FORGOT_PASSWORD: "/forgot-password.html"
     }
+};
 
-    /* ---------------- INIT ---------------- */
+// ==================== STATE MANAGEMENT ====================
+const AuthState = {
+    currentUser: null,
+    token: null,
+    isAuthenticated: false,
 
     init() {
-        this.enforceAuth();
-        this.cacheDOM();
-        this.bindEvents();
-        this.bindNetworkEvents();
-        this.initCamera();
-        this.createFileInput();
-        this.injectDisclaimer();
-    }
+        this.loadFromStorage();
+        this.setupAuthListener();
+        return this;
+    },
 
-    /* ---------------- AUTH INTEGRATION ---------------- */
-
-    getToken() {
-        return localStorage.getItem("medai_token");
-    }
-
-    getUser() {
-        const user = localStorage.getItem("medai_user");
-        return user ? JSON.parse(user) : null;
-    }
-
-    enforceAuth() {
-        const token = this.getToken();
-        if (!token) {
-            window.location.href = Config.REDIRECT_LOGIN;
+    loadFromStorage() {
+        try {
+            // Check for remembered session first
+            const remember = localStorage.getItem(CONFIG.REMEMBER_KEY) === 'true';
+            const storage = remember ? localStorage : sessionStorage;
+            
+            this.token = storage.getItem(CONFIG.TOKEN_KEY);
+            const userJson = storage.getItem(CONFIG.USER_KEY);
+            
+            if (this.token && userJson) {
+                this.currentUser = JSON.parse(userJson);
+                this.isAuthenticated = true;
+                
+                // Validate token with server (silent)
+                this.validateToken().catch(() => {
+                    // Token invalid, clear storage
+                    this.clear();
+                });
+            }
+        } catch (error) {
+            console.error("Failed to load auth state:", error);
+            this.clear();
         }
-    }
+    },
 
-    logout() {
-        localStorage.removeItem("medai_token");
-        localStorage.removeItem("medai_user");
-        window.location.href = Config.REDIRECT_LOGIN;
-    }
+    async validateToken() {
+        if (!this.token) return false;
+        
+        try {
+            const response = await fetch(`${CONFIG.API_BASE}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+            
+            if (!response.ok) {
+                this.clear();
+                return false;
+            }
+            
+            const data = await response.json();
+            this.currentUser = data.user;
+            return true;
+        } catch (error) {
+            console.error("Token validation failed:", error);
+            return false;
+        }
+    },
 
-    /* ---------------- DOM ---------------- */
+    save(remember = false) {
+        try {
+            const storage = remember ? localStorage : sessionStorage;
+            storage.setItem(CONFIG.TOKEN_KEY, this.token);
+            storage.setItem(CONFIG.USER_KEY, JSON.stringify(this.currentUser));
+            storage.setItem(CONFIG.REMEMBER_KEY, remember);
+            
+            // Dispatch auth event
+            window.dispatchEvent(new CustomEvent(CONFIG.AUTH_EVENT, {
+                detail: { authenticated: true, user: this.currentUser }
+            }));
+        } catch (error) {
+            console.error("Failed to save auth state:", error);
+        }
+    },
 
-    cacheDOM() {
-        const $ = id => document.getElementById(id);
-        this.dom = {
-            video: $("camera-stream"),
-            captureBtn: $("capture-trigger"),
-            uploadLocal: $("upload-local"),
-            notification: $("notification"),
-            resultsPanel: $("results-panel"),
-            resultTitle: $("result-title"),
-            resultDescription: $("result-description"),
-            findingsList: $("findings-list"),
-            confidenceText: $("confidence-text"),
-            confidencePath: $("confidence-path"),
-            logoutBtn: $("logout-btn")
-        };
-    }
+    clear() {
+        // Clear all storages
+        localStorage.removeItem(CONFIG.TOKEN_KEY);
+        localStorage.removeItem(CONFIG.USER_KEY);
+        localStorage.removeItem(CONFIG.REMEMBER_KEY);
+        sessionStorage.removeItem(CONFIG.TOKEN_KEY);
+        sessionStorage.removeItem(CONFIG.USER_KEY);
+        
+        this.currentUser = null;
+        this.token = null;
+        this.isAuthenticated = false;
+        
+        // Dispatch auth event
+        window.dispatchEvent(new CustomEvent(CONFIG.AUTH_EVENT, {
+            detail: { authenticated: false }
+        }));
+    },
 
-    bindEvents() {
-        this.dom.captureBtn?.addEventListener("click", () => this.safeCapture());
-        this.dom.uploadLocal?.addEventListener("click", () => this.fileInput?.click());
-        this.dom.logoutBtn?.addEventListener("click", () => this.logout());
-    }
-
-    bindNetworkEvents() {
-        window.addEventListener("online", () => this.state.isOnline = true);
-        window.addEventListener("offline", () => {
-            this.state.isOnline = false;
-            this.notify("Offline. Network required.", "error");
+    setupAuthListener() {
+        window.addEventListener('storage', (event) => {
+            if (event.key === CONFIG.TOKEN_KEY || event.key === CONFIG.USER_KEY) {
+                this.loadFromStorage();
+            }
         });
     }
+};
 
-    /* ---------------- SECURE FETCH (TOKEN AWARE) ---------------- */
+// ==================== UI NOTIFICATION SYSTEM ====================
+const Notification = {
+    element: null,
+    timeout: null,
 
-    async fetchSecure(url, options = {}) {
-        const token = this.getToken();
-        if (!token) {
-            this.logout();
+    init() {
+        this.element = document.getElementById('notification');
+        return this;
+    },
+
+    show(message, type = 'info', duration = 5000) {
+        if (!this.element) {
+            console.warn("Notification element not found");
             return;
         }
 
-        for (let attempt = 0; attempt <= Config.MAX_RETRIES; attempt++) {
+        // Clear existing timeout
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
 
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), Config.REQUEST_TIMEOUT);
+        // Set message and class
+        this.element.textContent = message;
+        this.element.className = `notification visible ${type}`;
+        
+        // Auto-hide
+        this.timeout = setTimeout(() => {
+            this.element.classList.remove('visible');
+        }, duration);
+    },
 
-            try {
-                const response = await fetch(url, {
-                    ...options,
-                    headers: {
-                        ...options.headers,
-                        Authorization: `Bearer ${token}`
-                    },
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeout);
-
-                // AUTO LOGOUT IF TOKEN INVALID
-                if (response.status === 401 || response.status === 403) {
-                    this.notify("Session expired. Please login again.", "warning");
-                    this.logout();
-                    return;
-                }
-
-                if (!response.ok) {
-                    if (
-                        Config.RETRYABLE_STATUS.includes(response.status) &&
-                        attempt < Config.MAX_RETRIES
-                    ) {
-                        await this.sleep(1000 * (attempt + 1));
-                        continue;
-                    }
-                    throw new Error(`Server error ${response.status}`);
-                }
-
-                return response;
-
-            } catch (err) {
-                clearTimeout(timeout);
-                if (attempt >= Config.MAX_RETRIES) throw err;
-                await this.sleep(1000 * (attempt + 1));
-            }
+    hide() {
+        if (this.element) {
+            this.element.classList.remove('visible');
         }
     }
+};
 
-    /* ---------------- ANALYSIS ---------------- */
+// ==================== FORM VALIDATION ====================
+const Validators = {
+    email(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    },
 
-    async sendForAnalysis(file, filename) {
-        if (this.state.isProcessing) return;
-        this.setLoading(true);
+    password(password) {
+        return {
+            valid: password.length >= 8,
+            message: "Password must be at least 8 characters"
+        };
+    },
+
+    name(name) {
+        return {
+            valid: name.length >= 2 && name.length <= 50,
+            message: "Name must be between 2 and 50 characters"
+        };
+    },
+
+    match(password, confirm) {
+        return {
+            valid: password === confirm,
+            message: "Passwords do not match"
+        };
+    }
+};
+
+// ==================== API CLIENT ====================
+const API = {
+    async request(endpoint, options = {}) {
+        const url = `${CONFIG.API_BASE}${endpoint}`;
+        
+        const defaultHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+
+        // Add auth token if available
+        if (AuthState.token) {
+            defaultHeaders['Authorization'] = `Bearer ${AuthState.token}`;
+        }
+
+        const config = {
+            ...options,
+            headers: {
+                ...defaultHeaders,
+                ...options.headers
+            }
+        };
 
         try {
-            const fd = new FormData();
-            fd.append("file", file, filename);
-
-            const response = await this.fetchSecure(
-                `${Config.API_BASE}${Config.ENDPOINT}`,
-                { method: "POST", body: fd }
-            );
-
-            if (!response) return; // in case logout happened
-
+            const response = await fetch(url, config);
             const data = await response.json();
 
-            if (!this.validateResponseSchema(data))
-                throw new Error("Invalid server response");
-
-            this.displayResults(data);
-
-        } catch (err) {
-            console.error(err);
-            this.notify("Analysis failed.", "error");
-        } finally {
-            this.setLoading(false);
-        }
-    }
-
-    validateResponseSchema(data) {
-        return (
-            data &&
-            typeof data === "object" &&
-            typeof data.diagnosis === "string" &&
-            Array.isArray(data.findings) &&
-            typeof data.confidence === "number"
-        );
-    }
-
-    /* ---------------- CAMERA + FILE ---------------- */
-
-    async safeCapture() {
-        if (this.state.isProcessing || !this.state.isOnline) return;
-        if (!this.rateLimitCheck()) return;
-
-        try {
-            const blob = await this.captureFrame();
-            await this.sendForAnalysis(blob, "capture.jpg");
-        } catch {
-            this.notify("Capture failed.", "error");
-        }
-    }
-
-    rateLimitCheck() {
-        const now = Date.now();
-        if (now - this.state.lastRequestTime < Config.COOLDOWN_MS) {
-            this.notify("Please wait before next request.", "warning");
-            return false;
-        }
-        this.state.lastRequestTime = now;
-        return true;
-    }
-
-    captureFrame() {
-        return new Promise((resolve, reject) => {
-            if (!this.dom.video || !this.dom.video.videoWidth) return reject();
-
-            const canvas = document.createElement("canvas");
-            canvas.width = this.dom.video.videoWidth;
-            canvas.height = this.dom.video.videoHeight;
-
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return reject();
-
-            ctx.drawImage(this.dom.video, 0, 0);
-            canvas.toBlob(blob => blob ? resolve(blob) : reject(), "image/jpeg");
-        });
-    }
-
-    /* ---------------- UI ---------------- */
-
-    setLoading(state) {
-        this.state.isProcessing = state;
-        if (this.dom.captureBtn)
-            this.dom.captureBtn.disabled = state;
-    }
-
-    notify(msg, type) {
-        if (!this.dom.notification) return;
-        this.dom.notification.textContent = msg;
-        this.dom.notification.className =
-            `notification-toast visible ${type}`;
-
-        setTimeout(() =>
-            this.dom.notification?.classList.remove("visible"), 4000);
-    }
-
-    injectDisclaimer() {
-        const disclaimer = document.createElement("div");
-        disclaimer.style.fontSize = "12px";
-        disclaimer.style.marginTop = "10px";
-        disclaimer.style.opacity = "0.8";
-        disclaimer.textContent =
-            "AI-assisted analysis only. Not a medical diagnosis. Clinical decisions must be made by licensed professionals.";
-        document.body.appendChild(disclaimer);
-    }
-
-    sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-    async initCamera() {
-        try {
-            this.cameraStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" }
-            });
-            if (this.dom.video) {
-                this.dom.video.srcObject = this.cameraStream;
-                await this.dom.video.play().catch(() => {});
+            if (!response.ok) {
+                throw {
+                    status: response.status,
+                    message: data.message || 'Request failed',
+                    code: data.code,
+                    data
+                };
             }
-        } catch {
-            this.notify("Camera unavailable.", "error");
+
+            return data;
+        } catch (error) {
+            if (error.status === 401) {
+                // Token expired or invalid
+                AuthState.clear();
+                redirectToLogin();
+            }
+            throw error;
+        }
+    },
+
+    // Auth endpoints
+    auth: {
+        async login(email, password) {
+            return API.request('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+        },
+
+        async register(userData) {
+            return API.request('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify(userData)
+            });
+        },
+
+        async forgotPassword(email) {
+            return API.request('/auth/forgot-password', {
+                method: 'POST',
+                body: JSON.stringify({ email })
+            });
+        },
+
+        async resetPassword(token, newPassword) {
+            return API.request('/auth/reset-password', {
+                method: 'POST',
+                body: JSON.stringify({ token, newPassword })
+            });
+        },
+
+        async getProfile() {
+            return API.request('/auth/me');
         }
     }
+};
 
-    createFileInput() {
-        this.fileInput = document.createElement("input");
-        this.fileInput.type = "file";
-        this.fileInput.accept = "image/*,.dcm";
-        this.fileInput.style.display = "none";
-        document.body.appendChild(this.fileInput);
+// ==================== GOOGLE SIGN-IN ====================
+const GoogleAuth = {
+    initialized: false,
 
-        this.fileInput.addEventListener("change", e => {
-            const file = e.target.files?.[0];
-            if (file) this.sendForAnalysis(file, file.name);
+    init() {
+        if (!CONFIG.GOOGLE_CLIENT_ID || typeof google === 'undefined') {
+            console.warn("Google Sign-In not available");
+            return;
+        }
+
+        if (this.initialized) return;
+
+        google.accounts.id.initialize({
+            client_id: CONFIG.GOOGLE_CLIENT_ID,
+            callback: this.handleCredentialResponse.bind(this),
+            auto_select: false,
+            cancel_on_tap_outside: true
         });
+
+        this.initialized = true;
+    },
+
+    renderButton(elementId) {
+        if (!this.initialized) this.init();
+        
+        google.accounts.id.renderButton(
+            document.getElementById(elementId),
+            {
+                type: 'standard',
+                theme: 'outline',
+                size: 'large',
+                text: 'signin_with',
+                shape: 'rectangular',
+                logo_alignment: 'left'
+            }
+        );
+    },
+
+    async handleCredentialResponse(response) {
+        try {
+            Notification.show('Authenticating with Google...', 'info');
+            
+            // Decode JWT to get user info
+            const userInfo = this.parseJwt(response.credential);
+            
+            // Send to your backend
+            const result = await API.request('/auth/google', {
+                method: 'POST',
+                body: JSON.stringify({
+                    token: response.credential,
+                    email: userInfo.email,
+                    name: userInfo.name
+                })
+            });
+
+            // Save auth state
+            AuthState.token = result.token;
+            AuthState.currentUser = result.user;
+            AuthState.save(document.getElementById('remember')?.checked || false);
+            
+            Notification.show('Login successful! Redirecting...', 'success');
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                window.location.href = CONFIG.ROUTES.DASHBOARD;
+            }, 1000);
+            
+        } catch (error) {
+            console.error("Google auth failed:", error);
+            Notification.show(
+                error.message || 'Google authentication failed',
+                'error'
+            );
+        }
+    },
+
+    parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error("Failed to parse JWT:", e);
+            return {};
+        }
     }
+};
+
+// ==================== PASSWORD VISIBILITY TOGGLE ====================
+function setupPasswordToggle() {
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const wrapper = this.closest('.password-wrapper');
+            const input = wrapper?.querySelector('input');
+            
+            if (input) {
+                const type = input.type === 'password' ? 'text' : 'password';
+                input.type = type;
+                
+                // Update icon/text
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+                } else {
+                    this.textContent = type === 'password' ? 'Show' : 'Hide';
+                }
+            }
+        });
+    });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    new MedAIApp().init();
+// ==================== REDIRECTION HELPER ====================
+function redirectToDashboard() {
+    window.location.href = CONFIG.ROUTES.DASHBOARD;
+}
+
+function redirectToLogin() {
+    window.location.href = CONFIG.ROUTES.LOGIN;
+}
+
+function redirectToForgotPassword() {
+    window.location.href = CONFIG.ROUTES.FORGOT_PASSWORD;
+}
+
+// ==================== LOGIN PAGE HANDLER ====================
+function initLoginPage() {
+    const form = document.getElementById('form-login');
+    if (!form) return;
+
+    // Check if already authenticated
+    if (AuthState.isAuthenticated) {
+        redirectToDashboard();
+        return;
+    }
+
+    // Initialize Google Sign-In
+    if (document.getElementById('google-signin-btn')) {
+        GoogleAuth.renderButton('google-signin-btn');
+    }
+
+    // Password toggle
+    setupPasswordToggle();
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const remember = document.getElementById('remember')?.checked || false;
+
+        // Validate inputs
+        if (!Validators.email(email)) {
+            Notification.show('Please enter a valid email address', 'error');
+            return;
+        }
+
+        if (!password) {
+            Notification.show('Please enter your password', 'error');
+            return;
+        }
+
+        // Show loading state
+        const submitBtn = document.getElementById('loginBtn');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Signing in...';
+        Notification.show('Authenticating...', 'info');
+
+        try {
+            const result = await API.auth.login(email, password);
+            
+            // Save auth state
+            AuthState.token = result.token;
+            AuthState.currentUser = result.user;
+            AuthState.save(remember);
+            
+            Notification.show('Login successful! Redirecting...', 'success');
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                window.location.href = CONFIG.ROUTES.DASHBOARD;
+            }, 1000);
+            
+        } catch (error) {
+            console.error("Login failed:", error);
+            
+            let errorMessage = 'Login failed. Please try again.';
+            
+            if (error.code === 'INVALID_CREDENTIALS') {
+                errorMessage = 'Invalid email or password';
+            } else if (error.code === 'ACCOUNT_DEACTIVATED') {
+                errorMessage = 'Your account has been deactivated';
+            } else if (error.code === 'VALIDATION_ERROR') {
+                errorMessage = 'Please check your inputs';
+            }
+            
+            Notification.show(errorMessage, 'error');
+            
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+}
+
+// ==================== REGISTRATION PAGE HANDLER ====================
+function initRegisterPage() {
+    const form = document.getElementById('form-register');
+    if (!form) return;
+
+    // Initialize Google Sign-In
+    if (document.getElementById('google-signin-btn')) {
+        GoogleAuth.renderButton('google-signin-btn');
+    }
+
+    // Password toggle
+    setupPasswordToggle();
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fullname = document.getElementById('fullname')?.value.trim();
+        const email = document.getElementById('email')?.value.trim();
+        const role = document.getElementById('role')?.value || 'user';
+        const password = document.getElementById('password')?.value;
+        const terms = document.getElementById('terms')?.checked;
+
+        // Validate inputs
+        const nameValidation = Validators.name(fullname);
+        if (!nameValidation.valid) {
+            Notification.show(nameValidation.message, 'error');
+            return;
+        }
+
+        if (!Validators.email(email)) {
+            Notification.show('Please enter a valid email address', 'error');
+            return;
+        }
+
+        const passwordValidation = Validators.password(password);
+        if (!passwordValidation.valid) {
+            Notification.show(passwordValidation.message, 'error');
+            return;
+        }
+
+        if (!terms) {
+            Notification.show('You must agree to the Terms and Privacy Policy', 'error');
+            return;
+        }
+
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account...';
+        Notification.show('Creating your account...', 'info');
+
+        try {
+            const result = await API.auth.register({
+                name: fullname,
+                email,
+                password,
+                role
+            });
+            
+            // Save auth state
+            AuthState.token = result.token;
+            AuthState.currentUser = result.user;
+            AuthState.save(false); // Don't remember by default for new accounts
+            
+            Notification.show('Account created successfully! Redirecting...', 'success');
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                window.location.href = CONFIG.ROUTES.DASHBOARD;
+            }, 1000);
+            
+        } catch (error) {
+            console.error("Registration failed:", error);
+            
+            let errorMessage = 'Registration failed. Please try again.';
+            
+            if (error.code === 'USER_EXISTS' || error.code === 'DUPLICATE_EMAIL') {
+                errorMessage = 'An account with this email already exists';
+            } else if (error.code === 'PASSWORD_TOO_SHORT') {
+                errorMessage = 'Password must be at least 8 characters';
+            } else if (error.code === 'VALIDATION_ERROR') {
+                errorMessage = 'Please check your inputs';
+            }
+            
+            Notification.show(errorMessage, 'error');
+            
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+}
+
+// ==================== FORGOT PASSWORD PAGE HANDLER ====================
+function initForgotPasswordPage() {
+    const form = document.getElementById('passwordResetForm');
+    const successState = document.getElementById('success-state');
+    
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email')?.value.trim();
+
+        if (!Validators.email(email)) {
+            Notification.show('Please enter a valid email address', 'error');
+            return;
+        }
+
+        // Show loading state
+        const submitBtn = document.getElementById('resetBtn');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+        Notification.show('Sending reset link...', 'info');
+
+        try {
+            const result = await API.auth.forgotPassword(email);
+            
+            // Show success state
+            if (successState) {
+                const emailDisplay = document.getElementById('user-email-display');
+                if (emailDisplay) {
+                    emailDisplay.textContent = email;
+                }
+                
+                form.closest('.auth-card').classList.add('hidden');
+                successState.classList.remove('hidden');
+            }
+            
+            Notification.show('Reset link sent! Check your email.', 'success');
+            
+        } catch (error) {
+            console.error("Password reset request failed:", error);
+            
+            // Always show success for security (don't reveal if email exists)
+            if (successState) {
+                const emailDisplay = document.getElementById('user-email-display');
+                if (emailDisplay) {
+                    emailDisplay.textContent = email;
+                }
+                
+                form.closest('.auth-card').classList.add('hidden');
+                successState.classList.remove('hidden');
+            }
+            
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+}
+
+// ==================== PROTECTED ROUTES CHECK ====================
+function checkProtectedRoute() {
+    const currentPath = window.location.pathname;
+    const protectedRoutes = [CONFIG.ROUTES.DASHBOARD];
+    
+    // Check if current path is protected
+    const isProtected = protectedRoutes.some(route => 
+        currentPath.endsWith(route)
+    );
+    
+    if (isProtected && !AuthState.isAuthenticated) {
+        // Store intended destination
+        sessionStorage.setItem('redirectAfterLogin', currentPath);
+        redirectToLogin();
+        return false;
+    }
+    
+    return true;
+}
+
+// ==================== DASHBOARD INTEGRATION ====================
+// This function will be called from dash.js to get the token
+window.MedAI = {
+    getToken: () => AuthState.token,
+    getUser: () => AuthState.currentUser,
+    isAuthenticated: () => AuthState.isAuthenticated,
+    logout: () => {
+        AuthState.clear();
+        redirectToLogin();
+    },
+    onAuthChange: (callback) => {
+        window.addEventListener(CONFIG.AUTH_EVENT, (e) => callback(e.detail));
+    },
+    api: API
+};
+
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize core modules
+    AuthState.init();
+    Notification.init();
+    
+    // Check protected routes
+    checkProtectedRoute();
+    
+    // Initialize appropriate page handler based on current page
+    const path = window.location.pathname;
+    
+    if (path.includes('login.html')) {
+        initLoginPage();
+    } else if (path.includes('reg.html')) {
+        initRegisterPage();
+    } else if (path.includes('forgot-password.html')) {
+        initForgotPasswordPage();
+    }
+    
+    // Setup global error handler for unhandled promises
+    window.addEventListener('unhandledrejection', (event) => {
+        console.error('Unhandled promise rejection:', event.reason);
+        Notification.show('An unexpected error occurred', 'error');
+    });
 });
 
-})();
+// Export for module usage if needed
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { AuthState, API, Notification };
+}
