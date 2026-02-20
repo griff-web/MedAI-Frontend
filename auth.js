@@ -12,10 +12,10 @@ const CONFIG = {
     REMEMBER_KEY: "medai_remember",
     AUTH_EVENT: "medai-auth-changed",
     ROUTES: {
-        DASHBOARD: "/dash.html",
-        LOGIN: "/login.html",
-        REGISTER: "/reg.html",
-        FORGOT_PASSWORD: "/forgot-password.html"
+        DASHBOARD: "dash.html",
+        LOGIN: "login.html",
+        REGISTER: "reg.html",
+        FORGOT_PASSWORD: "forgot-password.html"
     }
 };
 
