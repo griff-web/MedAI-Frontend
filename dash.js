@@ -2,14 +2,7 @@
 "use strict";
 
 /*
- * MEDAI ENTERPRISE ENGINE v3.1 (Hardened - LocalStorage Token Retained)
- * Security Improvements:
- * - Removed all innerHTML usage
- * - Strict API schema validation
- * - File signature validation
- * - Safe retry logic
- * - Rate limiting
- * - Reduced medical liability language
+ * MEDAI ENTERPRISE ENGINE v3.2 (Stability + Security Hardened)
  */
 
 class Config {
@@ -33,7 +26,6 @@ class MedAIApp {
 
         this.dom = {};
         this.cameraStream = null;
-        this.abortController = null;
         this.fileInput = null;
     }
 
@@ -66,7 +58,7 @@ class MedAIApp {
 
     bindEvents() {
         this.dom.captureBtn?.addEventListener("click", () => this.safeCapture());
-        this.dom.uploadLocal?.addEventListener("click", () => this.fileInput.click());
+        this.dom.uploadLocal?.addEventListener("click", () => this.fileInput?.click());
     }
 
     bindNetworkEvents() {
@@ -79,29 +71,31 @@ class MedAIApp {
 
     /* ---------------- SECURITY CORE ---------------- */
 
-    async fetchSecure(url, options = {}, retries = Config.MAX_RETRIES) {
-
+    async fetchSecure(url, options = {}) {
         const token = localStorage.getItem("medai_token") || "";
 
-        for (let i = 0; i <= retries; i++) {
-            try {
-                this.abortController = new AbortController();
-                const timeout = setTimeout(() => this.abortController.abort(), Config.REQUEST_TIMEOUT);
+        for (let attempt = 0; attempt <= Config.MAX_RETRIES; attempt++) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), Config.REQUEST_TIMEOUT);
 
+            try {
                 const response = await fetch(url, {
                     ...options,
                     headers: {
                         ...options.headers,
-                        Authorization: `Bearer ${token}`
+                        Authorization: token ? `Bearer ${token}` : undefined
                     },
-                    signal: this.abortController.signal
+                    signal: controller.signal
                 });
 
                 clearTimeout(timeout);
 
                 if (!response.ok) {
-                    if (Config.RETRYABLE_STATUS.includes(response.status) && i < retries) {
-                        await this.sleep(1000 * (i + 1));
+                    if (
+                        Config.RETRYABLE_STATUS.includes(response.status) &&
+                        attempt < Config.MAX_RETRIES
+                    ) {
+                        await this.sleep(1000 * (attempt + 1));
                         continue;
                     }
                     throw new Error(`Server error ${response.status}`);
@@ -110,8 +104,9 @@ class MedAIApp {
                 return response;
 
             } catch (err) {
-                if (i === retries) throw err;
-                await this.sleep(1000 * (i + 1));
+                clearTimeout(timeout);
+                if (attempt >= Config.MAX_RETRIES) throw err;
+                await this.sleep(1000 * (attempt + 1));
             }
         }
     }
@@ -138,9 +133,7 @@ class MedAIApp {
         const dicomCheck = new TextDecoder().decode(
             new Uint8Array(await file.slice(128, 132).arrayBuffer())
         );
-        if (dicomCheck === "DICM") return true;
-
-        return false;
+        return dicomCheck === "DICM";
     }
 
     rateLimitCheck() {
@@ -168,7 +161,7 @@ class MedAIApp {
     }
 
     async sendForAnalysis(file, filename) {
-
+        if (this.state.isProcessing) return;
         this.setLoading(true);
 
         try {
@@ -180,14 +173,20 @@ class MedAIApp {
                 { method: "POST", body: fd }
             );
 
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch {
+                throw new Error("Invalid JSON");
+            }
 
             if (!this.validateResponseSchema(data))
-                throw new Error("Invalid server response");
+                throw new Error("Invalid schema");
 
             this.displayResults(data);
 
-        } catch {
+        } catch (err) {
+            console.error(err);
             this.notify("Analysis failed.", "error");
         } finally {
             this.setLoading(false);
@@ -206,34 +205,39 @@ class MedAIApp {
         }
 
         await this.sendForAnalysis(file, file.name);
+        this.fileInput.value = ""; // allow re-upload of same file
     }
 
     /* ---------------- SAFE DOM RENDERING ---------------- */
 
     displayResults(data) {
-
         this.dom.resultsPanel?.classList.remove("hidden");
 
-        this.dom.resultTitle.textContent = data.diagnosis;
-        this.dom.resultDescription.textContent =
-            data.description || "AI-assisted interpretation provided.";
+        this.dom.resultTitle && (this.dom.resultTitle.textContent = data.diagnosis);
+        this.dom.resultDescription &&
+            (this.dom.resultDescription.textContent =
+                data.description || "AI-assisted interpretation provided.");
 
         this.updateConfidence(data.confidence);
 
-        this.dom.findingsList.textContent = "";
-
-        data.findings.forEach(item => {
-            const li = document.createElement("li");
-            li.textContent = `• ${item}`;
-            this.dom.findingsList.appendChild(li);
-        });
+        if (this.dom.findingsList) {
+            this.dom.findingsList.textContent = "";
+            data.findings.forEach(item => {
+                const li = document.createElement("li");
+                li.textContent = `• ${String(item)}`;
+                this.dom.findingsList.appendChild(li);
+            });
+        }
     }
 
     updateConfidence(score) {
-        const value = Math.max(0, Math.min(100, score));
-        this.dom.confidenceText.textContent =
-            `Model Confidence Estimate: ${value}%`;
-        this.dom.confidencePath.style.strokeDasharray = `${value},100`;
+        const value = Math.max(0, Math.min(100, Number(score) || 0));
+        this.dom.confidenceText &&
+            (this.dom.confidenceText.textContent =
+                `Model Confidence Estimate: ${value}%`);
+
+        if (this.dom.confidencePath)
+            this.dom.confidencePath.style.strokeDasharray = `${value},100`;
     }
 
     /* ---------------- CAMERA ---------------- */
@@ -243,8 +247,13 @@ class MedAIApp {
             this.cameraStream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: "environment" }
             });
-            if (this.dom.video)
+
+            if (this.dom.video) {
                 this.dom.video.srcObject = this.cameraStream;
+                this.dom.video.setAttribute("playsinline", true);
+                await this.dom.video.play().catch(() => {});
+            }
+
         } catch {
             this.notify("Camera unavailable.", "error");
         }
@@ -252,14 +261,20 @@ class MedAIApp {
 
     captureFrame() {
         return new Promise((resolve, reject) => {
-            if (!this.dom.video?.videoWidth) {
+            if (!this.dom.video || !this.dom.video.videoWidth) {
                 reject();
                 return;
             }
+
             const canvas = document.createElement("canvas");
             canvas.width = this.dom.video.videoWidth;
             canvas.height = this.dom.video.videoHeight;
-            canvas.getContext("2d").drawImage(this.dom.video, 0, 0);
+
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return reject();
+
+            ctx.drawImage(this.dom.video, 0, 0);
+
             canvas.toBlob(blob => blob ? resolve(blob) : reject(), "image/jpeg");
         });
     }
@@ -277,8 +292,9 @@ class MedAIApp {
         this.dom.notification.textContent = msg;
         this.dom.notification.className =
             `notification-toast visible ${type}`;
+
         setTimeout(() =>
-            this.dom.notification.classList.remove("visible"), 4000);
+            this.dom.notification?.classList.remove("visible"), 4000);
     }
 
     injectDisclaimer() {
@@ -287,8 +303,7 @@ class MedAIApp {
         disclaimer.style.marginTop = "10px";
         disclaimer.style.opacity = "0.8";
         disclaimer.textContent =
-            "AI-assisted analysis only. Not a medical diagnosis. " +
-            "Clinical decisions must be made by licensed professionals.";
+            "AI-assisted analysis only. Not a medical diagnosis. Clinical decisions must be made by licensed professionals.";
         document.body.appendChild(disclaimer);
     }
 
@@ -297,17 +312,16 @@ class MedAIApp {
     createFileInput() {
         this.fileInput = document.createElement("input");
         this.fileInput.type = "file";
+        this.fileInput.accept = "image/*,.dcm";
         this.fileInput.style.display = "none";
         document.body.appendChild(this.fileInput);
 
         this.fileInput.addEventListener("change", e => {
-            const file = e.target.files[0];
+            const file = e.target.files?.[0];
             if (file) this.processLocalFile(file);
         });
     }
 }
-
-/* ---------------- START ---------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
     new MedAIApp().init();
