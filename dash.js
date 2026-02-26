@@ -1,9 +1,9 @@
 /**
- * MEDAI ENTERPRISE ENGINE v3.5.0 (Production-Ready)
+ * MEDAI ENTERPRISE ENGINE v3.5.1 (User Profile Fix)
  * High-performance medical imaging interface with robust state management.
  * 
  * @author MedAI Team
- * @version 3.5.0
+ * @version 3.5.1
  * @license Proprietary
  */
 
@@ -37,7 +37,9 @@
         UI: {
             NOTIFICATION_DURATION: 4000,
             MAX_HISTORY_ITEMS: 50,
-            DEBOUNCE_DELAY: 300
+            DEBOUNCE_DELAY: 300,
+            USER_LOAD_RETRIES: 5,
+            USER_LOAD_DELAY: 200
         },
         LOG_LEVELS: { DEBUG: 0, INFO: 1, WARN: 2, ERROR: 3 },
         
@@ -141,7 +143,32 @@
         /**
          * Deep clone object
          */
-        clone: (obj) => JSON.parse(JSON.stringify(obj))
+        clone: (obj) => JSON.parse(JSON.stringify(obj)),
+
+        /**
+         * Extract name from user object (handles different formats)
+         */
+        extractUserName: (user) => {
+            if (!user) return null;
+            
+            // Try different possible name fields
+            return user.name || 
+                   user.displayName || 
+                   user.fullName || 
+                   user.username || 
+                   user.email?.split('@')[0] || 
+                   (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : null) ||
+                   (user.givenName && user.familyName ? `${user.givenName} ${user.familyName}` : null) ||
+                   'Medical Practitioner';
+        },
+
+        /**
+         * Extract role from user object
+         */
+        extractUserRole: (user) => {
+            if (!user) return 'user';
+            return user.role || user.userRole || user.type || 'user';
+        }
     };
 
     /* ==================== 3. ENHANCED SERVICES ==================== */
@@ -248,14 +275,34 @@
     }
 
     /**
-     * Authentication Service with CSRF protection
+     * Authentication Service with CSRF protection and user profile management
      */
     class AuthService {
         constructor() {
             this.token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
-            this.user = null;
+            this.user = this._loadUserFromStorage();
             this.csrfToken = this._generateCSRFToken();
             this.listeners = [];
+            this.loadRetries = 0;
+            
+            // Log initial state
+            console.log('AuthService initialized', { 
+                hasToken: !!this.token, 
+                hasUser: !!this.user,
+                userName: this.user?.name 
+            });
+        }
+
+        _loadUserFromStorage() {
+            try {
+                const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.USER);
+                if (stored) {
+                    return JSON.parse(stored);
+                }
+            } catch (e) {
+                console.warn('Failed to load user from storage', e);
+            }
+            return null;
         }
 
         _generateCSRFToken() {
@@ -276,34 +323,61 @@
             return this.token;
         }
 
+        getUser() {
+            return this.user;
+        }
+
         async validateToken() {
             if (!this.token) return false;
             
             try {
+                console.log('Validating token...');
+                
                 const response = await fetch(`${CONFIG.API.AUTH}/auth/me`, {
                     headers: {
                         'Authorization': `Bearer ${this.token}`,
-                        'X-CSRF-Token': this.getCSRFToken()
+                        'X-CSRF-Token': this.getCSRFToken(),
+                        'Content-Type': 'application/json'
                     }
                 });
                 
                 if (response.ok) {
-                    this.user = await response.json();
+                    const data = await response.json();
+                    console.log('Token validation successful', data);
+                    
+                    // Handle different response formats
+                    this.user = data.user || data;
+                    
+                    // Store user in localStorage
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(this.user));
+                    
                     this._notifyListeners(true);
                     return true;
                 }
                 
-                this.logout();
+                console.log('Token validation failed:', response.status);
                 return false;
                 
-            } catch {
-                return false; // Network error, assume valid
+            } catch (error) {
+                console.error('Token validation error:', error);
+                // If we have a cached user, assume still authenticated
+                return !!this.user;
             }
         }
 
         setToken(token) {
             this.token = token;
             localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, token);
+        }
+
+        setUser(user) {
+            this.user = user;
+            if (user) {
+                localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(user));
+            } else {
+                localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
+            }
+            this._notifyListeners(!!user);
         }
 
         logout() {
@@ -318,14 +392,248 @@
 
         onAuthChange(callback) {
             this.listeners.push(callback);
+            // Immediately call with current state
+            callback({ authenticated: !!this.user, user: this.user });
         }
 
         _notifyListeners(authenticated) {
-            this.listeners.forEach(cb => cb({ authenticated, user: this.user }));
+            this.listeners.forEach(cb => {
+                try {
+                    cb({ authenticated, user: this.user });
+                } catch (error) {
+                    console.error('Auth listener error:', error);
+                }
+            });
         }
 
         sanitizeInput(str) {
             return Utils.sanitize(str);
+        }
+    }
+
+    /**
+     * User Profile Manager - Dedicated service for handling user display
+     */
+    class UserProfileManager {
+        constructor(app, auth) {
+            this.app = app;
+            this.auth = auth;
+            this.retryCount = 0;
+            this.maxRetries = CONFIG.UI.USER_LOAD_RETRIES;
+            this.retryDelay = CONFIG.UI.USER_LOAD_DELAY;
+            this.observer = null;
+            this.isUpdating = false;
+        }
+
+        /**
+         * Initialize the profile manager
+         */
+        init() {
+            console.log('UserProfileManager initializing...');
+            
+            // Set up auth listener
+            this.auth.onAuthChange(({ authenticated, user }) => {
+                console.log('Auth change detected', { authenticated, user });
+                if (authenticated && user) {
+                    this.updateUserProfile(user);
+                } else {
+                    this.showLoadingState();
+                }
+            });
+
+            // Watch for DOM elements
+            this._watchForElements();
+
+            // Try immediate update if user exists
+            if (this.auth.getUser()) {
+                this.updateUserProfile(this.auth.getUser());
+            } else {
+                this.showLoadingState();
+                this._attemptLoadWithRetry();
+            }
+        }
+
+        /**
+         * Show loading state
+         */
+        showLoadingState() {
+            const displayNameEl = document.getElementById('display-name');
+            if (displayNameEl) {
+                displayNameEl.textContent = 'Loading...';
+                displayNameEl.classList.add('loading');
+            }
+        }
+
+        /**
+         * Update user profile in UI
+         */
+        updateUserProfile(user) {
+            if (this.isUpdating) return;
+            this.isUpdating = true;
+
+            try {
+                console.log('Updating user profile with:', user);
+
+                // Extract user information
+                const userName = Utils.extractUserName(user) || 'Medical Practitioner';
+                const userRole = Utils.extractUserRole(user);
+
+                // Update display name
+                const displayNameEl = document.getElementById('display-name');
+                if (displayNameEl) {
+                    displayNameEl.textContent = this.auth.sanitizeInput(userName);
+                    displayNameEl.classList.remove('loading');
+                    displayNameEl.setAttribute('data-user-id', user.id || '');
+                    console.log('Updated display name to:', userName);
+                }
+
+                // Update role
+                const userRoleEl = document.querySelector('.user-role');
+                if (userRoleEl) {
+                    userRoleEl.textContent = this._formatRole(userRole);
+                }
+
+                // Update avatar with initials
+                const avatarEl = document.getElementById('avatar-circle');
+                if (avatarEl) {
+                    const initials = this._getInitials(userName);
+                    avatarEl.textContent = initials;
+                }
+
+                // Update any other user info elements
+                this._updateAdditionalElements(user);
+
+                this.retryCount = 0; // Reset retry count on success
+
+            } catch (error) {
+                console.error('Error updating user profile:', error);
+            } finally {
+                this.isUpdating = false;
+            }
+        }
+
+        /**
+         * Get initials from name
+         */
+        _getInitials(name) {
+            if (!name) return 'MD';
+            
+            return name
+                .split(' ')
+                .map(part => part.charAt(0))
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+        }
+
+        /**
+         * Format role for display
+         */
+        _formatRole(role) {
+            const roles = {
+                'user': 'General Practitioner',
+                'doctor': 'Radiologist',
+                'admin': 'Administrator',
+                'technician': 'Radiology Technician',
+                'patient': 'Patient'
+            };
+            return roles[role] || role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        /**
+         * Update additional user info elements
+         */
+        _updateAdditionalElements(user) {
+            // Update user email if element exists
+            const emailEl = document.getElementById('user-email');
+            if (emailEl && user.email) {
+                emailEl.textContent = user.email;
+            }
+
+            // Update user ID if element exists
+            const idEl = document.getElementById('user-id');
+            if (idEl && user.id) {
+                idEl.textContent = user.id;
+            }
+        }
+
+        /**
+         * Watch for DOM elements to be added
+         */
+        _watchForElements() {
+            const targetNode = document.body;
+            const config = { childList: true, subtree: true };
+            
+            this.observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    if (mutation.addedNodes.length) {
+                        // Check if our target elements were added
+                        if (document.getElementById('display-name') && this.auth.getUser()) {
+                            this.updateUserProfile(this.auth.getUser());
+                        }
+                    }
+                }
+            });
+
+            this.observer.observe(targetNode, config);
+        }
+
+        /**
+         * Attempt to load user with retry
+         */
+        async _attemptLoadWithRetry() {
+            while (this.retryCount < this.maxRetries) {
+                await Utils.sleep(this.retryDelay * (this.retryCount + 1));
+                
+                const user = this._tryGetUser();
+                if (user) {
+                    this.updateUserProfile(user);
+                    return;
+                }
+                
+                this.retryCount++;
+                console.log(`User load retry ${this.retryCount}/${this.maxRetries}`);
+            }
+            
+            console.warn('Failed to load user after', this.maxRetries, 'retries');
+        }
+
+        /**
+         * Try to get user from various sources
+         */
+        _tryGetUser() {
+            // Check auth service
+            if (this.auth.getUser()) {
+                return this.auth.getUser();
+            }
+
+            // Check window.MedAI
+            if (window.MedAI?.getUser) {
+                const user = window.MedAI.getUser();
+                if (user) return user;
+            }
+
+            // Check localStorage directly
+            try {
+                const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.USER);
+                if (stored) {
+                    return JSON.parse(stored);
+                }
+            } catch (e) {
+                // Ignore
+            }
+
+            return null;
+        }
+
+        /**
+         * Clean up resources
+         */
+        destroy() {
+            if (this.observer) {
+                this.observer.disconnect();
+                this.observer = null;
+            }
         }
     }
 
@@ -645,6 +953,7 @@
             this.history = new HistoryService();
             this.queue = new RequestQueue();
             this.imageProcessor = new ImageProcessor(this.logger);
+            this.userProfile = new UserProfileManager(this, this.auth);
             
             // State management
             this.state = {
@@ -687,6 +996,9 @@
                 this._setupNetworkListeners();
                 this._setupKeyboardShortcuts();
                 
+                // Initialize user profile manager
+                this.userProfile.init();
+                
                 // Initial render
                 this.switchTab(this.state.activeTab);
                 
@@ -707,6 +1019,10 @@
         async _checkAuth() {
             // Integrate with existing auth system
             if (window.MedAI?.isAuthenticated?.()) {
+                const user = window.MedAI.getUser?.();
+                if (user) {
+                    this.auth.setUser(user);
+                }
                 return true;
             }
             
@@ -1308,6 +1624,9 @@
                 this.canvas = null;
             }
             
+            // Clean up user profile manager
+            this.userProfile.destroy();
+            
             // Flush logs
             this.logger.flush();
         }
@@ -1329,6 +1648,30 @@
             } catch {
                 return { status: 'error', online: navigator.onLine };
             }
+        },
+        
+        // Debug function to check user profile
+        debugUser: () => {
+            const app = window.medAIApp;
+            if (!app) return { error: 'App not initialized' };
+            
+            return {
+                authUser: app.auth.getUser(),
+                token: app.auth.getToken() ? 'Present' : 'Missing',
+                storedUser: localStorage.getItem(CONFIG.STORAGE_KEYS.USER),
+                displayName: document.getElementById('display-name')?.textContent,
+                state: app.state
+            };
+        },
+        
+        // Force refresh user profile
+        refreshUser: () => {
+            const app = window.medAIApp;
+            if (app?.auth.getUser()) {
+                app.userProfile.updateUserProfile(app.auth.getUser());
+                return 'User profile refreshed';
+            }
+            return 'No user found';
         }
     };
 
