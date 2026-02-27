@@ -1,6 +1,6 @@
 /**
  * MED-AI NEURAL COCKPIT (dash.js)
- * Unified Version: Triage + Heatmap + Voice + Advanced Analytics
+ * Fixed: Full Camera Lifecycle, Heatmap HUD, and Voice Scribe
  */
 
 const DashApp = {
@@ -23,20 +23,25 @@ const DashApp = {
         console.log("🚀 Neural Cockpit Initializing...");
         this.cacheDOM();
         this.bindEvents();
+        
+        // 1. START CAMERA IMMEDIATELY
+        this.initCamera(); 
+        
+        // 2. Load Modules
         this.initVoiceScribe();
         this.updateUserSession();
-        
-        // Initial Data Sync
         this.updateAnalytics();
         this.renderHistory();
 
-        if (this.state.activeTab === 'scanner') this.startCamera();
-        if (Notification.permission !== "granted") Notification.requestPermission();
+        // Notification Permission for Triage
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
 
-        // Hide loader
+        // Hide loader after a brief delay
         setTimeout(() => {
             document.getElementById('loading-overlay')?.classList.add('hidden');
-        }, 1000);
+        }, 8000);
     },
 
     cacheDOM() {
@@ -61,53 +66,69 @@ const DashApp = {
         };
     },
 
-    bindEvents() {
-        // Tab Navigation
-        this.dom.navItems.forEach(btn => {
-            btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
-        });
+    // ==================== CAMERA INITIALIZATION ====================
+    async initCamera() {
+        if (!this.dom.video) return;
 
-        // Modality Toggles
-        this.dom.typeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.dom.typeBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.state.scanType = btn.dataset.type;
-            });
-        });
+        const constraints = {
+            video: {
+                facingMode: this.state.cameraFacing,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        };
 
-        // Search in History
-        document.querySelector('.search-input')?.addEventListener('input', (e) => {
-            this.renderHistory(e.target.value);
-        });
-
-        // Core Actions
-        this.dom.captureBtn.addEventListener('click', () => this.performNeuralAnalysis());
-        document.getElementById('close-results')?.addEventListener('click', () => this.toggleResults(false));
-        document.getElementById('logout-btn')?.addEventListener('click', () => window.MedAI.logout());
+        try {
+            this.state.stream = await navigator.mediaDevices.getUserMedia(constraints);
+            this.dom.video.srcObject = this.state.stream;
+            
+            // Critical: Play the video once metadata is loaded
+            this.dom.video.onloadedmetadata = () => {
+                this.dom.video.play();
+                this.dom.statusBadge.textContent = "AI READY";
+                this.dom.statusBadge.style.color = "#4ade80"; // Success Green
+            };
+            
+            console.log("✅ Camera Started Successfully");
+        } catch (err) {
+            console.error("❌ Camera Error:", err);
+            this.dom.statusBadge.textContent = "CAMERA ERROR";
+            this.dom.statusBadge.style.color = "#f87171"; // Error Red
+        }
     },
 
-    // ==================== MEDICAL MODULES ====================
+    stopCamera() {
+        if (this.state.stream) {
+            this.state.stream.getTracks().forEach(track => track.stop());
+            this.state.stream = null;
+            console.log("⏹️ Camera Stopped");
+        }
+    },
+
+    // ==================== NEURAL MODULES ====================
 
     triggerTriage(result) {
         if (result.severity === 'CRITICAL') {
             document.body.classList.add('emergency-alert-active');
-            if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
             
-            const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-            alertAudio.play().catch(() => {});
+            // Haptic/Audio Feedback
+            if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(() => {});
 
             if (Notification.permission === "granted") {
                 new Notification("🚨 CRITICAL FINDING", { body: `${result.title} detected.` });
             }
-            setTimeout(() => document.body.classList.remove('emergency-alert-active'), 8000);
+            setTimeout(() => document.body.classList.remove('emergency-alert-active'), 5000);
         }
     },
 
     drawHeatmap(coords) {
         const ctx = this.dom.canvas.getContext('2d');
-        this.dom.canvas.width = this.dom.video.videoWidth;
-        this.dom.canvas.height = this.dom.video.videoHeight;
+        // Match canvas to video's actual display size
+        this.dom.canvas.width = this.dom.video.clientWidth;
+        this.dom.canvas.height = this.dom.video.clientHeight;
+        
         ctx.clearRect(0, 0, this.dom.canvas.width, this.dom.canvas.height);
 
         if (!coords) return;
@@ -129,6 +150,8 @@ const DashApp = {
         if (!Speech || !this.dom.scribeBtn) return;
 
         this.state.recognition = new Speech();
+        this.state.recognition.continuous = false;
+
         this.state.recognition.onresult = (e) => {
             const text = e.results[0][0].transcript;
             if (this.dom.clinicalNotes) {
@@ -136,31 +159,30 @@ const DashApp = {
             }
         };
 
-        this.dom.scribeBtn.addEventListener('click', () => {
+        this.dom.scribeBtn.onclick = () => {
             this.state.recognition.start();
             this.dom.scribeBtn.classList.add('recording-active');
-        });
+        };
         this.state.recognition.onend = () => this.dom.scribeBtn.classList.remove('recording-active');
     },
 
-    // ==================== ENGINE & LOGIC ====================
+    // ==================== CORE ANALYSIS ====================
 
     async performNeuralAnalysis() {
         if (this.state.isAnalyzing) return;
         this.state.isAnalyzing = true;
-        this.dom.statusBadge.textContent = "AI PROCESSING...";
+        this.dom.statusBadge.textContent = "AI ANALYZING...";
         
+        // Simulating processing time
         await new Promise(r => setTimeout(r, 2000));
 
         const result = this.generateClinicalResult();
         
-        // Run AI UI Modules
         this.triggerTriage(result);
         this.drawHeatmap(result.coords);
         
-        // Save & Render
-        const entry = { id: Date.now(), date: new Date().toLocaleString(), ...result };
-        this.state.history.unshift(entry);
+        // Save & Update UI
+        this.state.history.unshift({ id: Date.now(), date: new Date().toLocaleString(), ...result });
         localStorage.setItem('medai_history', JSON.stringify(this.state.history));
         
         this.renderResults(result);
@@ -173,26 +195,36 @@ const DashApp = {
     },
 
     generateClinicalResult() {
-        const isCritical = Math.random() > 0.7;
-        const types = {
-            xray: { title: isCritical ? "Pneumothorax" : "Normal Thoracic", findings: ["Clear lung fields"] },
-            ct: { title: isCritical ? "Hemorrhage" : "Clear Cranial", findings: ["Normal ventricles"] },
-            mri: { title: "Soft Tissue Assessment", findings: ["No edema"] },
-            ultrasound: { title: "Abdominal Fluid Check", findings: ["No free fluid"] }
-        };
-        const base = types[this.state.scanType] || types.xray;
-
+        const isCritical = Math.random() > 0.8;
         return {
-            ...base,
+            title: isCritical ? "Acute Abnormality Found" : "Routine Scan Clear",
             severity: isCritical ? "CRITICAL" : "NORMAL",
-            confidence: Math.floor(Math.random() * 15) + 85,
+            confidence: Math.floor(Math.random() * 10) + 90,
             type: this.state.scanType,
-            description: "AI-generated automated assessment based on neural visual patterns.",
-            coords: isCritical ? { x: 300, y: 200, radius: 120 } : null
+            description: "Neural analysis suggests immediate clinical correlation.",
+            findings: isCritical ? ["Region of interest identified", "High variance detected"] : ["Baseline within normal limits"],
+            coords: isCritical ? { x: 150, y: 150, radius: 100 } : null
         };
     },
 
-    // ==================== UI RENDERING ====================
+    // ==================== UI HELPERS ====================
+
+    switchTab(tabId) {
+        Object.keys(this.dom.sections).forEach(key => {
+            this.dom.sections[key].classList.toggle('hidden', key !== tabId);
+        });
+        this.dom.navItems.forEach(nav => nav.classList.toggle('active', nav.dataset.tab === tabId));
+        this.state.activeTab = tabId;
+        
+        if (tabId === 'scanner') {
+            this.initCamera();
+        } else {
+            this.stopCamera();
+            this.drawHeatmap(null);
+        }
+
+        if (tabId === 'analytics') this.renderAnalytics();
+    },
 
     updateAnalytics() {
         const hist = this.state.history;
@@ -213,11 +245,10 @@ const DashApp = {
         
         this.dom.analyticsPlaceholder.innerHTML = `
             <div class="analytics-grid">
-                <div class="stat-card"><span>Total</span><span class="value">${totalScans}</span></div>
-                <div class="stat-card"><span>Avg Conf.</span><span class="value">${averageConfidence}%</span></div>
+                <div class="stat-card"><span class="label">Total Scans</span><span class="value">${totalScans}</span></div>
+                <div class="stat-card"><span class="label">Avg Conf.</span><span class="value">${averageConfidence}%</span></div>
             </div>
-            <div class="distribution-chart-container">
-                <h4>Distribution</h4>
+            <div class="dist-chart">
                 ${Object.entries(distribution).map(([type, count]) => `
                     <div class="dist-row">
                         <span>${type.toUpperCase()}</span>
@@ -243,7 +274,7 @@ const DashApp = {
                 </div>
                 <div class="item-badge ${item.severity.toLowerCase()}">${item.confidence}%</div>
             </div>
-        `).join('');
+        `).join('') || `<div class="empty">No scans recorded</div>`;
     },
 
     renderResults(data) {
@@ -254,23 +285,20 @@ const DashApp = {
         document.getElementById('findings-list').innerHTML = data.findings.map(f => `<li>${f}</li>`).join('');
     },
 
-    // ==================== CORE UTILITIES ====================
-
-    switchTab(tabId) {
-        if (this.state.isAnalyzing) return;
-        Object.keys(this.dom.sections).forEach(key => {
-            this.dom.sections[key].classList.toggle('hidden', key !== tabId);
-        });
-        this.dom.navItems.forEach(nav => nav.classList.toggle('active', nav.dataset.tab === tabId));
-        this.state.activeTab = tabId;
-        
-        if (tabId === 'scanner') this.startCamera();
-        else { this.stopCamera(); this.drawHeatmap(null); }
-        if (tabId === 'analytics') this.renderAnalytics();
-    },
-
     toggleResults(show) {
         this.dom.resultsPanel.classList.toggle('hidden', !show);
+    },
+
+    bindEvents() {
+        this.dom.navItems.forEach(btn => btn.onclick = () => this.switchTab(btn.dataset.tab));
+        this.dom.typeBtns.forEach(btn => btn.onclick = () => {
+            this.dom.typeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.state.scanType = btn.dataset.type;
+        });
+        this.dom.captureBtn.onclick = () => this.performNeuralAnalysis();
+        document.getElementById('close-results').onclick = () => this.toggleResults(false);
+        document.getElementById('logout-btn').onclick = () => window.MedAI.logout();
     },
 
     updateUserSession() {
@@ -278,17 +306,6 @@ const DashApp = {
         if (user && this.dom.displayName) {
             this.dom.displayName.textContent = `Dr. ${user.name.replace('Dr. ', '')}`;
         }
-    },
-
-    async startCamera() {
-        try {
-            this.state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            this.dom.video.srcObject = this.state.stream;
-        } catch (e) { this.dom.statusBadge.textContent = "OFFLINE"; }
-    },
-
-    stopCamera() {
-        if (this.state.stream) this.state.stream.getTracks().forEach(t => t.stop());
     }
 };
 
