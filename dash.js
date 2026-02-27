@@ -1,6 +1,6 @@
 /**
- * MED-AI NEURAL COCKPIT (dash.js)
- * Fixed: Full Camera Lifecycle, Heatmap HUD, and Voice Scribe
+ * MED-AI DASHBOARD CORE (dash.js)
+ * Enhanced with Auth Integration, History Tracking, and Analytics
  */
 
 const DashApp = {
@@ -10,8 +10,8 @@ const DashApp = {
         isAnalyzing: false,
         cameraFacing: 'environment',
         stream: null,
+        // Loaded from LocalStorage or API
         history: JSON.parse(localStorage.getItem('medai_history')) || [],
-        recognition: null,
         analytics: {
             totalScans: 0,
             averageConfidence: 0,
@@ -20,218 +20,154 @@ const DashApp = {
     },
 
     init() {
-        console.log("🚀 Neural Cockpit Initializing...");
+        console.log("🚀 Med-AI Dashboard Initializing...");
         this.cacheDOM();
         this.bindEvents();
+        this.startCamera();
         
-        // 1. START CAMERA IMMEDIATELY
-        this.initCamera(); 
-        
-        // 2. Load Modules
-        this.initVoiceScribe();
+        // Auth Integration
         this.updateUserSession();
+        
+        // Initial Data Load
         this.updateAnalytics();
         this.renderHistory();
 
-        // Notification Permission for Triage
-        if ("Notification" in window && Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-
-        // Hide loader after a brief delay
         setTimeout(() => {
             document.getElementById('loading-overlay')?.classList.add('hidden');
-        }, 8000);
+        }, 1000);
     },
 
     cacheDOM() {
         this.dom = {
             video: document.getElementById('camera-stream'),
-            canvas: document.getElementById('heatmap-canvas'),
             captureBtn: document.getElementById('capture-trigger'),
-            scribeBtn: document.getElementById('voice-scribe-btn'),
             statusBadge: document.getElementById('ai-status'),
-            displayName: document.getElementById('display-name'),
-            historyList: document.getElementById('history-list'),
             resultsPanel: document.getElementById('results-panel'),
-            clinicalNotes: document.getElementById('clinical-notes'),
-            analyticsPlaceholder: document.querySelector('.analytics-placeholder'),
             sections: {
                 scanner: document.getElementById('scanner-section'),
                 history: document.getElementById('history-section'),
                 analytics: document.getElementById('analytics-section')
             },
             navItems: document.querySelectorAll('.nav-item'),
-            typeBtns: document.querySelectorAll('.type-btn')
+            typeBtns: document.querySelectorAll('.type-btn'),
+            displayName: document.getElementById('display-name'),
+            historyList: document.getElementById('history-list'),
+            analyticsPlaceholder: document.querySelector('.analytics-placeholder')
         };
     },
 
-    // ==================== CAMERA INITIALIZATION ====================
-    async initCamera() {
-        if (!this.dom.video) return;
+    bindEvents() {
+        this.dom.navItems.forEach(btn => {
+            btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
+        });
 
-        const constraints = {
-            video: {
-                facingMode: this.state.cameraFacing,
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            },
-            audio: false
-        };
+        this.dom.typeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.dom.typeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.state.scanType = btn.dataset.type;
+            });
+        });
 
-        try {
-            this.state.stream = await navigator.mediaDevices.getUserMedia(constraints);
-            this.dom.video.srcObject = this.state.stream;
-            
-            // Critical: Play the video once metadata is loaded
-            this.dom.video.onloadedmetadata = () => {
-                this.dom.video.play();
-                this.dom.statusBadge.textContent = "AI READY";
-                this.dom.statusBadge.style.color = "#4ade80"; // Success Green
-            };
-            
-            console.log("✅ Camera Started Successfully");
-        } catch (err) {
-            console.error("❌ Camera Error:", err);
-            this.dom.statusBadge.textContent = "CAMERA ERROR";
-            this.dom.statusBadge.style.color = "#f87171"; // Error Red
-        }
-    },
-
-    stopCamera() {
-        if (this.state.stream) {
-            this.state.stream.getTracks().forEach(track => track.stop());
-            this.state.stream = null;
-            console.log("⏹️ Camera Stopped");
-        }
-    },
-
-    // ==================== NEURAL MODULES ====================
-
-    triggerTriage(result) {
-        if (result.severity === 'CRITICAL') {
-            document.body.classList.add('emergency-alert-active');
-            
-            // Haptic/Audio Feedback
-            if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
-            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(() => {});
-
-            if (Notification.permission === "granted") {
-                new Notification("🚨 CRITICAL FINDING", { body: `${result.title} detected.` });
-            }
-            setTimeout(() => document.body.classList.remove('emergency-alert-active'), 5000);
-        }
-    },
-
-    drawHeatmap(coords) {
-        const ctx = this.dom.canvas.getContext('2d');
-        // Match canvas to video's actual display size
-        this.dom.canvas.width = this.dom.video.clientWidth;
-        this.dom.canvas.height = this.dom.video.clientHeight;
+        this.dom.captureBtn.addEventListener('click', () => this.performAnalysis());
+        document.getElementById('close-results')?.addEventListener('click', () => this.toggleResults(false));
+        document.getElementById('logout-btn')?.addEventListener('click', () => window.MedAI.logout());
         
-        ctx.clearRect(0, 0, this.dom.canvas.width, this.dom.canvas.height);
-
-        if (!coords) return;
-
-        const { x, y, radius } = coords;
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        grad.addColorStop(0, 'rgba(255, 0, 0, 0.7)');
-        grad.addColorStop(0.5, 'rgba(255, 165, 0, 0.4)');
-        grad.addColorStop(1, 'rgba(255, 255, 0, 0)');
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
+        // History Search
+        document.querySelector('.search-input')?.addEventListener('input', (e) => {
+            this.renderHistory(e.target.value);
+        });
     },
 
-    initVoiceScribe() {
-        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Speech || !this.dom.scribeBtn) return;
-
-        this.state.recognition = new Speech();
-        this.state.recognition.continuous = false;
-
-        this.state.recognition.onresult = (e) => {
-            const text = e.results[0][0].transcript;
-            if (this.dom.clinicalNotes) {
-                this.dom.clinicalNotes.value += (this.dom.clinicalNotes.value ? ". " : "") + text;
-            }
-        };
-
-        this.dom.scribeBtn.onclick = () => {
-            this.state.recognition.start();
-            this.dom.scribeBtn.classList.add('recording-active');
-        };
-        this.state.recognition.onend = () => this.dom.scribeBtn.classList.remove('recording-active');
+    updateUserSession() {
+        const user = window.MedAI.getUser();
+        if (user && this.dom.displayName) {
+            const prefix = user.name.toLowerCase().startsWith('dr') ? '' : 'Dr. ';
+            this.dom.displayName.textContent = `${prefix}${user.name}`;
+            
+            const avatar = document.getElementById('avatar-circle');
+            if(avatar) avatar.textContent = user.name.charAt(0).toUpperCase();
+        }
     },
 
-    // ==================== CORE ANALYSIS ====================
+    // --- Tab Management ---
+    switchTab(tabId) {
+        if (this.state.isAnalyzing) return;
+        Object.keys(this.dom.sections).forEach(key => {
+            this.dom.sections[key].classList.toggle('hidden', key !== tabId);
+        });
+        this.dom.navItems.forEach(nav => nav.classList.toggle('active', nav.dataset.tab === tabId));
+        
+        if (tabId === 'scanner') this.startCamera();
+        else this.stopCamera();
 
-    async performNeuralAnalysis() {
+        if (tabId === 'analytics') this.renderAnalytics();
+    },
+
+    // --- Analysis & History Logic ---
+    async performAnalysis() {
         if (this.state.isAnalyzing) return;
         this.state.isAnalyzing = true;
-        this.dom.statusBadge.textContent = "AI ANALYZING...";
+        this.dom.statusBadge.textContent = "ANALYZING...";
         
-        // Simulating processing time
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(res => setTimeout(res, 2000));
 
-        const result = this.generateClinicalResult();
+        const result = this.generateMockResult();
         
-        this.triggerTriage(result);
-        this.drawHeatmap(result.coords);
+        // Save to History
+        const historyEntry = {
+            id: Date.now(),
+            date: new Date().toLocaleString(),
+            type: this.state.scanType,
+            ...result
+        };
         
-        // Save & Update UI
-        this.state.history.unshift({ id: Date.now(), date: new Date().toLocaleString(), ...result });
+        this.state.history.unshift(historyEntry);
         localStorage.setItem('medai_history', JSON.stringify(this.state.history));
         
         this.renderResults(result);
         this.toggleResults(true);
         this.updateAnalytics();
-        this.renderHistory();
 
         this.state.isAnalyzing = false;
         this.dom.statusBadge.textContent = "AI READY";
     },
 
-    generateClinicalResult() {
-        const isCritical = Math.random() > 0.8;
-        return {
-            title: isCritical ? "Acute Abnormality Found" : "Routine Scan Clear",
-            severity: isCritical ? "CRITICAL" : "NORMAL",
-            confidence: Math.floor(Math.random() * 10) + 90,
-            type: this.state.scanType,
-            description: "Neural analysis suggests immediate clinical correlation.",
-            findings: isCritical ? ["Region of interest identified", "High variance detected"] : ["Baseline within normal limits"],
-            coords: isCritical ? { x: 150, y: 150, radius: 100 } : null
-        };
-    },
-
-    // ==================== UI HELPERS ====================
-
-    switchTab(tabId) {
-        Object.keys(this.dom.sections).forEach(key => {
-            this.dom.sections[key].classList.toggle('hidden', key !== tabId);
-        });
-        this.dom.navItems.forEach(nav => nav.classList.toggle('active', nav.dataset.tab === tabId));
-        this.state.activeTab = tabId;
+    renderHistory(filter = "") {
+        if (!this.dom.historyList) return;
         
-        if (tabId === 'scanner') {
-            this.initCamera();
-        } else {
-            this.stopCamera();
-            this.drawHeatmap(null);
+        const filtered = this.state.history.filter(item => 
+            item.title.toLowerCase().includes(filter.toLowerCase()) || 
+            item.type.includes(filter.toLowerCase())
+        );
+
+        if (filtered.length === 0) {
+            this.dom.historyList.innerHTML = `<div class="empty-state">No scans match your search.</div>`;
+            return;
         }
 
-        if (tabId === 'analytics') this.renderAnalytics();
+        this.dom.historyList.innerHTML = filtered.map(item => `
+            <div class="history-card animate-fade-in">
+                <div class="history-type-icon">${item.type === 'xray' ? '🩻' : '🧠'}</div>
+                <div class="history-info">
+                    <h4>${item.title}</h4>
+                    <p>${item.date} • ${item.type.toUpperCase()}</p>
+                </div>
+                <div class="history-conf">${item.confidence}%</div>
+            </div>
+        `).join('');
     },
 
+    // --- Analytics Logic ---
     updateAnalytics() {
         const hist = this.state.history;
         this.state.analytics.totalScans = hist.length;
+        
         if (hist.length > 0) {
             const sumConf = hist.reduce((acc, curr) => acc + curr.confidence, 0);
             this.state.analytics.averageConfidence = Math.round(sumConf / hist.length);
+            
+            // Distribution
             this.state.analytics.distribution = hist.reduce((acc, curr) => {
                 acc[curr.type] = (acc[curr.type] || 0) + 1;
                 return acc;
@@ -241,18 +177,31 @@ const DashApp = {
 
     renderAnalytics() {
         const { totalScans, averageConfidence, distribution } = this.state.analytics;
-        if (!this.dom.analyticsPlaceholder) return;
         
         this.dom.analyticsPlaceholder.innerHTML = `
             <div class="analytics-grid">
-                <div class="stat-card"><span class="label">Total Scans</span><span class="value">${totalScans}</span></div>
-                <div class="stat-card"><span class="label">Avg Conf.</span><span class="value">${averageConfidence}%</span></div>
+                <div class="stat-card">
+                    <span class="label">Total Diagnostics</span>
+                    <span class="value">${totalScans}</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Avg. AI Confidence</span>
+                    <span class="value">${averageConfidence}%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Active Modality</span>
+                    <span class="value">${this.getTopModality()}</span>
+                </div>
             </div>
-            <div class="dist-chart">
+            
+            <div class="distribution-chart-container">
+                <h4>Modality Distribution</h4>
                 ${Object.entries(distribution).map(([type, count]) => `
                     <div class="dist-row">
                         <span>${type.toUpperCase()}</span>
-                        <div class="progress-bar"><div class="fill" style="width:${totalScans ? (count/totalScans)*100 : 0}%"></div></div>
+                        <div class="progress-bar">
+                            <div class="fill" style="width: ${totalScans ? (count/totalScans)*100 : 0}%"></div>
+                        </div>
                         <span>${count}</span>
                     </div>
                 `).join('')}
@@ -260,21 +209,27 @@ const DashApp = {
         `;
     },
 
-    renderHistory(filter = "") {
-        if (!this.dom.historyList) return;
-        const filtered = this.state.history.filter(item => 
-            item.title.toLowerCase().includes(filter.toLowerCase())
-        );
+    getTopModality() {
+        const dist = this.state.analytics.distribution;
+        return Object.keys(dist).reduce((a, b) => dist[a] > dist[b] ? a : b).toUpperCase();
+    },
 
-        this.dom.historyList.innerHTML = filtered.map(item => `
-            <div class="history-card ${item.severity === 'CRITICAL' ? 'critical-border' : ''}">
-                <div class="history-info">
-                    <h4>${item.title}</h4>
-                    <p>${item.date} • ${item.type.toUpperCase()}</p>
-                </div>
-                <div class="item-badge ${item.severity.toLowerCase()}">${item.confidence}%</div>
-            </div>
-        `).join('') || `<div class="empty">No scans recorded</div>`;
+    // --- Camera & Results (Standard Logic) ---
+    async startCamera() {
+        try {
+            this.state.stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: this.state.cameraFacing }
+            });
+            this.dom.video.srcObject = this.state.stream;
+        } catch (e) { this.dom.statusBadge.textContent = "OFFLINE"; }
+    },
+
+    stopCamera() {
+        if (this.state.stream) this.state.stream.getTracks().forEach(t => t.stop());
+    },
+
+    toggleResults(show) {
+        this.dom.resultsPanel.classList.toggle('hidden', !show);
     },
 
     renderResults(data) {
@@ -285,27 +240,14 @@ const DashApp = {
         document.getElementById('findings-list').innerHTML = data.findings.map(f => `<li>${f}</li>`).join('');
     },
 
-    toggleResults(show) {
-        this.dom.resultsPanel.classList.toggle('hidden', !show);
-    },
-
-    bindEvents() {
-        this.dom.navItems.forEach(btn => btn.onclick = () => this.switchTab(btn.dataset.tab));
-        this.dom.typeBtns.forEach(btn => btn.onclick = () => {
-            this.dom.typeBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            this.state.scanType = btn.dataset.type;
-        });
-        this.dom.captureBtn.onclick = () => this.performNeuralAnalysis();
-        document.getElementById('close-results').onclick = () => this.toggleResults(false);
-        document.getElementById('logout-btn').onclick = () => window.MedAI.logout();
-    },
-
-    updateUserSession() {
-        const user = window.MedAI.getUser();
-        if (user && this.dom.displayName) {
-            this.dom.displayName.textContent = `Dr. ${user.name.replace('Dr. ', '')}`;
-        }
+    generateMockResult() {
+        const types = {
+            xray: { title: "Normal Thoracic Scan", confidence: 96, findings: ["Lungs clear", "No fractures"] },
+            ct: { title: "Clear Cranial View", confidence: 89, findings: ["No hemorrhage", "Ventricles normal"] },
+            mri: { title: "Soft Tissue Assessment", confidence: 92, findings: ["Ligaments intact", "No edema"] },
+            ultrasound: { title: "Abdominal Fluid Check", confidence: 85, findings: ["Organ size normal", "No free fluid"] }
+        };
+        return types[this.state.scanType] || types.xray;
     }
 };
 
