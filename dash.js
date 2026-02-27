@@ -1,16 +1,38 @@
- /**
- * MED-AI DASHBOARD CORE v2 (Fully Functional Demo)
+/**
+ * MED-AI DASHBOARD CORE v2.1 (Improved & Maintainable)
  * Camera, History, Analytics & Mock AI
  */
 
 const DashApp = {
+    // Configuration constants
+    CONFIG: {
+        STORAGE_KEY: 'medai_history',
+        DEBOUNCE_DELAY: 300,
+        PROGRESS_INTERVAL: 200,
+        MIN_CONFIDENCE: 80,
+        MAX_CONFIDENCE: 100,
+        SCAN_TYPES: ['xray', 'ct', 'mri', 'ultrasound']
+    },
+
+    // Mock data templates
+    MOCK_DATA: {
+        titles: {
+            xray: ["Normal Thoracic Scan", "Mild Pulmonary Opacity"],
+            ct: ["Clear Cranial View", "Sinus Inflammation"],
+            mri: ["Soft Tissue Assessment", "Ligament Strain"],
+            ultrasound: ["Abdominal Scan Clear", "Gallbladder Thickening"]
+        },
+        defaultFindings: ["Feature extraction complete", "Pattern match successful", "No critical anomalies detected"],
+        defaultDescription: "AI-powered diagnostic interpretation using pattern analysis."
+    },
+
     state: {
         activeTab: 'scanner',
         scanType: 'xray',
         isAnalyzing: false,
         cameraFacing: 'environment',
         stream: null,
-        history: JSON.parse(localStorage.getItem('medai_history')) || [],
+        history: [],
         analytics: {
             totalScans: 0,
             averageConfidence: 0,
@@ -18,145 +40,272 @@ const DashApp = {
         }
     },
 
+    // DOM element cache
+    dom: {},
+
     init() {
         console.log("🚀 Med-AI Dashboard Initializing...");
+        this.loadState();
         this.cacheDOM();
         this.bindEvents();
         this.seedDemoData();
         this.updateUserSession();
+        this.refreshUI();
+    },
+
+    // Load persisted state
+    loadState() {
+        try {
+            const savedHistory = localStorage.getItem(this.CONFIG.STORAGE_KEY);
+            this.state.history = savedHistory ? JSON.parse(savedHistory) : [];
+        } catch (error) {
+            console.error("Failed to load history:", error);
+            this.state.history = [];
+        }
         this.updateAnalytics();
-        this.renderHistory();
-        this.startCamera();
+    },
+
+    // Save state to localStorage
+    saveState() {
+        try {
+            localStorage.setItem(this.CONFIG.STORAGE_KEY, JSON.stringify(this.state.history));
+        } catch (error) {
+            console.error("Failed to save history:", error);
+        }
     },
 
     cacheDOM() {
+        const getElement = (id, query = false) => {
+            return query ? document.querySelector(id) : document.getElementById(id);
+        };
+
         this.dom = {
-            video: document.getElementById('camera-stream'),
-            captureBtn: document.getElementById('capture-trigger'),
-            statusBadge: document.getElementById('ai-status'),
-            resultsPanel: document.getElementById('results-panel'),
+            video: getElement('camera-stream'),
+            captureBtn: getElement('capture-trigger'),
+            statusBadge: getElement('ai-status'),
+            resultsPanel: getElement('results-panel'),
+            closeResults: getElement('close-results'),
+            displayName: getElement('display-name'),
+            historyList: getElement('history-list'),
             sections: {
-                scanner: document.getElementById('scanner-section'),
-                history: document.getElementById('history-section'),
-                analytics: document.getElementById('analytics-section')
+                scanner: getElement('scanner-section'),
+                history: getElement('history-section'),
+                analytics: getElement('analytics-section')
             },
             navItems: document.querySelectorAll('.nav-item'),
             typeBtns: document.querySelectorAll('.type-btn'),
-            displayName: document.getElementById('display-name'),
-            historyList: document.getElementById('history-list'),
-            analyticsPlaceholder: document.querySelector('.analytics-placeholder')
+            analyticsPlaceholder: document.querySelector('.analytics-placeholder'),
+            searchInput: document.querySelector('.search-input'),
+            resultElements: {
+                confidencePath: getElement('confidence-path'),
+                confidenceText: getElement('confidence-text'),
+                title: getElement('result-title'),
+                description: getElement('result-description'),
+                findingsList: getElement('findings-list')
+            }
         };
     },
 
     bindEvents() {
-        this.dom.navItems.forEach(btn => btn.addEventListener('click', () => this.switchTab(btn.dataset.tab)));
-
-        this.dom.typeBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.dom.typeBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.state.scanType = btn.dataset.type;
-            });
+        // Navigation
+        this.dom.navItems.forEach(btn => {
+            btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
         });
 
-        this.dom.captureBtn?.addEventListener('click', () => this.performAnalysis());
+        // Scan type selection
+        this.dom.typeBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleScanTypeClick(e));
+        });
 
-        document.getElementById('close-results')?.addEventListener('click', () => this.toggleResults(false));
-
-        const searchInput = document.querySelector('.search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', this.debounce((e) => this.renderHistory(e.target.value), 300));
+        // Capture button
+        if (this.dom.captureBtn) {
+            this.dom.captureBtn.addEventListener('click', () => this.performAnalysis());
         }
+
+        // Close results
+        if (this.dom.closeResults) {
+            this.dom.closeResults.addEventListener('click', () => this.toggleResults(false));
+        }
+
+        // Search input with debounce
+        if (this.dom.searchInput) {
+            this.dom.searchInput.addEventListener('input', 
+                this.debounce((e) => this.renderHistory(e.target.value), this.CONFIG.DEBOUNCE_DELAY)
+            );
+        }
+
+        // Handle page unload
+        window.addEventListener('beforeunload', () => this.cleanup());
+    },
+
+    handleScanTypeClick(event) {
+        const btn = event.currentTarget;
+        this.dom.typeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.state.scanType = btn.dataset.type;
+    },
+
+    cleanup() {
+        this.stopCamera();
+    },
+
+    refreshUI() {
+        this.updateAnalytics();
+        this.renderHistory();
+        this.startCamera().catch(error => {
+            console.error("Camera start failed:", error);
+            this.setStatus("CAMERA OFFLINE");
+        });
     },
 
     updateUserSession() {
-        if (!window.MedAI?.getUser) return;
-        const user = window.MedAI.getUser();
-        if (user && this.dom.displayName) {
-            const prefix = user.name.toLowerCase().startsWith('dr') ? '' : 'Dr. ';
-            this.dom.displayName.textContent = `${prefix}${user.name}`;
+        if (!window.MedAI?.getUser || !this.dom.displayName) return;
+        
+        try {
+            const user = window.MedAI.getUser();
+            if (user?.name) {
+                const prefix = user.name.toLowerCase().startsWith('dr') ? '' : 'Dr. ';
+                this.dom.displayName.textContent = `${prefix}${user.name}`;
+            }
+        } catch (error) {
+            console.error("Failed to update user session:", error);
         }
     },
 
     switchTab(tabId) {
         if (this.state.isAnalyzing) return;
-        Object.keys(this.dom.sections).forEach(key => {
-            this.dom.sections[key]?.classList.toggle('hidden', key !== tabId);
+
+        // Hide all sections
+        Object.values(this.dom.sections).forEach(section => {
+            if (section) section.classList.add('hidden');
         });
 
-        this.dom.navItems.forEach(nav => nav.classList.toggle('active', nav.dataset.tab === tabId));
+        // Show selected section
+        const selectedSection = this.dom.sections[tabId];
+        if (selectedSection) selectedSection.classList.remove('hidden');
 
-        if (tabId === 'scanner') this.startCamera();
-        else this.stopCamera();
+        // Update navigation
+        this.dom.navItems.forEach(nav => {
+            nav.classList.toggle('active', nav.dataset.tab === tabId);
+        });
 
-        if (tabId === 'analytics') this.renderAnalytics();
+        // Handle camera
+        if (tabId === 'scanner') {
+            this.startCamera();
+        } else {
+            this.stopCamera();
+        }
+
+        // Render tab-specific content
+        if (tabId === 'analytics') {
+            this.renderAnalytics();
+        }
+
+        this.state.activeTab = tabId;
     },
 
     async startCamera() {
+        if (this.state.stream) return;
+
         try {
-            this.state.stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: this.state.cameraFacing }
-            });
-            this.dom.video.srcObject = this.state.stream;
-            this.dom.video.play();
-            this.setStatus("AI READY");
+            const constraints = {
+                video: { 
+                    facingMode: this.state.cameraFacing,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+
+            this.state.stream = await navigator.mediaDevices.getUserMedia(constraints);
+            
+            if (this.dom.video) {
+                this.dom.video.srcObject = this.state.stream;
+                await this.dom.video.play();
+                this.setStatus("AI READY");
+            }
         } catch (err) {
-            console.error("Camera error:", err);
-            this.setStatus("CAMERA OFFLINE");
+            throw new Error(`Camera access failed: ${err.message}`);
         }
     },
 
     stopCamera() {
         if (this.state.stream) {
-            this.state.stream.getTracks().forEach(track => track.stop());
+            this.state.stream.getTracks().forEach(track => {
+                track.stop();
+            });
             this.state.stream = null;
+            
+            if (this.dom.video) {
+                this.dom.video.srcObject = null;
+            }
         }
     },
 
     toggleCamera() {
         this.stopCamera();
         this.state.cameraFacing = this.state.cameraFacing === 'environment' ? 'user' : 'environment';
-        this.startCamera();
+        this.startCamera().catch(error => {
+            console.error("Camera toggle failed:", error);
+            this.setStatus("CAMERA OFFLINE");
+        });
     },
 
     captureFrame() {
-        if (!this.dom.video) return null;
+        if (!this.dom.video || !this.dom.video.videoWidth) return null;
+
         const canvas = document.createElement('canvas');
         canvas.width = this.dom.video.videoWidth;
         canvas.height = this.dom.video.videoHeight;
+        
         const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+        
         ctx.drawImage(this.dom.video, 0, 0);
         return canvas.toDataURL('image/jpeg');
     },
 
     async performAnalysis() {
         if (this.state.isAnalyzing) return;
+
         this.state.isAnalyzing = true;
         this.setStatus("ANALYZING 0%");
 
-        this.captureFrame();
+        try {
+            // Capture frame (optional, could be used for actual processing)
+            this.captureFrame();
 
-        await this.simulateProgress();
+            // Simulate AI processing
+            await this.simulateProgress();
 
-        const result = this.generateMockResult();
+            // Generate and save result
+            const result = this.generateMockResult();
+            const entry = this.createHistoryEntry(result);
 
-        const entry = {
+            this.state.history.unshift(entry);
+            this.saveState();
+
+            // Update UI
+            this.renderResults(entry);
+            this.toggleResults(true);
+            this.updateAnalytics();
+            this.renderHistory();
+
+        } catch (error) {
+            console.error("Analysis failed:", error);
+            this.setStatus("ANALYSIS FAILED");
+        } finally {
+            this.state.isAnalyzing = false;
+            this.setStatus("AI READY");
+        }
+    },
+
+    createHistoryEntry(result) {
+        return {
             id: Date.now(),
             date: new Date().toLocaleString(),
             type: this.state.scanType,
             ...result
         };
-
-        this.state.history.unshift(entry);
-        localStorage.setItem('medai_history', JSON.stringify(this.state.history));
-
-        this.renderResults(entry);
-        this.toggleResults(true);
-        this.updateAnalytics();
-        this.renderHistory();
-
-        this.state.isAnalyzing = false;
-        this.setStatus("AI READY");
     },
 
     simulateProgress() {
@@ -170,75 +319,120 @@ const DashApp = {
                     resolve();
                 }
                 this.setStatus(`ANALYZING ${Math.floor(progress)}%`);
-            }, 200);
+            }, this.CONFIG.PROGRESS_INTERVAL);
         });
     },
 
     setStatus(text) {
-        if (this.dom.statusBadge) this.dom.statusBadge.textContent = text;
+        if (this.dom.statusBadge) {
+            this.dom.statusBadge.textContent = text;
+        }
     },
 
     renderHistory(filter = "") {
         if (!this.dom.historyList) return;
-        const filtered = this.state.history.filter(item =>
-            item.title.toLowerCase().includes(filter.toLowerCase()) ||
-            item.type.includes(filter.toLowerCase())
-        );
 
+        const filtered = this.filterHistory(filter);
+        
         if (filtered.length === 0) {
-            this.dom.historyList.innerHTML = `<div class="empty-state">No scans found.</div>`;
+            this.dom.historyList.innerHTML = '<div class="empty-state">No scans found.</div>';
             return;
         }
 
-        this.dom.historyList.innerHTML = filtered.map(item => `
+        this.dom.historyList.innerHTML = filtered.map(item => this.createHistoryCard(item)).join('');
+
+        // Attach click handlers to history cards
+        this.attachHistoryCardHandlers();
+    },
+
+    filterHistory(filter) {
+        if (!filter) return this.state.history;
+        
+        const searchTerm = filter.toLowerCase();
+        return this.state.history.filter(item => 
+            item.title?.toLowerCase().includes(searchTerm) ||
+            item.type?.toLowerCase().includes(searchTerm)
+        );
+    },
+
+    createHistoryCard(item) {
+        return `
             <div class="history-card" data-id="${item.id}">
                 <div class="history-info">
-                    <h4>${item.title}</h4>
+                    <h4>${this.escapeHtml(item.title)}</h4>
                     <p>${item.date} • ${item.type.toUpperCase()}</p>
                 </div>
                 <div class="history-conf">${item.confidence}%</div>
             </div>
-        `).join('');
+        `;
+    },
 
-        // Click to reopen
-        this.dom.historyList.querySelectorAll('.history-card')
-            .forEach(card => {
-                card.addEventListener('click', () => {
-                    const id = Number(card.dataset.id);
-                    const scan = this.state.history.find(h => h.id === id);
-                    if (scan) {
-                        this.renderResults(scan);
-                        this.toggleResults(true);
-                        this.switchTab('scanner');
-                    }
-                });
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    },
+
+    attachHistoryCardHandlers() {
+        this.dom.historyList.querySelectorAll('.history-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = Number(card.dataset.id);
+                const scan = this.state.history.find(h => h.id === id);
+                if (scan) {
+                    this.renderResults(scan);
+                    this.toggleResults(true);
+                    this.switchTab('scanner');
+                }
             });
+        });
     },
 
     updateAnalytics() {
-        const hist = this.state.history;
-        const total = hist.length;
+        const history = this.state.history;
+        const total = history.length;
+        
         this.state.analytics.totalScans = total;
 
         if (total === 0) {
-            this.state.analytics.averageConfidence = 0;
-            this.state.analytics.distribution = { xray: 0, ct: 0, mri: 0, ultrasound: 0 };
+            this.resetAnalytics();
             return;
         }
 
-        const sumConf = hist.reduce((a, c) => a + c.confidence, 0);
-        this.state.analytics.averageConfidence = Math.round(sumConf / total);
+        // Calculate average confidence
+        const validHistory = history.filter(item => typeof item.confidence === 'number');
+        if (validHistory.length > 0) {
+            const sumConf = validHistory.reduce((sum, item) => sum + item.confidence, 0);
+            this.state.analytics.averageConfidence = Math.round(sumConf / validHistory.length);
+        }
 
-        this.state.analytics.distribution = hist.reduce((acc, c) => {
-            acc[c.type] = (acc[c.type] || 0) + 1;
-            return acc;
-        }, { xray: 0, ct: 0, mri: 0, ultrasound: 0 });
+        // Calculate distribution
+        this.state.analytics.distribution = this.calculateDistribution(history);
+    },
+
+    resetAnalytics() {
+        this.state.analytics.averageConfidence = 0;
+        this.state.analytics.distribution = { 
+            xray: 0, ct: 0, mri: 0, ultrasound: 0 
+        };
+    },
+
+    calculateDistribution(history) {
+        const distribution = { xray: 0, ct: 0, mri: 0, ultrasound: 0 };
+        
+        history.forEach(item => {
+            if (distribution.hasOwnProperty(item.type)) {
+                distribution[item.type]++;
+            }
+        });
+        
+        return distribution;
     },
 
     renderAnalytics() {
         if (!this.dom.analyticsPlaceholder) return;
-        const { totalScans, averageConfidence, distribution } = this.state.analytics;
-        const topModality = totalScans ? this.getTopModality() : 'N/A';
+
+        const { totalScans, averageConfidence } = this.state.analytics;
+        const topModality = this.getTopModality();
 
         this.dom.analyticsPlaceholder.innerHTML = `
             <div class="stat-card">
@@ -258,60 +452,104 @@ const DashApp = {
 
     getTopModality() {
         const dist = this.state.analytics.distribution;
-        return Object.keys(dist).reduce((a, b) => dist[a] > dist[b] ? a : b).toUpperCase();
+        
+        // Check if all values are zero
+        if (Object.values(dist).every(value => value === 0)) {
+            return 'N/A';
+        }
+
+        return Object.keys(dist)
+            .reduce((a, b) => dist[a] > dist[b] ? a : b)
+            .toUpperCase();
     },
 
     toggleResults(show) {
-        this.dom.resultsPanel?.classList.toggle('hidden', !show);
+        if (this.dom.resultsPanel) {
+            this.dom.resultsPanel.classList.toggle('hidden', !show);
+        }
     },
 
     renderResults(data) {
-        document.getElementById('confidence-path').style.strokeDasharray = `${data.confidence}, 100`;
-        document.getElementById('confidence-text').textContent = `${data.confidence}%`;
-        document.getElementById('result-title').textContent = data.title;
-        document.getElementById('result-description').textContent = data.description;
-        document.getElementById('findings-list').innerHTML = data.findings.map(f => `<li>${f}</li>`).join('');
+        const { resultElements } = this.dom;
+        
+        if (resultElements.confidencePath) {
+            resultElements.confidencePath.style.strokeDasharray = `${data.confidence}, 100`;
+        }
+        
+        if (resultElements.confidenceText) {
+            resultElements.confidenceText.textContent = `${data.confidence}%`;
+        }
+        
+        if (resultElements.title) {
+            resultElements.title.textContent = data.title;
+        }
+        
+        if (resultElements.description) {
+            resultElements.description.textContent = data.description;
+        }
+        
+        if (resultElements.findingsList && Array.isArray(data.findings)) {
+            resultElements.findingsList.innerHTML = data.findings
+                .map(finding => `<li>${finding}</li>`)
+                .join('');
+        }
     },
 
     generateMockResult() {
-        const confidence = Math.floor(80 + Math.random() * 20);
-        const titles = {
-            xray: ["Normal Thoracic Scan", "Mild Pulmonary Opacity"],
-            ct: ["Clear Cranial View", "Sinus Inflammation"],
-            mri: ["Soft Tissue Assessment", "Ligament Strain"],
-            ultrasound: ["Abdominal Scan Clear", "Gallbladder Thickening"]
-        };
-        const title = titles[this.state.scanType][Math.floor(Math.random() * titles[this.state.scanType].length)];
+        const titles = this.MOCK_DATA.titles[this.state.scanType] || this.MOCK_DATA.titles.xray;
+        const confidence = Math.floor(this.CONFIG.MIN_CONFIDENCE + Math.random() * 20);
+        const title = titles[Math.floor(Math.random() * titles.length)];
+
         return {
             title,
             confidence,
-            description: "AI-powered diagnostic interpretation using pattern analysis.",
-            findings: ["Feature extraction complete", "Pattern match successful", "No critical anomalies detected"]
+            description: this.MOCK_DATA.defaultDescription,
+            findings: [...this.MOCK_DATA.defaultFindings] // Create a copy
         };
     },
 
     debounce(fn, delay) {
-        let timeout;
+        let timeoutId;
         return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => fn.apply(this, args), delay);
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => fn.apply(this, args), delay);
         };
     },
 
     seedDemoData() {
         if (this.state.history.length > 0) return;
-        ['xray','ct','mri'].forEach(type => {
+
+        const demoTypes = ['xray', 'ct', 'mri'];
+        const demoData = [];
+
+        demoTypes.forEach(type => {
+            // Temporarily set scan type for mock generation
+            const originalType = this.state.scanType;
             this.state.scanType = type;
+            
             const result = this.generateMockResult();
-            this.state.history.push({
+            demoData.push({
                 id: Date.now() + Math.random(),
                 date: new Date().toLocaleString(),
                 type,
                 ...result
             });
+
+            // Restore original type
+            this.state.scanType = originalType;
         });
-        localStorage.setItem('medai_history', JSON.stringify(this.state.history));
+
+        this.state.history.push(...demoData);
+        this.saveState();
+        this.updateAnalytics();
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => DashApp.init());
+// Initialize application
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        DashApp.init();
+    } catch (error) {
+        console.error("Failed to initialize Med-AI Dashboard:", error);
+    }
+});
