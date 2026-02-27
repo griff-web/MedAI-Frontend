@@ -1,205 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Diagnostic Dashboard | Med-AI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<!-- Favicon -->
-<link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
-
-<!-- PWA manifest -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-
-<!-- Apple PWA Support -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MedAI">
-
-<!-- Stylesheets -->
-<link rel="stylesheet" href="auth.css">
-<link rel="stylesheet" href="dash.css">
-
-<!-- Scripts -->
-<script src="auth.js" defer></script>
-<script src="dash.js" defer></script>
-
+    <meta charset="UTF-8">
+    <title>Med-AI Diagnostic Dashboard | Kenyan Flag Edition 🇰🇪</title>
+    
+    <!-- Primary Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Advanced medical imaging diagnostics with AI-powered analysis">
+    <meta name="theme-color" content="#1E1E1E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Med-AI">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQRHGEmi5WbR1z9s2efKq33kxiId0ir2_dg&s">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#1E1E1E">
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="dash.css">
+    
+    <!-- Preconnect to API -->
+    <link rel="preconnect" href="https://ai-p17b.onrender.com">
+    <link rel="dns-prefetch" href="https://ai-p17b.onrender.com">
+    
+    <!-- Scripts with defer for optimal loading -->
+    <script src="auth.js" defer></script>
+    <script src="dash.js" defer></script>
+    
+    <!-- Critical inline styles for initial render -->
+    <style>
+        /* Critical path styles to prevent FOUC */
+        .hidden { display: none !important; }
+        .dashboard-body { opacity: 0; transition: opacity 0.3s ease; }
+        .dashboard-body.loaded { opacity: 1; }
+    </style>
 </head>
 
 <body class="dashboard-body">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
 
-<nav class="dash-nav">
-    <div class="nav-brand">
-        <div class="logo">Med<span>AI</span></div>
-    </div>
+    <!-- Kenyan Flag Corner Decorations -->
+    <div class="flag-corner flag-corner-tl" aria-hidden="true"></div>
+    <div class="flag-corner flag-corner-br" aria-hidden="true"></div>
 
-    <div class="user-profile">
-        <div class="user-info">
-            <span class="user-name" id="display-name">Dr. Loading...</span>
-            <span class="user-role">Medical Practitioner</span>
+    <!-- Navigation -->
+    <nav class="dash-nav" aria-label="Main navigation">
+        <div class="nav-brand">
+            <div class="logo" aria-label="Med-AI logo">Med<span>AI</span></div>
         </div>
-        <div class="user-avatar" id="avatar-circle">MD</div>
-    </div>
-</nav>
 
-<main class="dash-container">
-
-    <aside class="dash-sidebar">
-        <button class="nav-item active" data-tab="scanner">
-            <i class="icon-camera">📸</i>
-            <span>Scanner</span>
-        </button>
-
-        <button class="nav-item" data-tab="history">
-            <i class="icon-history">⏳</i>
-            <span>History</span>
-        </button>
-
-        <button class="nav-item" data-tab="analytics">
-            <i class="icon-chart">📊</i>
-            <span>Analytics</span>
-        </button>
-        
-        <div class="sidebar-spacer"></div>
-
-        <button class="nav-item logout-trigger" data-tab="log-out" onclick="location.href='login2.html'">
-            <i class="icon-logout">🚪</i>
-            <span>Log-out</span>
-        </button>
-    </aside>
-
-    <section class="main-content">
-
-        <div id="scanner-section" class="content-view">
-            <header class="view-header">
-                <h2>Live Diagnostic Scan</h2>
-                <p>Select scan type and align the medical imagery within the viewfinder.</p>
-            </header>
-
-            <div class="scan-type-selector">
-                <button class="type-btn active" data-type="xray">X-Ray</button>
-                <button class="type-btn" data-type="ct">CT Scan</button>
-                <button class="type-btn" data-type="mri">MRI</button>
-                <button class="type-btn" data-type="ultrasound">Ultrasound</button>
+        <div class="user-profile" role="button" tabindex="0" aria-label="User profile" id="user-profile-btn">
+            <div class="user-info">
+                <span class="user-name" id="display-name">Dr. Loading...</span>
+                <span class="user-role">Medical Practitioner</span>
             </div>
+            <div class="user-avatar" id="avatar-circle" aria-hidden="true">MD</div>
+        </div>
+    </nav>
 
-            <div class="scanner-card">
-                <div class="camera-container" id="viewfinder">
-                    <video id="camera-stream" autoplay playsinline muted></video>
+    <!-- Main Dashboard Container -->
+    <main class="dash-container" id="main-content">
+        <!-- Sidebar Navigation -->
+        <aside class="dash-sidebar" aria-label="Dashboard sections">
+            <button class="nav-item active" data-tab="scanner" aria-current="page">
+                <i class="icon-camera" aria-hidden="true">📸</i>
+                <span>Scanner</span>
+            </button>
 
-                    <div class="scanner-overlay">
-                        <div class="target-box">
-                            <div class="corners"></div>
-                            <div class="scan-line"></div>
+            <button class="nav-item" data-tab="history">
+                <i class="icon-history" aria-hidden="true">⏳</i>
+                <span>History</span>
+            </button>
+
+            <button class="nav-item" data-tab="analytics">
+                <i class="icon-chart" aria-hidden="true">📊</i>
+                <span>Analytics</span>
+            </button>
+            
+            <div class="sidebar-spacer" aria-hidden="true"></div>
+
+            <button class="nav-item logout-trigger" data-tab="log-out" id="logout-btn" aria-label="Log out">
+                <i class="icon-logout" aria-hidden="true">🚪</i>
+                <span>Log-out</span>
+            </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <section class="main-content" aria-label="Dashboard content">
+            <!-- Scanner Section -->
+            <div id="scanner-section" class="content-view">
+                <header class="view-header">
+                    <h2>Live Diagnostic Scan</h2>
+                    <p>Select scan type and align the medical imagery within the viewfinder.</p>
+                </header>
+
+                <!-- Scan Type Selector -->
+                <div class="scan-type-selector" role="tablist" aria-label="Scan types">
+                    <button class="type-btn active" data-type="xray" role="tab" aria-selected="true" aria-controls="scanner-section">X-Ray</button>
+                    <button class="type-btn" data-type="ct" role="tab" aria-selected="false" aria-controls="scanner-section">CT Scan</button>
+                    <button class="type-btn" data-type="mri" role="tab" aria-selected="false" aria-controls="scanner-section">MRI</button>
+                    <button class="type-btn" data-type="ultrasound" role="tab" aria-selected="false" aria-controls="scanner-section">Ultrasound</button>
+                </div>
+
+                <!-- Scanner Card -->
+                <div class="scanner-card">
+                    <div class="camera-container" id="viewfinder">
+                        <video id="camera-stream" autoplay playsinline muted></video>
+
+                        <!-- Scanner Overlay -->
+                        <div class="scanner-overlay" aria-hidden="true">
+                            <div class="target-box">
+                                <div class="corners"></div>
+                                <div class="scan-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- AI Status Badge -->
+                        <div class="ai-status-badge online" id="ai-status-container" role="status" aria-live="polite">
+                            <span class="pulse-dot" aria-hidden="true"></span>
+                            <span id="ai-status">AI READY</span>
+                        </div>
+
+                        <!-- Camera Controls Overlay -->
+                        <div class="camera-zoom-indicator" id="zoom-indicator" aria-hidden="true">1x</div>
+                    </div>
+
+                    <!-- Camera Controls -->
+                    <div class="camera-controls">
+                        <button id="capture-trigger" class="btn-capture" title="Capture & Analyze" aria-label="Capture and analyze scan">
+                            <div class="inner-circle" aria-hidden="true"></div>
+                        </button>
+                        <div class="tool-group">
+                            <button id="toggle-torch" class="btn-tool" title="Toggle Flash" aria-label="Toggle flashlight">
+                                <span aria-hidden="true">🔦</span>
+                            </button>
+                            <button id="switch-camera" class="btn-tool" title="Switch Camera" aria-label="Switch between front and back camera">
+                                <span aria-hidden="true">🔄</span>
+                            </button>
+                            <button id="upload-local" class="btn-tool" title="Upload Local File" aria-label="Upload image from device">
+                                <span aria-hidden="true">📂</span>
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <div class="ai-status-badge" id="ai-status-container">
-                        <span class="pulse-dot"></span>
-                        <span id="ai-status">AI READY</span>
+                <!-- Quick Tips -->
+                <div class="scanner-tips" role="complementary" aria-label="Scanner tips">
+                    <p class="tip">💡 Position the area of interest within the green frame for optimal analysis</p>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div id="history-section" class="content-view hidden">
+                <header class="view-header">
+                    <h2>Scan History</h2>
+                    <p>Review and manage previous diagnostic scans</p>
+                    <div class="history-controls">
+                        <div class="search-wrapper">
+                            <i class="search-icon" aria-hidden="true">🔍</i>
+                            <input type="text" placeholder="Search by date, type, or findings..." class="search-input" aria-label="Search scan history">
+                        </div>
+                        <button class="btn-filter" aria-label="Filter scans" id="filter-history">
+                            <span aria-hidden="true">🔽</span>
+                        </button>
+                    </div>
+                </header>
+                
+                <!-- Filter Bar (hidden by default) -->
+                <div class="filter-bar hidden" id="filter-bar">
+                    <button class="filter-chip" data-filter="today">Today</button>
+                    <button class="filter-chip" data-filter="week">This Week</button>
+                    <button class="filter-chip" data-filter="month">This Month</button>
+                    <button class="filter-chip" data-filter="xray">X-Ray</button>
+                    <button class="filter-chip" data-filter="ct">CT</button>
+                    <button class="filter-chip" data-filter="mri">MRI</button>
+                    <button class="filter-chip" data-filter="ultrasound">Ultrasound</button>
+                </div>
+                
+                <div id="history-list" class="data-grid">
+                    <!-- Dynamically populated by JavaScript -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>No recent scans found.</p>
+                        <p class="empty-state-sub">Start by capturing or uploading a scan</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics-section" class="content-view hidden">
+                <header class="view-header">
+                    <h2>Performance Insights</h2>
+                    <p>Global AI confidence and diagnostic distribution</p>
+                </header>
+                
+                <!-- Analytics Placeholder - Populated by JS -->
+                <div class="analytics-placeholder">
+                    <!-- Analytics cards will be injected here -->
+                </div>
+
+                <!-- Additional Analytics Details -->
+                <div class="analytics-details hidden" id="analytics-details">
+                    <h3>Scan Distribution</h3>
+                    <div class="distribution-chart" id="distribution-chart"></div>
+                    
+                    <h3>Confidence Trends</h3>
+                    <div class="trend-chart" id="trend-chart"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Results Panel Modal -->
+    <div id="results-panel" class="results-container hidden" role="dialog" aria-modal="true" aria-labelledby="result-title">
+        <div class="panel-blur-overlay" aria-hidden="true"></div>
+        <div class="results-content animate-slide-up">
+            <div class="panel-header">
+                <div class="header-main">
+                    <span class="ai-badge">MED-AI ANALYSIS</span>
+                    <h3 id="results-title">Diagnostic Report</h3>
+                </div>
+                <button id="close-results" class="btn-close" aria-label="Close results panel">✕</button>
+            </div>
+
+            <div class="results-body">
+                <!-- Analysis Summary -->
+                <div class="analysis-summary">
+                    <div class="confidence-box">
+                        <div class="confidence-score" role="img" aria-label="Confidence score">
+                            <svg viewBox="0 0 36 36" class="circular-chart blue" aria-hidden="true">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="circle" id="confidence-path" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="percentage" id="confidence-text" aria-label="0 percent confidence">0%</div>
+                        </div>
+                        <span class="label">AI Confidence</span>
+                    </div>
+
+                    <div class="diagnosis-label">
+                        <h4 id="result-title">Reviewing Imagery...</h4>
+                        <p id="result-description">Our neural network is processing the pathological markers in the scan.</p>
                     </div>
                 </div>
 
-                <div class="camera-controls">
-                    <button id="capture-trigger" class="btn-capture" title="Capture & Analyze">
-                        <div class="inner-circle"></div>
+                <!-- Clinical Findings -->
+                <div class="clinical-findings">
+                    <h5>
+                        <i class="icon-list" aria-hidden="true">📋</i>
+                        Clinical Observations
+                    </h5>
+                    <ul id="findings-list" class="findings-grid" aria-label="Clinical findings">
+                        <!-- Findings populated by JavaScript -->
+                        <li class="loading-item" aria-busy="true">
+                            <div class="loading-spinner" aria-hidden="true"></div>
+                            Calibrating sensors...
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Additional Medical Metadata (hidden by default) -->
+                <div class="medical-metadata hidden" id="medical-metadata">
+                    <div class="metadata-row">
+                        <span class="metadata-label">Study ID:</span>
+                        <span class="metadata-value" id="study-id">MED-2024-001</span>
+                    </div>
+                    <div class="metadata-row">
+                        <span class="metadata-label">Modality:</span>
+                        <span class="metadata-value" id="modality-type">X-Ray</span>
+                    </div>
+                    <div class="metadata-row">
+                        <span class="metadata-label">AI Model:</span>
+                        <span class="metadata-value" id="ai-model">v6.0.0</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-footer">
+                    <button class="btn-outline" id="print-labels" aria-label="Print labels">
+                        <span aria-hidden="true">🏷️</span>
+                        Print Labels
                     </button>
-                    <div class="tool-group">
-                        <button id="toggle-torch" class="btn-tool" title="Toggle Flash">🔦</button>
-                        <button id="upload-local" class="btn-tool" title="Upload Local File">📂</button>
-                    </div>
+                    <button id="download-pdf" class="btn-primary" aria-label="Download medical report">
+                        <span aria-hidden="true">📥</span>
+                        Download Medical Report
+                    </button>
+                    <button id="share-report" class="btn-icon" aria-label="Share report" title="Share">
+                        <span aria-hidden="true">📤</span>
+                    </button>
                 </div>
-            </div>
-        </div>
-
-        <div id="history-section" class="content-view hidden">
-            <header class="view-header">
-                <h2>Scan History</h2>
-                <div class="history-controls">
-                    <input type="text" placeholder="Search patient ID..." class="search-input">
-                </div>
-            </header>
-            <div id="history-list" class="data-grid">
-                <div class="empty-state">No recent scans found.</div>
-            </div>
-        </div>
-
-        <div id="analytics-section" class="content-view hidden">
-            <header class="view-header">
-                <h2>Performance Insights</h2>
-                <p>Global AI confidence and diagnostic distribution.</p>
-            </header>
-            <div class="analytics-placeholder">
-                <!-- Charts or graphs go here -->
-            </div>
-        </div>
-
-    </section>
-</main>
-
-<div id="results-panel" class="results-container hidden">
-    <div class="panel-blur-overlay"></div>
-    <div class="results-content animate-slide-up">
-        <div class="panel-header">
-            <div class="header-main">
-                <span class="ai-badge">MED-AI ANALYSIS</span>
-                <h3>Diagnostic Report</h3>
-            </div>
-            <button id="close-results" aria-label="Close">✕</button>
-        </div>
-
-        <div class="results-body">
-            <div class="analysis-summary">
-                <div class="confidence-box">
-                    <div class="confidence-score">
-                        <svg viewBox="0 0 36 36" class="circular-chart blue">
-                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path class="circle" id="confidence-path" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <div class="percentage" id="confidence-text">0%</div>
-                    </div>
-                    <span class="label">AI Confidence</span>
-                </div>
-
-                <div class="diagnosis-label">
-                    <h4 id="result-title">Reviewing Imagery...</h4>
-                    <p id="result-description">Our neural network is processing the pathological markers in the scan.</p>
-                </div>
-            </div>
-
-            <div class="clinical-findings">
-                <h5><i class="icon-list">📋</i> Clinical Observations</h5>
-                <ul id="findings-list" class="findings-grid">
-                    <li class="loading-item">Calibrating sensors...</li>
-                </ul>
-            </div>
-
-            <div class="action-footer">
-                <button class="btn-outline">Print Labels</button>
-                <button id="download-pdf" class="btn-primary">Download Medical Report</button>
             </div>
         </div>
     </div>
-</div>
 
-<a href="MedBot.html" class="medbot-fab" id="MedBot-btn" title="Ask MedBot Assistant">
-    <span class="bot-icon">🤖</span>
-    <div class="fab-ping"></div>
-</a>
+    <!-- MedBot Assistant FAB -->
+    <a href="MedBot.html" class="medbot-fab" id="MedBot-btn" title="Ask MedBot Assistant" aria-label="Open MedBot assistant" role="button">
+        <span class="bot-icon" aria-hidden="true">🤖</span>
+        <div class="fab-ping" aria-hidden="true"></div>
+        <span class="fab-tooltip">Ask MedBot</span>
+    </a>
 
-<div id="notification" class="notification-toast hidden"></div>
+    <!-- Notification Toast -->
+    <div id="notification" class="notification-toast hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
 
-<!-- PWA Service Worker Registration -->
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => console.log("Service Worker registered"))
-      .catch(err => console.error("SW registration failed:", err));
-  });
-}
-</script>
+    <!-- Loading Overlay (for initial load) -->
+    <div id="loading-overlay" class="loading-overlay hidden" role="progressbar" aria-label="Loading application">
+        <div class="loading-spinner-large"></div>
+        <div class="loading-text">Initializing Med-AI...</div>
+    </div>
 
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Service Worker Registration with error handling
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("service-worker.js")
+                    .then(registration => {
+                        console.log("✅ Service Worker registered successfully:", registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('🔄 New version installing...');
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available
+                                    const toast = document.getElementById('notification');
+                                    if (toast) {
+                                        toast.textContent = 'New version available. Refresh to update.';
+                                        toast.className = 'notification-toast visible info';
+                                        setTimeout(() => toast.classList.remove('visible'), 5000);
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.error("❌ Service Worker registration failed:", err);
+                        
+                        // Show offline notification
+                        const toast = document.getElementById('notification');
+                        if (toast) {
+                            toast.textContent = 'Offline mode: Some features may be limited';
+                            toast.className = 'notification-toast visible warning';
+                            setTimeout(() => toast.classList.remove('visible'), 5000);
+                        }
+                    });
+            });
+        }
+
+        // Prevent FOUC
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('loaded');
+        });
+
+        // Handle browser back button with history
+        window.addEventListener('popstate', (event) => {
+            // Close any open modals
+            const resultsPanel = document.getElementById('results-panel');
+            if (resultsPanel && !resultsPanel.classList.contains('hidden')) {
+                resultsPanel.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Add to homescreen prompt for iOS
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install prompt after 30 seconds
+            setTimeout(() => {
+                if (deferredPrompt) {
+                    // Show custom install UI
+                    const toast = document.getElementById('notification');
+                    if (toast) {
+                        toast.innerHTML = '📱 Install Med-AI for offline access <button id="install-btn">Install</button>';
+                        toast.className = 'notification-toast visible info';
+                        
+                        document.getElementById('install-btn')?.addEventListener('click', async () => {
+                            deferredPrompt.prompt();
+                            const { outcome } = await deferredPrompt.userChoice;
+                            console.log(`User ${outcome} the installation`);
+                            deferredPrompt = null;
+                            toast.classList.remove('visible');
+                        });
+                    }
+                }
+            }, 30000);
+        });
+    </script>
+
+    <!-- Environment Variables (set by server) -->
+    <script>
+        window.ENV_API_BASE = "https://ai-p17b.onrender.com";
+        window.ENV_GOOGLE_CLIENT_ID = "your-google-client-id";
+        window.ENV_VAPID_PUBLIC_KEY = "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U";
+    </script>
+
+    <!-- Microdata for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "MedicalWebPage",
+        "name": "Med-AI Diagnostic Dashboard",
+        "description": "Advanced medical imaging diagnostics with AI-powered analysis",
+        "url": "https://med-ai.com/dashboard",
+        "medicalSpecialty": ["Radiology", "Diagnostic Imaging"],
+        "provider": {
+            "@type": "MedicalOrganization",
+            "name": "Med-AI Diagnostics",
+            "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "KE"
+            }
+        }
+    }
+    </script>
 </body>
 </html>
