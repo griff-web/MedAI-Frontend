@@ -1,8 +1,9 @@
 /**
- * MED-AI DASHBOARD CORE v3.0 - COMPLETE EDITION
- * All HTML Features Implemented 🇰🇪
+ * MED-AI DASHBOARD CORE v3.1 - WITH AUTH INTEGRATION
+ * All HTML Features Implemented + Real User Data 🇰🇪
  * 
  * Features included:
+ * ✓ Real user data from auth module
  * ✓ Camera controls (torch, switch, upload)
  * ✓ Filter bar with chips
  * ✓ Zoom indicator
@@ -69,14 +70,19 @@ const DashApp = {
             trendData: []
         },
         notifications: [],
-        currentResult: null
+        currentResult: null,
+        user: null // Will be populated from auth
     },
 
     // DOM element cache
     dom: {},
 
     init() {
-        console.log("🚀 Med-AI Dashboard Initializing with ALL features...");
+        console.log("🚀 Med-AI Dashboard Initializing with REAL user data...");
+        
+        // Get user from auth module FIRST
+        this.getUserFromAuth();
+        
         this.showLoadingOverlay(true);
         
         setTimeout(() => {
@@ -84,12 +90,76 @@ const DashApp = {
             this.cacheDOM();
             this.bindEvents();
             this.seedDemoData();
-            this.updateUserSession();
+            this.updateUserSession(); // Now uses real user data
             this.refreshUI();
             this.setupCharts();
             this.showLoadingOverlay(false);
             this.showToast("Dashboard ready", "success");
         }, 1500);
+    },
+
+    // ========== AUTH INTEGRATION ==========
+    getUserFromAuth() {
+        try {
+            // Check if MedAI global object exists (from auth.js)
+            if (window.MedAI && window.MedAI.getUser) {
+                const user = window.MedAI.getUser();
+                if (user) {
+                    this.state.user = user;
+                    console.log("✅ User loaded from auth:", user.name);
+                } else {
+                    console.warn("⚠️ No user found in auth, checking localStorage...");
+                    this.getUserFromStorage();
+                }
+            } else {
+                console.warn("⚠️ MedAI global not found, checking localStorage...");
+                this.getUserFromStorage();
+            }
+            
+            // If still no user, redirect to login
+            if (!this.state.user) {
+                console.error("❌ No authenticated user found");
+                this.showToast("Please log in to continue", "warning");
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        } catch (error) {
+            console.error("Failed to get user from auth:", error);
+            this.getUserFromStorage();
+        }
+    },
+
+    getUserFromStorage() {
+        try {
+            // Try to get user from localStorage (remembered sessions)
+            const userJson = localStorage.getItem('medai_user');
+            if (userJson) {
+                this.state.user = JSON.parse(userJson);
+                console.log("✅ User loaded from localStorage:", this.state.user.name);
+                return;
+            }
+            
+            // Try sessionStorage
+            const sessionUserJson = sessionStorage.getItem('medai_user');
+            if (sessionUserJson) {
+                this.state.user = JSON.parse(sessionUserJson);
+                console.log("✅ User loaded from sessionStorage:", this.state.user.name);
+                return;
+            }
+            
+            // Fallback to mock user only if absolutely nothing exists
+            if (!this.state.user) {
+                console.warn("⚠️ No user found in storage, using session only mode");
+                this.state.user = {
+                    name: "Guest User",
+                    email: "guest@med-ai.com",
+                    role: "Medical Practitioner"
+                };
+            }
+        } catch (error) {
+            console.error("Failed to get user from storage:", error);
+        }
     },
 
     // ========== DOM CACHING ==========
@@ -167,7 +237,10 @@ const DashApp = {
             },
             
             // Status
-            aiStatusContainer: getElement('ai-status-container')
+            aiStatusContainer: getElement('ai-status-container'),
+            
+            // Avatar
+            avatarCircle: getElement('avatar-circle')
         };
     },
 
@@ -251,8 +324,97 @@ const DashApp = {
         window.addEventListener('beforeunload', () => this.cleanup());
         window.addEventListener('popstate', () => this.handlePopState());
         
+        // Auth change listener
+        if (window.MedAI && window.MedAI.onAuthChange) {
+            window.MedAI.onAuthChange((authState) => {
+                if (authState.authenticated && authState.user) {
+                    this.state.user = authState.user;
+                    this.updateUserSession();
+                } else {
+                    // User logged out
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+        
         // Zoom handling (pinch gesture)
         this.setupZoomHandling();
+    },
+
+    // ========== USER SESSION UPDATE ==========
+    updateUserSession() {
+        if (!this.dom.displayName || !this.state.user) return;
+        
+        try {
+            const user = this.state.user;
+            
+            // Format name with appropriate title
+            let displayName = user.name;
+            
+            // Check if name already has Dr. prefix
+            if (!displayName.toLowerCase().startsWith('dr') && 
+                !displayName.toLowerCase().startsWith('dr.')) {
+                
+                // Check if user role suggests doctor title
+                if (user.role === 'doctor' || user.role === 'physician' || 
+                    user.role === 'practitioner' || user.role === 'specialist') {
+                    displayName = `Dr. ${displayName}`;
+                }
+            }
+            
+            this.dom.displayName.textContent = displayName;
+            
+            // Update avatar with user initials
+            if (this.dom.avatarCircle) {
+                const initials = this.getInitials(user.name);
+                this.dom.avatarCircle.textContent = initials;
+            }
+            
+            // Update user role if element exists
+            const userRoleEl = document.querySelector('.user-role');
+            if (userRoleEl && user.role) {
+                const formattedRole = user.role
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                userRoleEl.textContent = formattedRole;
+            }
+            
+            console.log(`👤 User session updated: ${displayName}`);
+            
+        } catch (error) {
+            console.error("Failed to update user session:", error);
+        }
+    },
+
+    getInitials(name) {
+        if (!name) return 'MD';
+        
+        return name
+            .split(' ')
+            .map(part => part.charAt(0).toUpperCase())
+            .slice(0, 2)
+            .join('');
+    },
+
+    // ========== LOGOUT FUNCTION ==========
+    logout() {
+        this.showToast("Logging out...", "info");
+        
+        // Use auth module logout if available
+        if (window.MedAI && window.MedAI.logout) {
+            window.MedAI.logout();
+        } else {
+            // Fallback: clear storage and redirect
+            localStorage.removeItem('medai_user');
+            localStorage.removeItem('medai_token');
+            sessionStorage.removeItem('medai_user');
+            sessionStorage.removeItem('medai_token');
+            
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000);
+        }
     },
 
     // ========== CAMERA FUNCTIONS ==========
@@ -699,6 +861,7 @@ MED-AI DIAGNOSTIC REPORT
 ========================
 Date: ${new Date().toLocaleString()}
 Study ID: ${this.dom.resultElements.studyId?.textContent || 'N/A'}
+Patient/User: ${this.state.user?.name || 'Unknown'}
 
 DIAGNOSIS: ${this.state.currentResult.title}
 Modality: ${this.state.currentResult.type.toUpperCase()}
@@ -757,22 +920,14 @@ For medical use only. Always consult with a qualified healthcare provider.
         });
     },
 
-    // ========== USER FUNCTIONS ==========
+    // ========== USER PROFILE ==========
     showUserProfile() {
-        this.showToast("User profile settings", "info");
+        if (this.state.user) {
+            this.showToast(`${this.state.user.name} - ${this.state.user.role || 'Medical Practitioner'}`, "info");
+        } else {
+            this.showToast("User profile", "info");
+        }
         // In a real app, this would open a profile modal
-    },
-
-    logout() {
-        this.showToast("Logging out...", "info");
-        
-        setTimeout(() => {
-            // Clear session
-            localStorage.removeItem('medai_user');
-            
-            // Redirect to login (simulated)
-            window.location.href = '/login.html';
-        }, 1000);
     },
 
     // ========== NOTIFICATION SYSTEM ==========
@@ -1168,23 +1323,6 @@ For medical use only. Always consult with a qualified healthcare provider.
             console.error("Camera start failed:", error);
             this.setAIStatus('offline', 'CAMERA OFFLINE');
         });
-    },
-
-    updateUserSession() {
-        if (!this.dom.displayName) return;
-        
-        // Mock user data
-        const mockUser = {
-            name: "John Mwangi",
-            role: "Medical Practitioner"
-        };
-        
-        this.dom.displayName.textContent = `Dr. ${mockUser.name}`;
-        
-        const avatarEl = document.getElementById('avatar-circle');
-        if (avatarEl) {
-            avatarEl.textContent = mockUser.name.split(' ').map(n => n[0]).join('');
-        }
     },
 
     switchTab(tabId) {
