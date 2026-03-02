@@ -3,81 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediSync AI | Clinical Co-Pilot</title>
+    <title>MediSync Kenya | Afya Digital</title>
     <style>
         :root {
-            --primary-patient: #0d9488;
-            --primary-doctor: #4f46e5;
-            --bg-light: #f8fafc;
-            --text-dark: #1e293b;
+            --ke-black: #000000;
+            --ke-red: #BB0000;
+            --ke-green: #006600;
+            --ke-white: #FFFFFF;
+            --light-gray: #f4f4f4;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--ke-black);
+            background-image: linear-gradient(180deg, var(--ke-black) 0%, #1a1a1a 100%);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: white;
         }
 
         .chat-container {
-            width: 90%;
-            max-width: 600px;
-            height: 80vh;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 95%;
+            max-width: 700px;
+            height: 85vh;
+            background: var(--ke-white);
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: border 0.3s ease;
-            border: 2px solid var(--primary-patient);
+            border-top: 8px solid var(--ke-red);
+            border-bottom: 8px solid var(--ke-green);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        .chat-container.doctor-mode {
-            border-color: var(--primary-doctor);
-        }
-
-        /* Header */
+        /* Header Area */
         header {
-            padding: 20px;
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 15px 20px;
+            background: var(--ke-white);
+            color: var(--ke-black);
+            border-bottom: 1px solid #ddd;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .mode-toggle {
+        .shield-logo {
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--ke-red);
             display: flex;
-            background: #f1f5f9;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-toggle {
+            background: #eee;
             padding: 4px;
-            border-radius: 8px;
+            border-radius: 50px;
+            display: flex;
         }
 
         .mode-btn {
             border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 18px;
+            border-radius: 50px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: 0.2s;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: 0.3s;
+            background: transparent;
+            color: #666;
         }
 
         .mode-btn.active {
-            background: var(--primary-patient);
+            background: var(--ke-black);
             color: white;
         }
 
-        .doctor-mode .mode-btn.active {
-            background: var(--primary-doctor);
+        .doctor-active .mode-btn.active {
+            background: var(--ke-red);
         }
 
-        /* Chat Area */
+        /* Chat Window */
         #chat-window {
             flex: 1;
             padding: 20px;
@@ -85,170 +95,161 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            background: #f9f9f9;
         }
 
         .message {
-            max-width: 85%;
+            max-width: 80%;
             padding: 12px 16px;
-            border-radius: 12px;
-            line-height: 1.5;
+            border-radius: 15px;
             font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--ke-black);
         }
 
         .bot {
-            background: #f1f5f9;
+            background: #e8e8e8;
             align-self: flex-start;
             border-bottom-left-radius: 2px;
         }
 
         .user {
-            background: var(--primary-patient);
+            background: var(--ke-green);
             color: white;
             align-self: flex-end;
             border-bottom-right-radius: 2px;
         }
 
-        .doctor-mode .user {
-            background: var(--primary-doctor);
+        .doctor-active .user {
+            background: var(--ke-red);
+        }
+
+        /* Medical Content Styling */
+        .med-title { font-weight: bold; color: var(--ke-red); display: block; margin-bottom: 5px; }
+        .clinical-data { 
+            font-family: monospace; 
+            background: #222; 
+            color: #00ff00; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin-top: 10px;
+            font-size: 0.85rem;
         }
 
         /* Input Area */
         .input-area {
-            padding: 20px;
-            border-top: 1px solid #e2e8f0;
+            padding: 15px;
+            background: white;
             display: flex;
             gap: 10px;
+            border-top: 1px solid #eee;
         }
 
         input {
             flex: 1;
             padding: 12px;
-            border: 1px solid #cbd5e1;
+            border: 2px solid #ddd;
             border-radius: 8px;
             outline: none;
         }
 
         button#send-btn {
-            background: var(--primary-patient);
+            background: var(--ke-black);
             color: white;
             border: none;
-            padding: 0 20px;
+            padding: 0 25px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-        }
-
-        .doctor-mode button#send-btn {
-            background: var(--primary-doctor);
-        }
-
-        .tech-data {
-            font-family: 'Courier New', Courier, monospace;
-            background: #1e293b;
-            color: #38bdf8;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 8px;
-            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
 
-<div class="chat-container" id="main-container">
+<div class="chat-container" id="main-frame">
     <header>
-        <div>
-            <strong style="font-size: 1.2rem;">MediSync AI</strong>
-            <div id="status" style="font-size: 0.7rem; color: #64748b;">Ready for Patient Query</div>
+        <div class="shield-logo">
+            <span>🇰🇪</span> MEDISYNC KENYA
         </div>
         <div class="mode-toggle">
-            <button class="mode-btn active" id="patient-tab" onclick="setMode('patient')">Patient</button>
-            <button class="mode-btn" id="doctor-tab" onclick="setMode('doctor')">Doctor</button>
+            <button class="mode-btn active" id="p-tab" onclick="setMode('patient')">Patient</button>
+            <button class="mode-btn" id="d-tab" onclick="setMode('doctor')">Doctor</button>
         </div>
     </header>
 
     <div id="chat-window">
         <div class="message bot">
-            Hello! I am MediSync. Switch to <strong>Doctor mode</strong> for clinical data, or stay in <strong>Patient mode</strong> for simple explanations. How can I help?
+            Jambo! I am your medical assistant. <br><br>
+            <strong>Patients:</strong> Ask me about Malaria, COVID, Typhoid, DPT, or Ulcers.<br>
+            <strong>Doctors:</strong> Switch modes for clinical guidelines and ICD-10 codes.
         </div>
     </div>
 
     <div class="input-area">
-        <input type="text" id="user-input" placeholder="Type a medical term or symptom..." onkeypress="handleKey(event)">
-        <button id="send-btn" onclick="sendMessage()">Send</button>
+        <input type="text" id="user-input" placeholder="e.g., Hi do you know Malaria?" onkeypress="checkEnter(event)">
+        <button id="send-btn" onclick="processMsg()">Send</button>
     </div>
 </div>
 
 <script>
-    let currentMode = 'patient';
+    let mode = 'patient';
 
-    function setMode(mode) {
-        currentMode = mode;
-        const container = document.getElementById('main-container');
-        const pBtn = document.getElementById('patient-tab');
-        const dBtn = document.getElementById('doctor-tab');
-        const status = document.getElementById('status');
-
-        if (mode === 'doctor') {
-            container.classList.add('doctor-mode');
-            dBtn.classList.add('active');
-            pBtn.classList.remove('active');
-            status.innerText = "Authorized: Clinical Access Enabled";
-        } else {
-            container.classList.remove('doctor-mode');
-            pBtn.classList.add('active');
-            dBtn.classList.remove('active');
-            status.innerText = "Ready for Patient Query";
-        }
-    }
-
-    function handleKey(e) {
-        if (e.key === 'Enter') sendMessage();
-    }
-
-    function sendMessage() {
-        const input = document.getElementById('user-input');
-        const chatWindow = document.getElementById('chat-window');
+    function setMode(m) {
+        mode = m;
+        document.getElementById('main-frame').className = 'chat-container ' + (m === 'doctor' ? 'doctor-active' : '');
+        document.getElementById('p-tab').className = 'mode-btn ' + (m === 'patient' ? 'active' : '');
+        document.getElementById('d-tab').className = 'mode-btn ' + (m === 'doctor' ? 'active' : '');
         
-        if (input.value.trim() === "") return;
+        const notice = document.createElement('div');
+        notice.className = 'message bot';
+        notice.style.fontStyle = 'italic';
+        notice.style.fontSize = '0.8rem';
+        notice.innerHTML = m === 'doctor' ? "System set to Professional Mode (Clinical Level 4)" : "System set to Patient Mode (Simple Language)";
+        document.getElementById('chat-window').appendChild(notice);
+    }
 
-        // Add User Message
-        const userMsg = document.createElement('div');
-        userMsg.className = 'message user';
-        userMsg.innerText = input.value;
-        chatWindow.appendChild(userMsg);
+    function checkEnter(e) { if (e.key === 'Enter') processMsg(); }
 
-        const query = input.value.toLowerCase();
+    function processMsg() {
+        const input = document.getElementById('user-input');
+        const chat = document.getElementById('chat-window');
+        if (!input.value.trim()) return;
+
+        const uMsg = document.createElement('div');
+        uMsg.className = 'message user';
+        uMsg.innerText = input.value;
+        chat.appendChild(uMsg);
+
+        const val = input.value.toLowerCase();
         input.value = "";
 
-        // Simulate Bot Delay
         setTimeout(() => {
-            const botMsg = document.createElement('div');
-            botMsg.className = 'message bot';
-            botMsg.innerHTML = getResponse(query);
-            chatWindow.appendChild(botMsg);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }, 600);
+            const bMsg = document.createElement('div');
+            bMsg.className = 'message bot';
+            bMsg.innerHTML = getClinicalLogic(val);
+            chat.appendChild(bMsg);
+            chat.scrollTop = chat.scrollHeight;
+        }, 500);
     }
 
-    function getResponse(text) {
-        if (currentMode === 'patient') {
-            if (text.includes('hypertension')) {
-                return "<strong>Hypertension</strong> is just high blood pressure. Think of it like water pressing too hard against the walls of your garden hose. Over time, it can wear the hose out.";
-            }
-            if (text.includes('diabetes')) {
-                return "<strong>Diabetes</strong> means your body has trouble moving sugar from your blood into your cells for energy. It's like having a key (insulin) that doesn't quite fit the lock anymore.";
-            }
-            return "That's an interesting question. In simple terms, that condition affects how your body processes information. Would you like me to explain the symptoms?";
+    function getClinicalLogic(q) {
+        const knows = q.includes('hi do you know') || q.includes('what is') || q.includes('info');
+        
+        if (mode === 'patient') {
+            if (q.includes('malaria')) return "<span class='med-title'>Malaria</span>It's a disease spread by mosquitoes. It causes high fever and shaking chills. In Kenya, it's common, but very treatable with the right medicine from a clinic.";
+            if (q.includes('covid')) return "<span class='med-title'>COVID-19</span>A respiratory virus. It feels like a bad flu with cough and fever. Protect yourself by washing hands and staying up to date with vaccines.";
+            if (q.includes('typhoid')) return "<span class='med-title'>Typhoid</span>Caused by bacteria in dirty water or food. It causes a very high fever and stomach pain. Always boil your drinking water!";
+            if (q.includes('dpt')) return "<span class='med-title'>DPT Vaccine</span>This is a '3-in-1' shot given to babies to protect them from Diphtheria, Pertussis (whooping cough), and Tetanus.";
+            if (q.includes('ulcer')) return "<span class='med-title'>Stomach Ulcers</span>Small sores on the lining of your stomach. They cause burning pain. It's often caused by bacteria called H. Pylori, not just spicy food!";
+            return "I'm here to help! Ask me about Malaria, Typhoid, COVID, DPT, or Ulcers.";
         } else {
-            // Doctor Mode
-            if (text.includes('hypertension')) {
-                return "<strong>Clinical Summary: Hypertension</strong><br>Persistent elevation in systemic arterial blood pressure (Systolic &ge; 140 mmHg). <div class='tech-data'>ICD-10: I10 | Recommended: ACE inhibitors or ARBs for primary management.</div>";
-            }
-            if (text.includes('diabetes')) {
-                return "<strong>Endocrine Profile: Diabetes Mellitus</strong><br>Metabolic disorder characterized by hyperglycemia resulting from defects in insulin secretion or action.<div class='tech-data'>Check: HbA1c levels, fasting plasma glucose, and GFR for renal complications.</div>";
-            }
-            return "Query processed. Please provide specific biomarkers or ICD-10 codes for a more detailed differential diagnosis.";
+            // DOCTOR MODE
+            if (q.includes('malaria')) return "<span class='med-title'>Plasmodium Falciparum (Malaria)</span>Gold standard diagnosis: Giemsa-stained blood smear (mRDT for field use). <div class='clinical-data'>First-line: AL (Artemether-lumefantrine). ICD-10: B50.9</div>";
+            if (q.includes('covid')) return "<span class='med-title'>SARS-CoV-2 Protocol</span>Monitor SpO2 levels. Use dexamethasone only for patients requiring supplemental oxygen.<div class='clinical-data'>ICD-10: U07.1 | Monitor for cytokine storm.</div>";
+            if (q.includes('typhoid')) return "<span class='med-title'>Typhoid Fever (S. Typhi)</span>Diagnosis via blood culture (Widal test has low specificity). <div class='clinical-data'>Treatment: Ceftriaxone or Azithromycin. Watch for intestinal perforation.</div>";
+            if (q.includes('dpt')) return "<span class='med-title'>DTP/Pentavalent Coverage</span>Administered at 6, 10, and 14 weeks in the KEPI schedule (Kenya Expanded Programme on Immunization).<div class='clinical-data'>Protects against C. diphtheriae, B. pertussis, and C. tetani.</div>";
+            if (q.includes('ulcer')) return "<span class='med-title'>Peptic Ulcer Disease (PUD)</span>Commonly H. pylori positive or NSAID-induced. <div class='clinical-data'>Rx: Triple Therapy (PPI + Clarithromycin + Amoxicillin). ICD-10: K27</div>";
+            return "<strong>Clinician Dashboard:</strong> Enter disease name for Kenyan National Clinical Guidelines summary.";
         }
     }
 </script>
