@@ -2,85 +2,253 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedAI </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>MedAI · Clinical Assistant</title>
+    <!-- Enterprise-grade dependencies with Subresource Integrity -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ========== ENTERPRISE CSS ARCHITECTURE ========== */
+        /* CSS Custom Properties with fallbacks */
         :root {
             --ke-black: #000000;
             --ke-red: #BB0000;
             --ke-green: #006600;
             --ke-white: #FFFFFF;
-            --light-gray: #f4f4f4;
+            --ke-gray-50: #f9fafb;
+            --ke-gray-100: #f3f4f6;
+            --ke-gray-200: #e5e7eb;
+            --ke-gray-300: #d1d5db;
+            --ke-gray-400: #9ca3af;
+            --ke-gray-500: #6b7280;
+            --ke-gray-600: #4b5563;
+            --ke-gray-700: #374151;
+            --ke-gray-800: #1f2937;
+            --ke-gray-900: #111827;
+            
+            /* Semantic tokens */
+            --primary-bg: var(--ke-white);
+            --secondary-bg: var(--ke-gray-50);
+            --border-color: var(--ke-gray-200);
+            --text-primary: var(--ke-gray-900);
+            --text-secondary: var(--ke-gray-600);
+            --accent-patient: var(--ke-green);
+            --accent-doctor: var(--ke-red);
+            
+            /* Spacing system (8-point grid) */
+            --space-xs: 0.25rem;  /* 4px */
+            --space-sm: 0.5rem;    /* 8px */
+            --space-md: 1rem;       /* 16px */
+            --space-lg: 1.5rem;     /* 24px */
+            --space-xl: 2rem;       /* 32px */
+            --space-2xl: 3rem;      /* 48px */
+            
+            /* Typography scale */
+            --text-xs: 0.75rem;     /* 12px */
+            --text-sm: 0.875rem;    /* 14px */
+            --text-base: 1rem;       /* 16px */
+            --text-lg: 1.125rem;     /* 18px */
+            --text-xl: 1.25rem;      /* 20px */
+            --text-2xl: 1.5rem;      /* 24px */
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+            --transition-slow: 350ms ease;
+            
+            /* Z-index scale */
+            --z-dropdown: 100;
+            --z-sticky: 200;
+            --z-modal: 300;
+            --z-popover: 400;
+            --z-toast: 500;
+        }
+
+        /* Dark mode support (enterprise feature) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-bg: var(--ke-gray-900);
+                --secondary-bg: var(--ke-gray-800);
+                --border-color: var(--ke-gray-700);
+                --text-primary: var(--ke-white);
+                --text-secondary: var(--ke-gray-400);
+            }
+            
+            .chat-container {
+                background: var(--primary-bg);
+            }
+            
+            .message.bot {
+                background: var(--secondary-bg);
+                color: var(--text-primary);
+            }
+            
+            input {
+                background: var(--secondary-bg);
+                color: var(--text-primary);
+                border-color: var(--border-color);
+            }
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--ke-black);
-            background-image: linear-gradient(180deg, var(--ke-black) 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, var(--ke-gray-900) 0%, #1a1a1a 100%);
             margin: 0;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: white;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding: var(--space-md);
         }
 
+        /* Main Container - Fully Responsive */
         .chat-container {
-            width: 95%;
-            max-width: 700px;
-            height: 85vh;
-            background: var(--ke-white);
-            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 900px;
+            background: var(--primary-bg);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             border-top: 8px solid var(--ke-red);
             border-bottom: 8px solid var(--ke-green);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow-xl);
+            transition: all var(--transition-base);
+            position: relative;
         }
 
-        /* Header Area */
+        /* Responsive breakpoints */
+        @media (max-width: 640px) {
+            .chat-container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+                border-top-width: 4px;
+                border-bottom-width: 4px;
+            }
+            
+            body {
+                padding: 0;
+            }
+        }
+
+        @media (min-width: 2000px) {
+            .chat-container {
+                max-width: 1000px;
+                height: 80vh;
+            }
+        }
+
+        /* Header with Navigation */
         header {
-            padding: 15px 20px;
-            background: var(--ke-white);
-            color: var(--ke-black);
-            border-bottom: 1px solid #ddd;
+            padding: var(--space-md) var(--space-lg);
+            background: var(--primary-bg);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .back-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            border: none;
+            font-size: var(--text-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            background: var(--border-color);
+            transform: scale(1.05);
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
         }
 
         .shield-logo {
-            font-weight: 900;
+            font-weight: 800;
             letter-spacing: 1px;
             color: var(--ke-red);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--space-xs);
+            font-size: var(--text-lg);
         }
 
+        .shield-logo i {
+            font-size: var(--text-xl);
+        }
+
+        /* Mode Toggle - Accessible */
         .mode-toggle {
-            background: #eee;
+            background: var(--secondary-bg);
             padding: 4px;
-            border-radius: 50px;
+            border-radius: 40px;
             display: flex;
+            gap: 4px;
+            border: 1px solid var(--border-color);
         }
 
         .mode-btn {
             border: none;
-            padding: 8px 18px;
-            border-radius: 50px;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 32px;
             cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 700;
-            transition: 0.3s;
+            font-size: var(--text-sm);
+            font-weight: 600;
+            transition: all var(--transition-fast);
             background: transparent;
-            color: #666;
+            color: var(--text-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-btn:focus-visible {
+            outline: 2px solid var(--ke-red);
+            outline-offset: 2px;
         }
 
         .mode-btn.active {
             background: var(--ke-black);
             color: white;
+            box-shadow: var(--shadow-sm);
         }
 
         .doctor-active .mode-btn.active {
@@ -90,169 +258,922 @@
         /* Chat Window */
         #chat-window {
             flex: 1;
-            padding: 20px;
+            padding: var(--space-lg);
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            background: #f9f9f9;
+            gap: var(--space-md);
+            background: var(--secondary-bg);
+            scroll-behavior: smooth;
         }
 
+        /* Message Bubbles */
         .message {
             max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 15px;
-            font-size: 0.95rem;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: 20px;
+            font-size: var(--text-base);
             line-height: 1.5;
-            color: var(--ke-black);
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease;
+            position: relative;
         }
 
-        .bot {
-            background: #e8e8e8;
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.bot {
+            background: var(--primary-bg);
             align-self: flex-start;
-            border-bottom-left-radius: 2px;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
         }
 
-        .user {
+        .message.user {
             background: var(--ke-green);
             color: white;
             align-self: flex-end;
-            border-bottom-right-radius: 2px;
+            border-bottom-right-radius: 4px;
         }
 
-        .doctor-active .user {
+        .doctor-active .message.user {
             background: var(--ke-red);
         }
 
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: var(--space-md) var(--space-lg);
+            background: var(--primary-bg);
+            border-radius: 20px;
+            align-self: flex-start;
+            border: 1px solid var(--border-color);
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--ke-gray-400);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
         /* Medical Content Styling */
-        .med-title { font-weight: bold; color: var(--ke-red); display: block; margin-bottom: 5px; }
+        .med-title { 
+            font-weight: 700; 
+            color: var(--ke-red); 
+            display: block; 
+            margin-bottom: var(--space-xs);
+            font-size: var(--text-lg);
+        }
+        
         .clinical-data { 
-            font-family: monospace; 
-            background: #222; 
+            font-family: 'SF Mono', 'Fira Code', monospace; 
+            background: var(--ke-gray-800); 
             color: #00ff00; 
-            padding: 10px; 
-            border-radius: 5px; 
-            margin-top: 10px;
-            font-size: 0.85rem;
+            padding: var(--space-md); 
+            border-radius: 12px; 
+            margin-top: var(--space-md);
+            font-size: var(--text-sm);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .med-metadata {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .med-tag {
+            background: var(--secondary-bg);
+            padding: 4px var(--space-sm);
+            border-radius: 16px;
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
         }
 
         /* Input Area */
         .input-area {
-            padding: 15px;
-            background: white;
+            padding: var(--space-md) var(--space-lg);
+            background: var(--primary-bg);
             display: flex;
-            gap: 10px;
-            border-top: 1px solid #eee;
+            gap: var(--space-sm);
+            border-top: 1px solid var(--border-color);
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
         }
 
         input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            width: 100%;
+            padding: var(--space-md) var(--space-lg);
+            border: 2px solid var(--border-color);
+            border-radius: 30px;
             outline: none;
+            font-size: var(--text-base);
+            transition: all var(--transition-fast);
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+        }
+
+        input:focus {
+            border-color: var(--ke-green);
+            box-shadow: 0 0 0 3px rgba(0, 102, 0, 0.1);
+        }
+
+        .doctor-active input:focus {
+            border-color: var(--ke-red);
+            box-shadow: 0 0 0 3px rgba(187, 0, 0, 0.1);
+        }
+
+        input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         button#send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             background: var(--ke-black);
             color: white;
             border: none;
-            padding: 0 25px;
-            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-size: var(--text-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+            flex-shrink: 0;
+        }
+
+        button#send-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            background: var(--ke-gray-800);
+        }
+
+        button#send-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        button#send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .doctor-active button#send-btn {
+            background: var(--ke-red);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: var(--space-lg);
+            right: var(--space-lg);
+            z-index: var(--z-toast);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .toast {
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            padding: var(--space-md) var(--space-lg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--ke-green);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            animation: toastSlide 0.3s ease;
+            max-width: 300px;
+        }
+
+        .toast.error {
+            border-left-color: var(--ke-red);
+        }
+
+        @keyframes toastSlide {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Quick Action Buttons */
+        .quick-actions {
+            display: flex;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-lg);
+            background: var(--primary-bg);
+            border-top: 1px solid var(--border-color);
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .quick-action-btn {
+            padding: var(--space-xs) var(--space-md);
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: var(--text-sm);
+            color: var(--text-primary);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all var(--transition-fast);
+        }
+
+        .quick-action-btn:hover {
+            background: var(--border-color);
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                var(--secondary-bg) 25%,
+                var(--border-color) 50%,
+                var(--secondary-bg) 75%
+            );
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* Print styles */
+        @media print {
+            .chat-container {
+                height: auto;
+                box-shadow: none;
+            }
+            
+            .input-area,
+            .quick-actions,
+            .mode-toggle {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
 
-<div class="chat-container" id="main-frame">
-    <header>
-        <div class="shield-logo">
-            <span>MedAI</span> 
-        </div>
-        <div class="mode-toggle">
-            <button class="mode-btn active" id="p-tab" onclick="setMode('patient')">Patient</button>
-            <button class="mode-btn" id="d-tab" onclick="setMode('doctor')">Doctor</button>
-        </div>
-    </header>
+    <div class="chat-container" id="main-frame" data-theme="patient">
+        <!-- Header with Navigation -->
+        <header>
+            <div class="nav-left">
+                <a href="dash.html" class="back-button" aria-label="Back to Dashboard">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="shield-logo">
+                    <i class="fas fa-shield-heart"></i>
+                    <span>MedAI</span>
+                </div>
+            </div>
+            
+            <div class="mode-toggle" role="tablist" aria-label="User mode">
+                <button class="mode-btn active" id="p-tab" role="tab" aria-selected="true" aria-controls="chat-window">Patient</button>
+                <button class="mode-btn" id="d-tab" role="tab" aria-selected="false" aria-controls="chat-window">Doctor</button>
+            </div>
+        </header>
 
-    <div id="chat-window">
-        <div class="message bot">
-            Jambo! I am your medical assistant. <br><br>
-            <strong>Patients:</strong> Ask me about Malaria, COVID, Typhoid, DPT, or Ulcers.<br>
-            <strong>Doctors:</strong> Switch modes for clinical guidelines and ICD-10 codes.
+        <!-- Quick Actions (Contextual) -->
+        <div class="quick-actions" id="quick-actions">
+            <button class="quick-action-btn" data-quick="malaria">🦟 Malaria</button>
+            <button class="quick-action-btn" data-quick="covid">😷 COVID-19</button>
+            <button class="quick-action-btn" data-quick="typhoid">🌡️ Typhoid</button>
+            <button class="quick-action-btn" data-quick="dpt">💉 DPT</button>
+            <button class="quick-action-btn" data-quick="ulcer">🔥 Ulcers</button>
+        </div>
+
+        <!-- Chat Window -->
+        <div id="chat-window" role="log" aria-live="polite" aria-label="Chat messages">
+            <div class="message bot">
+                <i class="fas fa-hand-wave" style="margin-right: 8px;"></i>
+                Jambo! I am your medical assistant.<br><br>
+                <strong>Patients:</strong> Ask me about Malaria, COVID, Typhoid, DPT, or Ulcers.<br>
+                <strong>Doctors:</strong> Switch modes for clinical guidelines and ICD-10 codes.
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Type your message here..." 
+                    aria-label="Message input"
+                    autocomplete="off"
+                >
+            </div>
+            <button id="send-btn" aria-label="Send message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 
-    <div class="input-area">
-        <input type="text" id="user-input" placeholder="e.g., Hi do you know Malaria?" onkeypress="checkEnter(event)">
-        <button id="send-btn" onclick="processMsg()">Send</button>
-    </div>
-</div>
+    <!-- Enterprise JavaScript Module -->
+    <script>
+        (function() {
+            'use strict';
 
-<script>
-    let mode = 'patient';
+            // ==================== CONFIGURATION ====================
+            const CONFIG = {
+                apiVersion: '2.0.0',
+                typingDelay: 600, // ms
+                maxMessageLength: 500,
+                maxHistoryLength: 100,
+                toastDuration: 5000, // ms
+                supportedLanguages: ['en', 'sw'],
+                defaultLanguage: 'en'
+            };
 
-    function setMode(m) {
-        mode = m;
-        document.getElementById('main-frame').className = 'chat-container ' + (m === 'doctor' ? 'doctor-active' : '');
-        document.getElementById('p-tab').className = 'mode-btn ' + (m === 'patient' ? 'active' : '');
-        document.getElementById('d-tab').className = 'mode-btn ' + (m === 'doctor' ? 'active' : '');
-        
-        const notice = document.createElement('div');
-        notice.className = 'message bot';
-        notice.style.fontStyle = 'italic';
-        notice.style.fontSize = '0.8rem';
-        notice.innerHTML = m === 'doctor' ? "System set to Professional Mode (Clinical Level 4)" : "System set to Patient Mode (Simple Language)";
-        document.getElementById('chat-window').appendChild(notice);
-    }
+            // ==================== KNOWLEDGE BASE ====================
+            const MedicalKnowledgeBase = {
+                patient: {
+                    malaria: {
+                        title: 'Malaria',
+                        content: 'It\'s a disease spread by mosquitoes. It causes high fever and shaking chills. In Kenya, it\'s common, but very treatable with the right medicine from a clinic.',
+                        tags: ['fever', 'mosquito', 'treatment'],
+                        followUps: ['symptoms', 'prevention', 'treatment']
+                    },
+                    covid: {
+                        title: 'COVID-19',
+                        content: 'A respiratory virus. It feels like a bad flu with cough and fever. Protect yourself by washing hands and staying up to date with vaccines.',
+                        tags: ['virus', 'respiratory', 'vaccine'],
+                        followUps: ['symptoms', 'vaccines', 'prevention']
+                    },
+                    typhoid: {
+                        title: 'Typhoid',
+                        content: 'Caused by bacteria in dirty water or food. It causes a very high fever and stomach pain. Always boil your drinking water!',
+                        tags: ['bacteria', 'water', 'fever'],
+                        followUps: ['symptoms', 'prevention', 'treatment']
+                    },
+                    dpt: {
+                        title: 'DPT Vaccine',
+                        content: 'This is a \'3-in-1\' shot given to babies to protect them from Diphtheria, Pertussis (whooping cough), and Tetanus.',
+                        tags: ['vaccine', 'children', 'prevention'],
+                        followUps: ['schedule', 'side-effects', 'importance']
+                    },
+                    ulcer: {
+                        title: 'Stomach Ulcers',
+                        content: 'Small sores on the lining of your stomach. They cause burning pain. It\'s often caused by bacteria called H. Pylori, not just spicy food!',
+                        tags: ['stomach', 'pain', 'h-pylori'],
+                        followUps: ['causes', 'treatment', 'diet']
+                    }
+                },
+                doctor: {
+                    malaria: {
+                        title: 'Plasmodium Falciparum (Malaria)',
+                        content: 'Gold standard diagnosis: Giemsa-stained blood smear (mRDT for field use).',
+                        clinicalData: 'First-line: AL (Artemether-lumefantrine). ICD-10: B50.9\nSecond-line: Quinine + Doxycycline\nPediatric: Weight-based dosing',
+                        tags: ['parasite', 'fever', 'anemia'],
+                        guidelines: 'WHO 2023 Malaria Guidelines',
+                        level: '4'
+                    },
+                    covid: {
+                        title: 'SARS-CoV-2 Protocol',
+                        content: 'Monitor SpO2 levels. Use dexamethasone only for patients requiring supplemental oxygen.',
+                        clinicalData: 'ICD-10: U07.1\nMonitor for cytokine storm.\nRemdesivir: 200mg IV day1, then 100mg days2-5',
+                        tags: ['virus', 'respiratory', 'pneumonia'],
+                        guidelines: 'CDC COVID-19 Treatment Guidelines',
+                        level: '4'
+                    },
+                    typhoid: {
+                        title: 'Typhoid Fever (S. Typhi)',
+                        content: 'Diagnosis via blood culture (Widal test has low specificity).',
+                        clinicalData: 'Treatment: Ceftriaxone 2g IV daily or Azithromycin 1g PO.\nWatch for intestinal perforation.\nICD-10: A01.0',
+                        tags: ['bacteria', 'fever', 'abdominal'],
+                        guidelines: 'IDSA Typhoid Guidelines',
+                        level: '4'
+                    },
+                    dpt: {
+                        title: 'DTP/Pentavalent Coverage',
+                        content: 'Administered at 6, 10, and 14 weeks in the KEPI schedule.',
+                        clinicalData: 'Protects against C. diphtheriae, B. pertussis, and C. tetani.\nBooster: 18 months, 5 years.\nICD-10: Z23',
+                        tags: ['vaccine', 'pediatric', 'schedule'],
+                        guidelines: 'Kenya National Immunization Schedule',
+                        level: '4'
+                    },
+                    ulcer: {
+                        title: 'Peptic Ulcer Disease (PUD)',
+                        content: 'Commonly H. pylori positive or NSAID-induced.',
+                        clinicalData: 'Rx: Triple Therapy (PPI + Clarithromycin + Amoxicillin) x14d.\nICD-10: K27\nTest: Urea breath test or stool antigen',
+                        tags: ['stomach', 'h-pylori', 'bleeding'],
+                        guidelines: 'ACG Clinical Guidelines',
+                        level: '4'
+                    }
+                }
+            };
 
-    function checkEnter(e) { if (e.key === 'Enter') processMsg(); }
+            // ==================== STATE MANAGEMENT ====================
+            class AppState {
+                constructor() {
+                    this.mode = 'patient';
+                    this.conversationHistory = [];
+                    this.isProcessing = false;
+                    this.typingTimeout = null;
+                    this.messageQueue = [];
+                    this.sessionId = this.generateSessionId();
+                    this.startTime = Date.now();
+                    this.messageCount = 0;
+                }
 
-    function processMsg() {
-        const input = document.getElementById('user-input');
-        const chat = document.getElementById('chat-window');
-        if (!input.value.trim()) return;
+                generateSessionId() {
+                    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                }
 
-        const uMsg = document.createElement('div');
-        uMsg.className = 'message user';
-        uMsg.innerText = input.value;
-        chat.appendChild(uMsg);
+                addToHistory(message, type) {
+                    this.conversationHistory.push({
+                        id: this.generateSessionId(),
+                        type: type,
+                        message: message,
+                        timestamp: new Date().toISOString(),
+                        mode: this.mode
+                    });
 
-        const val = input.value.toLowerCase();
-        input.value = "";
+                    // Limit history size
+                    if (this.conversationHistory.length > CONFIG.maxHistoryLength) {
+                        this.conversationHistory.shift();
+                    }
 
-        setTimeout(() => {
-            const bMsg = document.createElement('div');
-            bMsg.className = 'message bot';
-            bMsg.innerHTML = getClinicalLogic(val);
-            chat.appendChild(bMsg);
-            chat.scrollTop = chat.scrollHeight;
-        }, 500);
-    }
+                    this.messageCount++;
+                }
 
-    function getClinicalLogic(q) {
-        const knows = q.includes('hi do you know') || q.includes('what is') || q.includes('info');
-        
-        if (mode === 'patient') {
-            if (q.includes('malaria')) return "<span class='med-title'>Malaria</span>It's a disease spread by mosquitoes. It causes high fever and shaking chills. In Kenya, it's common, but very treatable with the right medicine from a clinic.";
-            if (q.includes('covid')) return "<span class='med-title'>COVID-19</span>A respiratory virus. It feels like a bad flu with cough and fever. Protect yourself by washing hands and staying up to date with vaccines.";
-            if (q.includes('typhoid')) return "<span class='med-title'>Typhoid</span>Caused by bacteria in dirty water or food. It causes a very high fever and stomach pain. Always boil your drinking water!";
-            if (q.includes('dpt')) return "<span class='med-title'>DPT Vaccine</span>This is a '3-in-1' shot given to babies to protect them from Diphtheria, Pertussis (whooping cough), and Tetanus.";
-            if (q.includes('ulcer')) return "<span class='med-title'>Stomach Ulcers</span>Small sores on the lining of your stomach. They cause burning pain. It's often caused by bacteria called H. Pylori, not just spicy food!";
-            return "I'm here to help! Ask me about Malaria, Typhoid, COVID, DPT, or Ulcers.";
-        } else {
-            // DOCTOR MODE
-            if (q.includes('malaria')) return "<span class='med-title'>Plasmodium Falciparum (Malaria)</span>Gold standard diagnosis: Giemsa-stained blood smear (mRDT for field use). <div class='clinical-data'>First-line: AL (Artemether-lumefantrine). ICD-10: B50.9</div>";
-            if (q.includes('covid')) return "<span class='med-title'>SARS-CoV-2 Protocol</span>Monitor SpO2 levels. Use dexamethasone only for patients requiring supplemental oxygen.<div class='clinical-data'>ICD-10: U07.1 | Monitor for cytokine storm.</div>";
-            if (q.includes('typhoid')) return "<span class='med-title'>Typhoid Fever (S. Typhi)</span>Diagnosis via blood culture (Widal test has low specificity). <div class='clinical-data'>Treatment: Ceftriaxone or Azithromycin. Watch for intestinal perforation.</div>";
-            if (q.includes('dpt')) return "<span class='med-title'>DTP/Pentavalent Coverage</span>Administered at 6, 10, and 14 weeks in the KEPI schedule (Kenya Expanded Programme on Immunization).<div class='clinical-data'>Protects against C. diphtheriae, B. pertussis, and C. tetani.</div>";
-            if (q.includes('ulcer')) return "<span class='med-title'>Peptic Ulcer Disease (PUD)</span>Commonly H. pylori positive or NSAID-induced. <div class='clinical-data'>Rx: Triple Therapy (PPI + Clarithromycin + Amoxicillin). ICD-10: K27</div>";
-            return "<strong>Clinician Dashboard:</strong> Enter disease name for Kenyan National Clinical Guidelines summary.";
-        }
-    }
-</script>
+                getContext() {
+                    return {
+                        mode: this.mode,
+                        lastMessages: this.conversationHistory.slice(-5),
+                        sessionId: this.sessionId,
+                        messageCount: this.messageCount,
+                        sessionDuration: Date.now() - this.startTime
+                    };
+                }
 
+                reset() {
+                    this.conversationHistory = [];
+                    this.messageCount = 0;
+                    this.startTime = Date.now();
+                }
+            }
+
+            // ==================== NLP ENGINE ====================
+            class NLUEngine {
+                constructor(knowledgeBase) {
+                    this.kb = knowledgeBase;
+                    this.synonyms = {
+                        malaria: ['malaria', 'fever', 'chills', 'mosquito'],
+                        covid: ['covid', 'corona', 'virus', 'pandemic', 'sars'],
+                        typhoid: ['typhoid', 'enteric', 'typhus'],
+                        dpt: ['dpt', 'vaccine', 'immunization', 'shot', 'diphtheria', 'pertussis', 'tetanus'],
+                        ulcer: ['ulcer', 'stomach', 'heartburn', 'gerd', 'acid']
+                    };
+                }
+
+                classifyIntent(input) {
+                    const normalized = input.toLowerCase().trim();
+                    
+                    // Remove punctuation and extra spaces
+                    const cleanInput = normalized.replace(/[^\w\s]/g, '');
+                    
+                    // Tokenize
+                    const words = cleanInput.split(/\s+/);
+                    
+                    // Score each disease
+                    const scores = {};
+                    
+                    for (const [disease, keywords] of Object.entries(this.synonyms)) {
+                        scores[disease] = 0;
+                        
+                        for (const keyword of keywords) {
+                            // Check for exact matches
+                            if (cleanInput.includes(keyword)) {
+                                scores[disease] += 2;
+                            }
+                            
+                            // Check for word matches
+                            if (words.includes(keyword)) {
+                                scores[disease] += 3;
+                            }
+                        }
+                    }
+                    
+                    // Find best match
+                    let bestMatch = null;
+                    let highestScore = 0;
+                    
+                    for (const [disease, score] of Object.entries(scores)) {
+                        if (score > highestScore) {
+                            highestScore = score;
+                            bestMatch = disease;
+                        }
+                    }
+                    
+                    // Check for question patterns
+                    const isQuestion = /\?$|^(what|who|when|where|why|how|can you|tell me)/i.test(normalized);
+                    const isGreeting = /^(hi|hello|hey|jambo|greetings)/i.test(normalized);
+                    const isThanks = /(thank|thanks|thx)/i.test(normalized);
+                    
+                    return {
+                        intent: bestMatch || 'unknown',
+                        confidence: highestScore > 0 ? Math.min(highestScore / 10, 1) : 0,
+                        entities: {
+                            diseases: words.filter(w => Object.keys(this.synonyms).includes(w)),
+                            isQuestion,
+                            isGreeting,
+                            isThanks
+                        },
+                        original: input
+                    };
+                }
+
+                generateResponse(intent, mode) {
+                    if (intent.confidence < 0.3) {
+                        if (intent.entities.isGreeting) {
+                            return {
+                                type: 'greeting',
+                                content: '👋 Hello! How can I help you with your health today?'
+                            };
+                        }
+                        if (intent.entities.isThanks) {
+                            return {
+                                type: 'thanks',
+                                content: '😊 You\'re welcome! Stay healthy!'
+                            };
+                        }
+                        return {
+                            type: 'unknown',
+                            content: 'I\'m here to help! Ask me about Malaria, Typhoid, COVID, DPT, or Ulcers.',
+                            suggestions: ['malaria', 'covid', 'typhoid', 'dpt', 'ulcer']
+                        };
+                    }
+
+                    const disease = intent.intent;
+                    const data = this.kb[mode][disease];
+                    
+                    if (!data) return null;
+
+                    return {
+                        type: 'medical_info',
+                        disease: disease,
+                        title: data.title,
+                        content: data.content,
+                        clinicalData: data.clinicalData,
+                        tags: data.tags || [],
+                        guidelines: data.guidelines,
+                        level: data.level
+                    };
+                }
+            }
+
+            // ==================== UI CONTROLLER ====================
+            class UIController {
+                constructor(state, nlu) {
+                    this.state = state;
+                    this.nlu = nlu;
+                    this.elements = {
+                        chat: document.getElementById('chat-window'),
+                        input: document.getElementById('user-input'),
+                        sendBtn: document.getElementById('send-btn'),
+                        mainFrame: document.getElementById('main-frame'),
+                        pTab: document.getElementById('p-tab'),
+                        dTab: document.getElementById('d-tab'),
+                        quickActions: document.getElementById('quick-actions'),
+                        toastContainer: document.getElementById('toast-container')
+                    };
+                    
+                    this.initEventListeners();
+                    this.renderQuickActions();
+                }
+
+                initEventListeners() {
+                    // Send button
+                    this.elements.sendBtn.addEventListener('click', () => this.handleSend());
+                    
+                    // Enter key
+                    this.elements.input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.handleSend();
+                        }
+                    });
+                    
+                    // Input validation
+                    this.elements.input.addEventListener('input', () => {
+                        const length = this.elements.input.value.length;
+                        if (length > CONFIG.maxMessageLength) {
+                            this.elements.input.value = this.elements.input.value.substr(0, CONFIG.maxMessageLength);
+                            this.showToast('Message too long', 'error');
+                        }
+                    });
+                    
+                    // Mode toggles
+                    this.elements.pTab.addEventListener('click', () => this.setMode('patient'));
+                    this.elements.dTab.addEventListener('click', () => this.setMode('doctor'));
+                    
+                    // Quick actions
+                    this.elements.quickActions.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.quick-action-btn');
+                        if (btn) {
+                            const query = btn.dataset.quick;
+                            this.elements.input.value = `Tell me about ${query}`;
+                            this.handleSend();
+                        }
+                    });
+                    
+                    // Handle visibility change
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.hidden) {
+                            // Pause any ongoing processes
+                        } else {
+                            // Resume
+                            this.scrollToBottom();
+                        }
+                    });
+                }
+
+                async handleSend() {
+                    const input = this.elements.input.value.trim();
+                    
+                    if (!input || this.state.isProcessing) return;
+                    
+                    // Clear input
+                    this.elements.input.value = '';
+                    
+                    // Add user message
+                    this.addMessage(input, 'user');
+                    
+                    // Process
+                    this.state.isProcessing = true;
+                    this.setInputState(false);
+                    
+                    // Show typing indicator
+                    const typingId = this.showTypingIndicator();
+                    
+                    try {
+                        // Simulate API call
+                        await new Promise(resolve => setTimeout(resolve, CONFIG.typingDelay));
+                        
+                        // Process message
+                        const intent = this.nlu.classifyIntent(input);
+                        const response = this.nlu.generateResponse(intent, this.state.mode);
+                        
+                        // Remove typing indicator
+                        this.removeTypingIndicator(typingId);
+                        
+                        // Add bot response
+                        if (response) {
+                            this.addBotResponse(response);
+                        } else {
+                            this.addMessage('I couldn\'t find information about that. Try asking about Malaria, COVID, Typhoid, DPT, or Ulcers.', 'bot');
+                        }
+                        
+                        // Update analytics
+                        this.state.addToHistory(input, 'user');
+                        this.state.addToHistory(response, 'bot');
+                        
+                    } catch (error) {
+                        console.error('Error processing message:', error);
+                        this.removeTypingIndicator(typingId);
+                        this.showToast('An error occurred. Please try again.', 'error');
+                        this.addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                    } finally {
+                        this.state.isProcessing = false;
+                        this.setInputState(true);
+                    }
+                }
+
+                addBotResponse(response) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message bot';
+                    
+                    let html = '';
+                    
+                    if (response.type === 'medical_info') {
+                        html = `<span class="med-title">${response.title}</span>${response.content}`;
+                        
+                        if (response.clinicalData) {
+                            html += `<div class="clinical-data">${response.clinicalData.replace(/\n/g, '<br>')}</div>`;
+                        }
+                        
+                        if (response.tags && response.tags.length) {
+                            html += '<div class="med-metadata">';
+                            response.tags.forEach(tag => {
+                                html += `<span class="med-tag">#${tag}</span>`;
+                            });
+                            html += '</div>';
+                        }
+                    } else {
+                        html = response.content;
+                    }
+                    
+                    messageDiv.innerHTML = html;
+                    this.elements.chat.appendChild(messageDiv);
+                    this.scrollToBottom();
+                }
+
+                addMessage(text, type) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${type}`;
+                    messageDiv.textContent = text;
+                    this.elements.chat.appendChild(messageDiv);
+                    this.scrollToBottom();
+                }
+
+                showTypingIndicator() {
+                    const id = 'typing_' + Date.now();
+                    const typingDiv = document.createElement('div');
+                    typingDiv.id = id;
+                    typingDiv.className = 'typing-indicator';
+                    typingDiv.innerHTML = '<span></span><span></span><span></span>';
+                    this.elements.chat.appendChild(typingDiv);
+                    this.scrollToBottom();
+                    return id;
+                }
+
+                removeTypingIndicator(id) {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.remove();
+                    }
+                }
+
+                setMode(mode) {
+                    this.state.mode = mode;
+                    
+                    // Update UI
+                    this.elements.mainFrame.className = 'chat-container ' + (mode === 'doctor' ? 'doctor-active' : '');
+                    
+                    // Update tabs
+                    this.elements.pTab.className = 'mode-btn ' + (mode === 'patient' ? 'active' : '');
+                    this.elements.dTab.className = 'mode-btn ' + (mode === 'doctor' ? 'active' : '');
+                    
+                    // Update accessibility
+                    this.elements.pTab.setAttribute('aria-selected', mode === 'patient');
+                    this.elements.dTab.setAttribute('aria-selected', mode === 'doctor');
+                    
+                    // Add system message
+                    const msg = mode === 'doctor' 
+                        ? '🔬 System set to Professional Mode (Clinical Level 4)' 
+                        : '👤 System set to Patient Mode (Simple Language)';
+                    
+                    this.addMessage(msg, 'bot');
+                    
+                    // Log mode change
+                    this.state.addToHistory(`Mode changed to ${mode}`, 'system');
+                    
+                    // Render contextual quick actions
+                    this.renderQuickActions();
+                }
+
+                renderQuickActions() {
+                    const diseases = this.state.mode === 'doctor' 
+                        ? ['Malaria', 'COVID', 'Typhoid', 'DPT', 'Ulcers']
+                        : ['Malaria', 'COVID', 'Typhoid', 'DPT', 'Ulcers'];
+                    
+                    // Quick actions are already in HTML, just update tooltips maybe
+                }
+
+                setInputState(enabled) {
+                    this.elements.input.disabled = !enabled;
+                    this.elements.sendBtn.disabled = !enabled;
+                }
+
+                scrollToBottom() {
+                    this.elements.chat.scrollTop = this.elements.chat.scrollHeight;
+                }
+
+                showToast(message, type = 'info') {
+                    const toast = document.createElement('div');
+                    toast.className = `toast ${type}`;
+                    toast.innerHTML = `
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                        <span>${message}</span>
+                    `;
+                    
+                    this.elements.toastContainer.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.remove();
+                    }, CONFIG.toastDuration);
+                }
+            }
+
+            // ==================== ANALYTICS MODULE ====================
+            class Analytics {
+                constructor(state) {
+                    this.state = state;
+                    this.events = [];
+                }
+
+                trackEvent(eventName, data = {}) {
+                    const event = {
+                        name: eventName,
+                        timestamp: new Date().toISOString(),
+                        sessionId: this.state.sessionId,
+                        data: data
+                    };
+                    
+                    this.events.push(event);
+                    
+                    // In production, send to analytics endpoint
+                    if (process.env.NODE_ENV === 'production') {
+                        // navigator.sendBeacon('/api/analytics', JSON.stringify(event));
+                    }
+                    
+                    console.debug('Analytics:', event);
+                }
+
+                generateReport() {
+                    return {
+                        sessionId: this.state.sessionId,
+                        duration: Date.now() - this.state.startTime,
+                        messageCount: this.state.messageCount,
+                        mode: this.state.mode,
+                        events: this.events
+                    };
+                }
+            }
+
+            // ==================== INITIALIZATION ====================
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initialize state
+                const state = new AppState();
+                
+                // Initialize NLP
+                const nlu = new NLUEngine(MedicalKnowledgeBase);
+                
+                // Initialize UI
+                const ui = new UIController(state, nlu);
+                
+                // Initialize analytics
+                const analytics = new Analytics(state);
+                
+                // Track session start
+                analytics.trackEvent('session_start', {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    screenSize: `${window.innerWidth}x${window.innerHeight}`
+                });
+                
+                // Handle unload
+                window.addEventListener('beforeunload', () => {
+                    analytics.trackEvent('session_end', {
+                        duration: Date.now() - state.startTime,
+                        messageCount: state.messageCount
+                    });
+                });
+                
+                // Make available globally for debugging (remove in production)
+                if (process.env.NODE_ENV === 'development') {
+                    window.debug = { state, nlu, ui, analytics };
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
