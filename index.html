@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Med-AI </title>
+  <title>MED-AI · ADVANCED DIAGNOSTIC INTERFACE</title>
   
-  <!-- Ultra-fast favicon (inline SVG) -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2300FF88' stroke='%2300D4FF' stroke-width='2'/%3E%3Cpath d='M30 50 L45 50 L50 30 L55 50 L70 50 L55 65 L60 80 L50 70 L40 80 L45 65 L30 50' fill='%23000'/%3E%3C/svg%3E">
+  <!-- Ultra-fast inline favicon (medical cross) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23000' stroke='%2300FF88' stroke-width='3'/%3E%3Cpath d='M50 25 L50 75 M25 50 L75 50' stroke='%2300FF88' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
   
-  <!-- Meta tags for PWA feel -->
+  <!-- Meta tags for immersive experience -->
   <meta name="theme-color" content="#00FF88">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Medical AI Diagnostic Interface">
+  <meta name="description" content="Medical AI Diagnostic System · Advanced Biometric Interface">
   
   <!-- Fonts with optimal loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
   
-  <!-- Three.js for particle magic -->
+  <!-- Three.js for volumetric effects -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   
   <style>
@@ -31,22 +31,37 @@
     }
 
     :root {
-      /* Medical color system */
+      /* Medical grade color system - enhanced */
       --primary-green: #00FF88;
+      --primary-green-dark: #00CC66;
       --primary-blue: #00D4FF;
+      --primary-blue-dark: #0099CC;
       --primary-red: #FF3366;
-      --bg-deep: #03050B;
-      --glass-bg: rgba(10, 20, 30, 0.65);
-      --text-primary: rgba(255, 255, 255, 0.95);
-      --text-secondary: rgba(255, 255, 255, 0.6);
+      --primary-red-dark: #CC2255;
+      --primary-purple: #8A2BE2;
+      --bg-deep: #020308;
+      --bg-darker: #010104;
+      --glass-bg: rgba(5, 15, 25, 0.75);
+      --glass-bg-intense: rgba(2, 10, 18, 0.85);
       
-      /* Glow effects */
-      --glow-green: 0 0 30px rgba(0, 255, 136, 0.4);
-      --glow-blue: 0 0 30px rgba(0, 212, 255, 0.4);
-      --glow-red: 0 0 30px rgba(255, 51, 102, 0.4);
+      /* Text colors */
+      --text-primary: rgba(255, 255, 255, 0.98);
+      --text-secondary: rgba(255, 255, 255, 0.8);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
+      
+      /* Glow effects - enhanced */
+      --glow-green: 0 0 30px rgba(0, 255, 136, 0.6), 0 0 60px rgba(0, 255, 136, 0.3);
+      --glow-blue: 0 0 30px rgba(0, 212, 255, 0.6), 0 0 60px rgba(0, 212, 255, 0.3);
+      --glow-red: 0 0 30px rgba(255, 51, 102, 0.6), 0 0 60px rgba(255, 51, 102, 0.3);
+      --glow-white: 0 0 40px rgba(255, 255, 255, 0.5);
+      
+      /* Gradients */
+      --gradient-medical: linear-gradient(135deg, var(--primary-green), var(--primary-blue), var(--primary-red));
+      --gradient-dark: linear-gradient(135deg, var(--bg-deep), var(--bg-darker));
       
       /* Transitions */
-      --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-bounce: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     /* Respect reduced motion */
@@ -60,7 +75,7 @@
     body {
       min-height: 100vh;
       background: var(--bg-deep);
-      font-family: 'Inter', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -68,7 +83,27 @@
       position: relative;
     }
 
-    /* ================ WEBGL CANVAS ================ */
+    /* ================ HYPER-REALISTIC MEDICAL SCANNER EFFECT ================ */
+    .scanner-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.15) 0%, transparent 60%),
+                  repeating-linear-gradient(45deg, 
+                    rgba(0, 255, 136, 0.02) 0px, 
+                    rgba(0, 255, 136, 0.02) 2px,
+                    transparent 2px, 
+                    transparent 8px);
+      z-index: 2;
+      pointer-events: none;
+      animation: scannerPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes scannerPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* ================ VOLUMETRIC WEBGL CANVAS ================ */
     #canvas-container {
       position: fixed;
       top: 0;
@@ -76,325 +111,476 @@
       width: 100%;
       height: 100%;
       z-index: 1;
-      opacity: 0.8;
+      opacity: 0.9;
       pointer-events: none;
     }
 
-    /* ================ MEDICAL GRID OVERLAY ================ */
-    .grid-overlay {
+    /* ================ MEDICAL GRID WITH DEPTH ================ */
+    .grid-system {
       position: fixed;
       inset: 0;
       background-image: 
-        linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
+        linear-gradient(rgba(0, 255, 136, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.08) 1px, transparent 1px);
+      background-size: 60px 60px;
+      transform: perspective(500px) rotateX(5deg);
+      transform-origin: center;
       z-index: 2;
       pointer-events: none;
-      animation: gridFloat 60s linear infinite;
+      animation: gridMove 30s linear infinite;
     }
 
-    @keyframes gridFloat {
-      to { transform: translateY(40px) translateX(40px); }
+    @keyframes gridMove {
+      to { transform: perspective(500px) rotateX(5deg) translateY(60px) translateX(30px); }
     }
 
-    /* ================ MAIN LOADER ================ */
+    /* ================ MAIN LOADER CONTAINER ================ */
     .loader-container {
       position: relative;
       z-index: 10;
-      width: min(680px, 92%);
-      padding: clamp(2rem, 6vw, 4rem);
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(0, 255, 136, 0.15);
-      border-radius: 48px;
-      box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 255, 136, 0.1) inset;
-      animation: containerAppear 0.8s var(--transition-slow);
+      width: min(720px, 94%);
+      padding: clamp(2.5rem, 7vw, 4.5rem);
+      background: var(--glass-bg-intense);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(0, 255, 136, 0.25);
+      border-radius: 64px;
+      box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.9), 
+                  0 0 0 2px rgba(0, 255, 136, 0.15) inset,
+                  0 0 60px rgba(0, 255, 136, 0.2);
+      animation: containerRise 1s var(--transition-slow);
     }
 
-    @keyframes containerAppear {
-      from {
+    @keyframes containerRise {
+      0% {
         opacity: 0;
-        transform: scale(0.96) translateY(20px);
-        filter: blur(10px);
+        transform: scale(0.92) translateY(40px);
+        filter: blur(20px);
       }
-      to {
+      100% {
         opacity: 1;
         transform: scale(1) translateY(0);
         filter: blur(0);
       }
     }
 
-    /* ================ REAL-TIME ECG ================ */
+    /* ================ CINEMATIC ECG DISPLAY ================ */
+    .ecg-lab {
+      margin-bottom: 3rem;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 32px;
+      padding: 1.5rem 1.5rem 1rem;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      box-shadow: 0 0 40px rgba(0, 255, 136, 0.15) inset;
+    }
+
+    .ecg-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .ecg-header span {
+      color: var(--primary-green);
+      text-shadow: 0 0 10px var(--primary-green);
+    }
+
     .ecg-container {
-      margin-bottom: 2.5rem;
-      height: 80px;
+      height: 120px;
       position: relative;
       overflow: hidden;
-      border-radius: 40px;
-      background: rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.2) inset;
     }
 
     #ecg-canvas {
       width: 100%;
       height: 100%;
       display: block;
-      filter: drop-shadow(0 0 8px var(--primary-green));
+      filter: drop-shadow(0 0 15px var(--primary-green)) brightness(1.2);
     }
 
-    /* ================ MEDICAL ICON WITH PULSE ================ */
-    .icon-container {
+    .ecg-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+    }
+
+    .ecg-footer .bpm {
+      color: var(--primary-red);
+      text-shadow: 0 0 8px var(--primary-red);
+      animation: bpmPulse 1s infinite;
+    }
+
+    @keyframes bpmPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* ================ 3D MEDICAL ICON ================ */
+    .icon-lab {
       display: flex;
       justify-content: center;
       margin: 2rem 0 2.5rem;
       position: relative;
     }
 
-    .medical-core {
-      width: 140px;
-      height: 140px;
+    .icon-3d {
+      width: 160px;
+      height: 160px;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .pulse-ring {
+    .ring-outer {
       position: absolute;
       inset: 0;
+      border: 3px solid transparent;
+      border-top: 3px solid var(--primary-green);
+      border-bottom: 3px solid var(--primary-blue);
       border-radius: 50%;
-      border: 2px solid transparent;
-      border-top-color: var(--primary-green);
-      border-bottom-color: var(--primary-blue);
-      animation: spin 4s linear infinite;
-    }
-
-    .pulse-ring:nth-child(2) {
-      inset: 15px;
-      border-top-color: var(--primary-blue);
-      border-bottom-color: var(--primary-red);
-      animation-direction: reverse;
-      animation-duration: 3s;
-    }
-
-    .pulse-ring:nth-child(3) {
-      inset: 30px;
-      border-top-color: var(--primary-red);
-      border-bottom-color: var(--primary-green);
-      animation-duration: 5s;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .caduceus-icon {
-      width: 80px;
-      height: 80px;
-      background: radial-gradient(circle at 30% 30%, rgba(0, 255, 136, 0.2), transparent 70%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 5;
-      animation: iconBreath 2.2s ease-in-out infinite;
-    }
-
-    @keyframes iconBreath {
-      0%, 100% { transform: scale(1); opacity: 0.9; }
-      50% { transform: scale(1.1); opacity: 1; }
-    }
-
-    .caduceus-icon svg {
-      width: 60px;
-      height: 60px;
+      animation: spin3D 6s linear infinite;
       filter: drop-shadow(0 0 20px var(--primary-green));
     }
 
+    .ring-middle {
+      position: absolute;
+      inset: 20px;
+      border: 3px solid transparent;
+      border-left: 3px solid var(--primary-red);
+      border-right: 3px solid var(--primary-purple);
+      border-radius: 50%;
+      animation: spin3DReverse 4s linear infinite;
+      filter: drop-shadow(0 0 20px var(--primary-red));
+    }
+
+    .ring-inner {
+      position: absolute;
+      inset: 40px;
+      border: 3px solid transparent;
+      border-top: 3px solid var(--primary-blue);
+      border-bottom: 3px solid var(--primary-green);
+      border-radius: 50%;
+      animation: spin3D 3s linear infinite;
+      filter: drop-shadow(0 0 20px var(--primary-blue));
+    }
+
+    @keyframes spin3D {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spin3DReverse {
+      to { transform: rotate(-360deg); }
+    }
+
+    .core-symbol {
+      width: 90px;
+      height: 90px;
+      background: radial-gradient(circle at 30% 30%, 
+        rgba(0, 255, 136, 0.3) 0%,
+        rgba(0, 212, 255, 0.2) 50%,
+        transparent 80%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      animation: corePulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes corePulse {
+      0%, 100% { 
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      50% { 
+        transform: scale(1.15);
+        filter: brightness(1.3);
+      }
+    }
+
+    .core-symbol svg {
+      width: 70px;
+      height: 70px;
+      filter: drop-shadow(0 0 30px var(--primary-green));
+    }
+
     /* ================ TYPOGRAPHY ================ */
-    .brand {
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      font-size: clamp(3rem, 8vw, 5rem);
-      letter-spacing: -0.02em;
+    .brand-container {
       text-align: center;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .brand-main {
+      font-size: clamp(4rem, 10vw, 6rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
       line-height: 1;
-      margin-bottom: 0.75rem;
+      position: relative;
     }
 
     .brand-med {
-      background: linear-gradient(135deg, #fff 0%, var(--primary-green) 50%, var(--primary-blue) 100%);
+      background: linear-gradient(135deg, #FFFFFF 0%, var(--primary-green) 50%, var(--primary-blue) 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
+      filter: drop-shadow(0 0 30px rgba(0, 255, 136, 0.5));
     }
 
     .brand-ai {
-      background: linear-gradient(135deg, var(--primary-red) 0%, #FF8A5C 100%);
+      background: linear-gradient(135deg, var(--primary-red) 0%, #FF8A5C 70%, #FFD700 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
+      filter: drop-shadow(0 0 30px rgba(255, 51, 102, 0.5));
     }
 
-    .status-badge {
+    .brand-tagline {
+      font-size: 0.75rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-top: 0.5rem;
+    }
+
+    /* ================ STATUS WITH HUD EFFECT ================ */
+    .status-hud {
       text-align: center;
-      margin-bottom: 2rem;
+      margin: 2rem 0;
+      position: relative;
     }
 
     #status-text {
-      font-size: 0.9rem;
-      font-weight: 500;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      background: rgba(0, 255, 136, 0.1);
-      padding: 0.5rem 1.5rem;
-      border-radius: 40px;
       display: inline-block;
-      border: 1px solid rgba(0, 255, 136, 0.2);
-      backdrop-filter: blur(4px);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      color: var(--text-primary);
+      background: rgba(0, 255, 136, 0.08);
+      padding: 0.75rem 2rem;
+      border-radius: 60px;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* ================ PROGRESS ================ */
-    .progress-section {
+    #status-text::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+      animation: scan 3s infinite;
+    }
+
+    @keyframes scan {
+      to { left: 100%; }
+    }
+
+    /* ================ PROGRESS WITH MEDICAL PRECISION ================ */
+    .progress-lab {
       margin: 2rem 0 1.5rem;
     }
 
-    .progress-bar {
-      height: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      overflow: hidden;
-      position: relative;
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .progress-bar-container {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      padding: 2px;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.2) inset;
     }
 
     #progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, 
-        var(--primary-green) 0%,
-        var(--primary-blue) 50%,
-        var(--primary-red) 100%);
+      background: var(--gradient-medical);
       border-radius: 6px;
-      transition: width 0.3s ease;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-      box-shadow: 0 0 20px var(--primary-green);
+      box-shadow: 0 0 30px var(--primary-green);
     }
 
-    .progress-stats {
+    #progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, 
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .progress-metrics {
       display: flex;
       justify-content: space-between;
-      margin-top: 0.75rem;
+      margin-top: 1rem;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
     }
 
     #hex-token {
       color: var(--primary-green);
-      text-shadow: 0 0 8px var(--primary-green);
-      background: rgba(0, 255, 136, 0.05);
-      padding: 0.25rem 0.75rem;
+      text-shadow: 0 0 15px var(--primary-green);
+      background: rgba(0, 255, 136, 0.1);
+      padding: 0.35rem 1rem;
       border-radius: 30px;
-      border: 1px solid rgba(0, 255, 136, 0.2);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      letter-spacing: 1px;
     }
 
     #percentage {
       color: var(--primary-blue);
-      font-weight: 700;
-      background: rgba(0, 212, 255, 0.05);
-      padding: 0.25rem 0.75rem;
+      text-shadow: 0 0 15px var(--primary-blue);
+      background: rgba(0, 212, 255, 0.1);
+      padding: 0.35rem 1rem;
       border-radius: 30px;
-      border: 1px solid rgba(0, 212, 255, 0.2);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      font-weight: 700;
     }
 
     /* ================ SYSTEM METRICS ================ */
-    .metrics-grid {
+    .metrics-panel {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
-      margin-top: 2rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(0, 255, 136, 0.15);
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 2px solid rgba(0, 255, 136, 0.2);
+      position: relative;
     }
 
-    .metric-item {
+    .metric-cell {
       text-align: center;
+      position: relative;
     }
 
     .metric-label {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--text-secondary);
+      letter-spacing: 0.2em;
+      color: var(--text-tertiary);
       margin-bottom: 0.5rem;
     }
 
     .metric-value {
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       color: var(--primary-green);
-      text-shadow: 0 0 10px var(--primary-green);
+      text-shadow: 0 0 20px var(--primary-green);
       transition: all 0.3s ease;
+      background: rgba(0, 255, 136, 0.05);
+      padding: 0.35rem 0.5rem;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 255, 136, 0.2);
     }
 
     /* ================ FADE OUT ================ */
     .fade-out {
-      animation: fadeOut 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation: cinematicFade 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       pointer-events: none;
     }
 
-    @keyframes fadeOut {
+    @keyframes cinematicFade {
       0% {
         opacity: 1;
         transform: scale(1);
-        filter: blur(0);
+        filter: blur(0) brightness(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+        filter: blur(10px) brightness(1.5);
       }
       100% {
         opacity: 0;
         transform: scale(1.2);
-        filter: blur(20px);
+        filter: blur(30px) brightness(2);
       }
     }
   </style>
 </head>
 <body>
-  <!-- WebGL Canvas for particles -->
+  <!-- Volumetric WebGL Canvas -->
   <div id="canvas-container"></div>
   
-  <!-- Grid overlay -->
-  <div class="grid-overlay"></div>
+  <!-- Scanner overlays -->
+  <div class="scanner-overlay"></div>
+  <div class="grid-system"></div>
 
   <!-- Main Loader -->
   <div class="loader-container" id="loader">
-    <!-- Real-time ECG -->
-    <div class="ecg-container">
-      <canvas id="ecg-canvas" width="600" height="80"></canvas>
+    <!-- ECG Lab - Hyper-realistic -->
+    <div class="ecg-lab">
+      <div class="ecg-header">
+        <span>♡ REAL-TIME CARDIAC MONITOR</span>
+        <span>HR: <span class="bpm" id="bpm-display">72</span> BPM</span>
+      </div>
+      <div class="ecg-container">
+        <canvas id="ecg-canvas" width="800" height="120"></canvas>
+      </div>
+      <div class="ecg-footer">
+        <span>LEAD II · 25mm/s · 10mm/mV</span>
+      </div>
     </div>
 
-    <!-- Medical Icon with rotating rings -->
-    <div class="icon-container">
-      <div class="medical-core">
-        <div class="pulse-ring"></div>
-        <div class="pulse-ring"></div>
-        <div class="pulse-ring"></div>
-        <div class="caduceus-icon">
-          <!-- Medical SVG (Caduceus/Winged staff) -->
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 10 L50 90 M50 10 L30 30 L50 30 L70 30 L50 10 M50 90 L30 70 L50 70 L70 70 L50 90" 
-                  stroke="url(#grad)" stroke-width="6" stroke-linecap="round" fill="none"/>
-            <circle cx="50" cy="30" r="6" fill="#00FF88" filter="url(#glow)"/>
-            <circle cx="50" cy="70" r="6" fill="#00D4FF" filter="url(#glow)"/>
+    <!-- 3D Medical Icon -->
+    <div class="icon-lab">
+      <div class="icon-3d">
+        <div class="ring-outer"></div>
+        <div class="ring-middle"></div>
+        <div class="ring-inner"></div>
+        <div class="core-symbol">
+          <svg viewBox="0 0 100 100" fill="none">
+            <!-- Medical cross with heartbeat line -->
+            <path d="M50 20 L50 80 M20 50 L80 50" stroke="url(#medicalGrad)" stroke-width="8" stroke-linecap="round" filter="url(#glow)"/>
+            <path d="M30 50 L40 50 L45 40 L50 60 L55 40 L60 50 L70 50" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round"/>
             <defs>
-              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient id="medicalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#00FF88"/>
                 <stop offset="50%" stop-color="#00D4FF"/>
                 <stop offset="100%" stop-color="#FF3366"/>
               </linearGradient>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feGaussianBlur stdDeviation="4" result="blur"/>
                 <feMerge>
-                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="blur"/>
                   <feMergeNode in="SourceGraphic"/>
                 </feMerge>
               </filter>
@@ -405,39 +591,50 @@
     </div>
 
     <!-- Brand -->
-    <div class="brand">
-      <span class="brand-med">MED</span><span class="brand-ai">AI</span>
+    <div class="brand-container">
+      <div class="brand-main">
+        <span class="brand-med">MED</span><span class="brand-ai">·AI</span>
+      </div>
+      <div class="brand-tagline">ADVANCED DIAGNOSTIC INTERFACE</div>
     </div>
 
-    <!-- Status -->
-    <div class="status-badge">
-      <div id="status-text">Initializing Neural Core</div>
+    <!-- Status HUD -->
+    <div class="status-hud">
+      <div id="status-text">INITIALIZING NEURAL MATRIX</div>
     </div>
 
     <!-- Progress -->
-    <div class="progress-section">
-      <div class="progress-bar">
+    <div class="progress-lab">
+      <div class="progress-header">
+        <span>SYSTEM LOAD</span>
+        <span id="data-rate">0 MB/s</span>
+      </div>
+      <div class="progress-bar-container">
         <div id="progress-fill"></div>
       </div>
-      <div class="progress-stats">
-        <span id="hex-token">0x0000 0000</span>
+      <div class="progress-metrics">
+        <span id="hex-token">0x00000000</span>
         <span id="percentage">0%</span>
       </div>
     </div>
 
     <!-- System Metrics -->
-    <div class="metrics-grid">
-      <div class="metric-item">
-        <div class="metric-label">System</div>
+    <div class="metrics-panel">
+      <div class="metric-cell">
+        <div class="metric-label">SYSTEM</div>
         <div class="metric-value" id="system-status">BOOT</div>
       </div>
-      <div class="metric-item">
-        <div class="metric-label">Region</div>
-        <div class="metric-value" id="region-display">SCAN</div>
+      <div class="metric-cell">
+        <div class="metric-label">REGION</div>
+        <div class="metric-value" id="region-display">---</div>
       </div>
-      <div class="metric-item">
-        <div class="metric-label">Security</div>
+      <div class="metric-cell">
+        <div class="metric-label">SECURITY</div>
         <div class="metric-value" id="security-level">L1</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">TEMP</div>
+        <div class="metric-value" id="temperature">37.2°C</div>
       </div>
     </div>
   </div>
@@ -446,66 +643,81 @@
     (function() {
       "use strict";
 
-      // ================ THREE.JS PARTICLE BACKGROUND ================
-      function initParticles() {
+      // ================ ADVANCED 3D PARTICLE SYSTEM ================
+      function initVolumetricParticles() {
         const container = document.getElementById('canvas-container');
         if (!container) return;
 
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x03050B);
+        scene.background = new THREE.Color(0x020308);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 30;
+        camera.position.z = 35;
+        camera.position.y = 2;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
-        // Create particles
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 2000;
-        const posArray = new Float32Array(particlesCount * 3);
-        const colorArray = new Float32Array(particlesCount * 3);
+        // Create volumetric particle cloud
+        const particlesCount = 2500;
+        const positions = new Float32Array(particlesCount * 3);
+        const colors = new Float32Array(particlesCount * 3);
+        const sizes = new Float32Array(particlesCount);
 
-        for (let i = 0; i < particlesCount * 3; i += 3) {
-          // Positions
-          posArray[i] = (Math.random() - 0.5) * 100;
-          posArray[i+1] = (Math.random() - 0.5) * 100;
-          posArray[i+2] = (Math.random() - 0.5) * 100;
+        for (let i = 0; i < particlesCount; i++) {
+          // Spherical distribution for depth
+          const radius = 30 + Math.random() * 20;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos((Math.random() * 2) - 1);
+          
+          positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+          positions[i*3+1] = radius * Math.sin(phi) * Math.sin(theta) * 0.5; // Flatten vertically
+          positions[i*3+2] = radius * Math.cos(phi);
 
-          // Colors (medical greens and blues)
-          const colorChoice = Math.random();
-          if (colorChoice < 0.5) {
-            colorArray[i] = 0;      // R
-            colorArray[i+1] = 1;     // G
-            colorArray[i+2] = 0.5;   // B
+          // Medical colors
+          const colorVal = Math.random();
+          if (colorVal < 0.4) {
+            colors[i*3] = 0; colors[i*3+1] = 1; colors[i*3+2] = 0.3; // Green
+          } else if (colorVal < 0.7) {
+            colors[i*3] = 0; colors[i*3+1] = 0.7; colors[i*3+2] = 1; // Blue
           } else {
-            colorArray[i] = 0;        // R
-            colorArray[i+1] = 0.8;    // G
-            colorArray[i+2] = 1;      // B
+            colors[i*3] = 1; colors[i*3+1] = 0.2; colors[i*3+2] = 0.4; // Red
           }
+
+          sizes[i] = Math.random() * 0.3 + 0.1;
         }
 
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-        const particlesMaterial = new THREE.PointsMaterial({
-          size: 0.15,
+        const material = new THREE.PointsMaterial({
+          size: 0.2,
           vertexColors: true,
           transparent: true,
-          opacity: 0.6,
-          blending: THREE.AdditiveBlending
+          opacity: 0.7,
+          blending: THREE.AdditiveBlending,
+          sizeAttenuation: true
         });
 
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // Add subtle fog for depth
+        scene.fog = new THREE.FogExp2(0x020308, 0.008);
 
         // Animation
+        let time = 0;
         function animate() {
           requestAnimationFrame(animate);
-          particlesMesh.rotation.y += 0.0002;
-          particlesMesh.rotation.x += 0.0001;
+          time += 0.0005;
+          
+          particles.rotation.y += 0.0003;
+          particles.rotation.x = Math.sin(time) * 0.1;
+          
           renderer.render(scene, camera);
         }
         animate();
@@ -518,30 +730,50 @@
         });
       }
 
-      // ================ REAL ECG WITH MEDICAL PRECISION ================
-      class ECGMonitor {
+      // ================ HYPER-REALISTIC ECG WITH MEDICAL WAVEFORM ================
+      class RealisticECG {
         constructor(canvasId) {
           this.canvas = document.getElementById(canvasId);
           if (!this.canvas) return;
           
           this.ctx = this.canvas.getContext('2d');
-          this.width = this.canvas.width = 600;
-          this.height = this.canvas.height = 80;
-          this.offset = 0;
+          this.width = this.canvas.width = 800;
+          this.height = this.canvas.height = 120;
+          this.phase = 0;
+          this.bpm = 72;
+          this.lastBeat = 0;
           
-          // Real ECG waveform pattern (medical grade)
-          this.ecgPattern = [
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40,  // Baseline
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
-            45, 50, 55, 60, 65, 70, 75, 75, 70, 60,  // P wave
-            50, 40, 35, 30, 30, 30, 35, 40, 45, 50,
-            60, 70, 75, 75, 70, 60, 50, 40, 40, 40,  // QRS complex
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
-            45, 50, 55, 60, 65, 65, 60, 55, 50, 45,  // T wave
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
-            40, 40, 40, 40, 40, 40, 40, 40, 40, 40
-          ];
+          // Medical-grade ECG waveform (real P-QRS-T complex)
+          this.basePattern = [];
+          
+          // Generate realistic cardiac cycle (600 samples = 6 seconds at 100Hz)
+          for (let i = 0; i < 600; i++) {
+            const t = i / 600; // Normalized time in cycle
+            
+            // Realistic ECG morphology
+            if (t < 0.12) { // P wave
+              this.basePattern.push(50 + 15 * Math.sin(t * Math.PI / 0.12));
+            } else if (t < 0.16) { // PR segment
+              this.basePattern.push(50);
+            } else if (t < 0.2) { // Q wave
+              this.basePattern.push(50 - 10 * Math.sin((t - 0.16) * Math.PI / 0.04));
+            } else if (t < 0.28) { // R wave
+              this.basePattern.push(50 + 60 * Math.sin((t - 0.2) * Math.PI / 0.08));
+            } else if (t < 0.32) { // S wave
+              this.basePattern.push(50 - 25 * Math.sin((t - 0.28) * Math.PI / 0.04));
+            } else if (t < 0.4) { // ST segment
+              this.basePattern.push(50);
+            } else if (t < 0.52) { // T wave
+              this.basePattern.push(50 + 25 * Math.sin((t - 0.4) * Math.PI / 0.12));
+            } else { // Diastole
+              this.basePattern.push(50);
+            }
+          }
+          
+          // Add baseline wander (respiratory variation)
+          for (let i = 0; i < this.basePattern.length; i++) {
+            this.basePattern[i] += 5 * Math.sin(i * 0.1);
+          }
           
           this.start();
         }
@@ -549,51 +781,100 @@
         draw() {
           this.ctx.clearRect(0, 0, this.width, this.height);
           
-          // Draw grid
-          this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.15)';
+          // Draw dark background grid (medical paper style)
+          this.ctx.fillStyle = '#000000';
+          this.ctx.fillRect(0, 0, this.width, this.height);
+          
+          // Fine grid (1mm squares at 25mm/s scale)
+          this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
           this.ctx.lineWidth = 0.5;
           
-          // Vertical grid lines
-          for (let i = 0; i < this.width; i += 20) {
+          // Vertical lines (time)
+          for (let x = 0; x < this.width; x += 20) {
             this.ctx.beginPath();
-            this.ctx.moveTo(i, 0);
-            this.ctx.lineTo(i, this.height);
-            this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, this.height);
+            this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.08)';
             this.ctx.stroke();
           }
           
-          // Horizontal grid lines
-          for (let i = 0; i < this.height; i += 20) {
+          // Horizontal lines (amplitude)
+          for (let y = 0; y < this.height; y += 20) {
             this.ctx.beginPath();
-            this.ctx.moveTo(0, i);
-            this.ctx.lineTo(this.width, i);
-            this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.width, y);
+            this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.08)';
+            this.ctx.stroke();
+          }
+          
+          // Thicker lines every 5 squares
+          this.ctx.strokeStyle = 'rgba(0, 255, 136, 0.15)';
+          this.ctx.lineWidth = 1;
+          for (let x = 0; x < this.width; x += 100) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, this.height);
+            this.ctx.stroke();
+          }
+          for (let y = 0; y < this.height; y += 100) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.width, y);
             this.ctx.stroke();
           }
 
-          // Draw ECG wave
+          // Draw ECG signal with glow
           this.ctx.beginPath();
           this.ctx.strokeStyle = '#00FF88';
-          this.ctx.lineWidth = 2.5;
+          this.ctx.lineWidth = 3;
           this.ctx.shadowColor = '#00FF88';
-          this.ctx.shadowBlur = 15;
+          this.ctx.shadowBlur = 20;
           this.ctx.shadowOffsetX = 0;
           this.ctx.shadowOffsetY = 0;
 
-          for (let i = 0; i < this.width; i++) {
-            const patternIndex = (i + this.offset) % this.ecgPattern.length;
-            const y = this.ecgPattern[patternIndex];
-            if (i === 0) {
-              this.ctx.moveTo(i, y);
+          const speed = 2; // Scroll speed
+          
+          for (let x = 0; x < this.width; x++) {
+            const patternIndex = Math.floor((x * speed + this.phase) % this.basePattern.length);
+            const y = this.basePattern[patternIndex];
+            
+            if (x === 0) {
+              this.ctx.moveTo(x, y);
             } else {
-              this.ctx.lineTo(i, y);
+              this.ctx.lineTo(x, y);
             }
           }
 
           this.ctx.stroke();
+          
+          // Add second channel (faint)
+          this.ctx.beginPath();
+          this.ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+          this.ctx.lineWidth = 1.5;
+          this.ctx.shadowBlur = 10;
+          
+          for (let x = 0; x < this.width; x++) {
+            const patternIndex = Math.floor((x * speed + this.phase + 100) % this.basePattern.length);
+            const y = this.basePattern[patternIndex] + 5; // Slight offset for second lead
+            if (x === 0) {
+              this.ctx.moveTo(x, y);
+            } else {
+              this.ctx.lineTo(x, y);
+            }
+          }
+          
+          this.ctx.stroke();
           this.ctx.shadowBlur = 0;
 
-          this.offset = (this.offset + 1) % this.ecgPattern.length;
+          // Update phase for scrolling
+          this.phase = (this.phase + 3) % this.basePattern.length;
+          
+          // Randomly vary BPM slightly for realism
+          if (Math.random() < 0.01) {
+            this.bpm = 72 + (Math.random() - 0.5) * 8;
+            document.getElementById('bpm-display').textContent = Math.round(this.bpm);
+          }
+
           requestAnimationFrame(() => this.draw());
         }
 
@@ -602,13 +883,14 @@
         }
       }
 
-      // ================ LOADER LOGIC ================
-      class MedicalLoader {
+      // ================ LOADER WITH CINEMATIC PROGRESSION ================
+      class CinematicLoader {
         constructor() {
           this.progress = 0;
-          this.duration = 35000; // 35 seconds
+          this.duration = 38000; // 38 seconds
           this.step = 200;
           this.increment = 100 / (this.duration / this.step);
+          this.dataRate = 0;
           
           // Elements
           this.bar = document.getElementById('progress-fill');
@@ -618,72 +900,74 @@
           this.systemStatus = document.getElementById('system-status');
           this.regionDisplay = document.getElementById('region-display');
           this.securityLevel = document.getElementById('security-level');
+          this.temperature = document.getElementById('temperature');
+          this.dataRateEl = document.getElementById('data-rate');
           this.loader = document.getElementById('loader');
 
-          // Status messages
+          // Cinematic status messages
           this.messages = [
             "INITIALIZING NEURAL MATRIX",
-            "CALIBRATING BIOSENSORS",
-            "LOADING MEDICAL DATABASE",
-            "ESTABLISHING SECURE LINK",
-            "SYNCING GLOBAL HEALTH DATA",
-            "ANALYZING BIOMETRICS",
-            "ACTIVATING DIAGNOSTICS",
-            "SYSTEM READY"
+            "CALIBRATING QUANTUM SENSORS",
+            "LOADING MEDICAL DATABASE 2.1 PB",
+            "ESTABLISHING SECURE SATELLITE LINK",
+            "SYNCING WHO GLOBAL HEALTH NETWORK",
+            "ANALYZING REAL-TIME BIOMETRICS",
+            "ACTIVATING DIAGNOSTIC PROTOCOLS",
+            "VERIFYING CRYPTOGRAPHIC INTEGRITY",
+            "OPTIMIZING NEURAL PATHWAYS",
+            "SYSTEM READY · ACCESS GRANTED"
           ];
 
           // Security levels
-          this.secureLevels = ['L1', 'L2', 'L3', 'L4', 'L5'];
+          this.secureLevels = ['L1', 'L2', 'L3', 'L4', 'L5', 'L5+', 'MAX'];
+          
+          // Temperature variation for realism
+          this.baseTemp = 37.2;
           
           this.init();
         }
 
         async init() {
-          // Get region with fallbacks
-          this.getRegion();
+          // Get region with multiple fallbacks
+          await this.detectRegion();
           
           // Start loader
           this.startLoader();
         }
 
-        async getRegion() {
+        async detectRegion() {
+          const regions = ['GLOBAL', 'NA', 'EU', 'ASIA', 'AFRICA', 'OCEANIA', 'LATAM'];
+          
           try {
-            // Try IP first
-            const ipResponse = await fetch('https://ipapi.co/json/').catch(() => null);
+            // Try IP first with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const ipResponse = await fetch('https://ipapi.co/json/', { signal: controller.signal }).catch(() => null);
+            clearTimeout(timeoutId);
+            
             if (ipResponse?.ok) {
               const data = await ipResponse.json();
-              this.regionDisplay.textContent = data.country_name || 'GLOBAL';
-              this.regionDisplay.style.textShadow = '0 0 15px #00FF88';
+              this.regionDisplay.textContent = data.country_code || data.country_name?.substring(0, 3).toUpperCase() || 'GLOBAL';
+            } else {
+              this.regionDisplay.textContent = regions[Math.floor(Math.random() * regions.length)];
             }
-
-            // Try GPS for precision
-            if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition(
-                async (pos) => {
-                  try {
-                    const gpsResponse = await fetch(
-                      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
-                    );
-                    if (gpsResponse.ok) {
-                      const data = await gpsResponse.json();
-                      this.regionDisplay.textContent = data.address?.state || data.address?.country || this.regionDisplay.textContent;
-                    }
-                  } catch (e) {
-                    console.debug('GPS reverse geocoding failed');
-                  }
-                },
-                () => console.debug('GPS permission denied')
-              );
-            }
-          } catch (e) {
-            console.debug('Region detection failed, using default');
-            this.regionDisplay.textContent = 'GLOBAL';
+          } catch {
+            this.regionDisplay.textContent = regions[Math.floor(Math.random() * regions.length)];
           }
         }
 
         startLoader() {
           const loop = setInterval(() => {
             this.progress += this.increment;
+            
+            // Simulate data rate
+            this.dataRate = Math.floor(Math.random() * 150 + 50);
+            this.dataRateEl.textContent = `${this.dataRate} MB/s`;
+            
+            // Vary temperature slightly for realism
+            const tempVar = (Math.random() - 0.5) * 0.3;
+            this.temperature.textContent = `${(this.baseTemp + tempVar).toFixed(1)}°C`;
             
             if (this.progress >= 100) {
               this.progress = 100;
@@ -700,7 +984,7 @@
           this.bar.style.width = `${this.progress}%`;
           this.percentage.textContent = `${Math.floor(this.progress)}%`;
 
-          // Update hex token (cryptographic random)
+          // Generate cryptographically random hex
           const randomHex = Array.from({ length: 8 }, () => 
             Math.floor(Math.random() * 16).toString(16)
           ).join('').toUpperCase();
@@ -714,36 +998,35 @@
           const secIndex = Math.floor((this.progress / 100) * this.secureLevels.length);
           this.securityLevel.textContent = this.secureLevels[Math.min(secIndex, this.secureLevels.length - 1)];
 
-          // Update system status
-          if (this.progress > 30) this.systemStatus.textContent = 'ACTIVE';
-          if (this.progress > 60) this.systemStatus.textContent = 'OPTIMIZED';
-          if (this.progress > 85) this.systemStatus.textContent = 'READY';
+          // Update system status with realistic progression
+          if (this.progress < 20) this.systemStatus.textContent = 'BOOT';
+          else if (this.progress < 40) this.systemStatus.textContent = 'POST';
+          else if (this.progress < 60) this.systemStatus.textContent = 'INIT';
+          else if (this.progress < 80) this.systemStatus.textContent = 'ACTIVE';
+          else if (this.progress < 95) this.systemStatus.textContent = 'OPTIMIZE';
+          else this.systemStatus.textContent = 'READY';
         }
 
         complete() {
-          this.statusText.textContent = 'ACCESS GRANTED';
-          this.securityLevel.textContent = 'L5';
+          this.statusText.textContent = '✓ ACCESS GRANTED · REDIRECTING';
+          this.securityLevel.textContent = 'MAX';
           this.systemStatus.textContent = 'READY';
           
           setTimeout(() => {
             this.loader.classList.add('fade-out');
             setTimeout(() => {
-              window.location.href = 'https://med-ai.com/dashboard'; // Replace with your URL
-            }, 1200);
-          }, 1500);
+              window.location.href = 'login.html';
+            }, 1500);
+          }, 1000);
         }
       }
 
       // ================ INITIALIZE EVERYTHING ================
       window.addEventListener('load', () => {
-        // Start particles (non-blocking)
-        setTimeout(initParticles, 100);
-        
-        // Start ECG
-        new ECGMonitor('ecg-canvas');
-        
-        // Start loader
-        new MedicalLoader();
+        // Initialize all systems with slight delays for dramatic effect
+        setTimeout(() => initVolumetricParticles(), 100);
+        setTimeout(() => new RealisticECG('ecg-canvas'), 200);
+        setTimeout(() => new CinematicLoader(), 300);
       });
     })();
   </script>
